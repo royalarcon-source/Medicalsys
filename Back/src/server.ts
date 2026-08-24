@@ -10,6 +10,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+import medicoRoutes from "./routes/medico.routes";
+import especialidadRoutes from "./routes/especialidad.routes";
+import { errorHandler } from "./middlewares/errorHandler";
+
+app.use("/api/medicos", medicoRoutes);
+app.use("/api/especialidades", especialidadRoutes);
+
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 3000;
 
 AppDataSource.initialize()
