@@ -6,6 +6,6 @@ import { requirePermission } from "../middlewares/requirePermission";
 const router = Router();
 
 router.post("/", requirePermission("MEDICO_CREAR"), MedicoController.registrar);
-router.get("/:id", MedicoController.obtenerPorId);
+router.get("/:id", requirePermission("MEDICO_VER"), MedicoController.obtenerPorId);
 
 export default router;
