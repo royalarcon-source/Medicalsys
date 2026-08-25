@@ -1,8 +1,10 @@
 import "reflect-metadata";
 import express from "express";
+// @ts-ignore
 import cors from "cors";
 import dotenv from "dotenv";
 import { AppDataSource } from "./config/database";
+import authRoutes from "./routes/auth.routes";
 
 dotenv.config();
 
@@ -10,20 +12,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-import medicoRoutes from "./routes/medico.routes";
-import especialidadRoutes from "./routes/especialidad.routes";
-import { errorHandler } from "./middlewares/errorHandler";
-
-app.use("/api/medicos", medicoRoutes);
-app.use("/api/especialidades", especialidadRoutes);
-
-app.use(errorHandler);
+// Registro de endpoints de autenticación
+app.use("/api/auth", authRoutes);
 
 const PORT = process.env.PORT || 3000;
 
 AppDataSource.initialize()
   .then(() => {
-    console.log("Conexión a PostgreSQL establecida");
+    console.log("Conexión a PostgreSQL establecida exitosamente.");
     app.listen(PORT, () => {
       console.log(`Servidor corriendo en http://localhost:${PORT}`);
     });
