@@ -1,0 +1,1 @@
+export { RegistrarUsuario } from './RegistrarUsuario'
