@@ -1,3 +1,0 @@
-npx ts-node-dev --transpile-only src/scripts/test-medico.ts
-npx ts-node-dev --transpile-only src/scripts/cleanup-test-medico.ts
-npx ts-node src/test/probar-medico.ts
