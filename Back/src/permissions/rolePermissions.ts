@@ -1,0 +1,44 @@
+export type RoleName = "ADMINISTRADOR" | "MEDICO" | "RECEPCIONISTA" | "PACIENTE";
+
+export type Permission =
+  | "MEDICO_CREAR"
+  | "MEDICO_VER"
+  | "ESPECIALIDAD_LISTAR"
+  | "ESPECIALIDAD_GESTIONAR"
+  | "PACIENTE_GESTIONAR"
+  | "CITA_GESTIONAR"
+  | "CONSULTA_GESTIONAR"
+  | "HISTORIA_CLINICA_VER"
+  | "USUARIO_GESTIONAR";
+
+export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
+  ADMINISTRADOR: [
+    "MEDICO_CREAR",
+    "MEDICO_VER",
+    "ESPECIALIDAD_LISTAR",
+    "ESPECIALIDAD_GESTIONAR",
+    "PACIENTE_GESTIONAR",
+    "CITA_GESTIONAR",
+    "CONSULTA_GESTIONAR",
+    "HISTORIA_CLINICA_VER",
+    "USUARIO_GESTIONAR",
+  ],
+  MEDICO: [
+    "MEDICO_VER",
+    "ESPECIALIDAD_LISTAR",
+    "CONSULTA_GESTIONAR",
+    "HISTORIA_CLINICA_VER",
+  ],
+  RECEPCIONISTA: [
+    "MEDICO_VER",
+    "ESPECIALIDAD_LISTAR",
+    "PACIENTE_GESTIONAR",
+    "CITA_GESTIONAR",
+  ],
+  PACIENTE: ["ESPECIALIDAD_LISTAR"],
+};
+
+export function hasPermission(roleName: string, permission: Permission): boolean {
+  const permissions = ROLE_PERMISSIONS[roleName as RoleName];
+  return permissions?.includes(permission) ?? false;
+}
