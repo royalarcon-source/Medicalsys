@@ -7,6 +7,8 @@ import authRoutes from "./routes/auth.routes";
 import medicoRoutes from "./routes/medico.routes";
 import especialidadRoutes from "./routes/especialidad.routes";
 import { errorHandler } from "./middlewares/errorHandler";
+import pacienteRoutes from "./routes/paciente.routes";
+
 
 dotenv.config();
 
@@ -18,7 +20,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/medicos", medicoRoutes);
 app.use("/api/especialidades", especialidadRoutes);
-
+app.use("/api/pacientes", pacienteRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
