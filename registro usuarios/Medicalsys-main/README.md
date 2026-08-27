@@ -1,2 +1,0 @@
-# Medicalsys
-Proyecto 
