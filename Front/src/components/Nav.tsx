@@ -6,6 +6,9 @@ export default function Nav() {
       <NavLink to="/pacientes" end>
         Pacientes
       </NavLink>
+      <NavLink to="/roles" end>
+        Roles
+      </NavLink>
     </nav>
   );
 }

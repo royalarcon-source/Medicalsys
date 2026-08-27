@@ -190,3 +190,241 @@ td {
   color: #1a7f37;
   font-size: 14px;
 }
+
+/* --- Página de Roles (demo de matriz de permisos) --- */
+
+.demo-layout {
+  min-height: 100svh;
+  background: #0f1117;
+  color: #e2e8f0;
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0 -24px;
+}
+
+.demo-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.demo-section-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
+
+.demo-roles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 700px) {
+  .demo-roles-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.demo-role-card {
+  background: #161820;
+  border: 1.5px solid #1e2130;
+  border-radius: 12px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.demo-role-card:hover {
+  border-color: var(--role-color);
+  background: var(--role-bg);
+  color: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+.demo-role-card.active {
+  border-color: var(--role-color);
+  background: var(--role-bg);
+  color: #f8fafc;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--role-color) 20%, transparent);
+}
+
+.demo-role-abbr {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  padding: 3px 8px;
+  background: rgba(255,255,255,0.06);
+}
+
+.demo-role-name {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: inherit;
+}
+
+.demo-role-desc {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.demo-role-card.active .demo-role-desc {
+  color: #94a3b8;
+}
+
+.demo-matrix-section {
+  background: #161820;
+  border: 1px solid #1e2130;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.demo-matrix-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--role-bg);
+  border-bottom: 1px solid #1e2130;
+}
+
+.demo-matrix-abbr {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.demo-matrix-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--role-color);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.demo-matrix-subtitle {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 2px 0 0;
+}
+
+.demo-matrix-count {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--role-color);
+  background: rgba(255,255,255,0.06);
+  padding: 4px 12px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.demo-permissions-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-perm-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  border-bottom: 1px solid #1a1c26;
+  transition: background 0.15s;
+}
+
+.demo-perm-row:last-child {
+  border-bottom: none;
+}
+
+.demo-perm-row:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.demo-perm-row.denied {
+  opacity: 0.45;
+}
+
+.demo-perm-status {
+  font-size: 16px;
+  font-weight: 800;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.demo-perm-row.allowed .demo-perm-status {
+  color: #10b981;
+}
+
+.demo-perm-row.denied .demo-perm-status {
+  color: #ef4444;
+}
+
+.demo-perm-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.demo-perm-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.demo-perm-endpoint {
+  font-size: 11px;
+  color: #64748b;
+  background: transparent;
+  padding: 0;
+  font-family: 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+}
+
+.demo-perm-method {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  min-width: 42px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.demo-perm-verdict {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+  flex-shrink: 0;
+  font-family: ui-monospace, monospace;
+}
+
+.verdict-ok {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.verdict-no {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
