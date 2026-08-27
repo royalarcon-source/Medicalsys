@@ -12,18 +12,10 @@ app.use(express.json());
 
 import medicoRoutes from "./routes/medico.routes";
 import especialidadRoutes from "./routes/especialidad.routes";
-import pacienteRoutes from "./routes/paciente.routes";
-import rolRoutes from "./routes/rol.routes";
 import { errorHandler } from "./middlewares/errorHandler";
 
 app.use("/api/medicos", medicoRoutes);
 app.use("/api/especialidades", especialidadRoutes);
-app.use("/api/pacientes", pacienteRoutes);
-app.use("/api/roles", rolRoutes);
-
-app.use((_req, res) => {
-  res.status(404).json({ error: "Ruta no encontrada" });
-});
 
 app.use(errorHandler);
 
