@@ -30,7 +30,7 @@ export const PacienteController = {
         throw new AppError("El identificador del paciente debe ser un número válido", 400);
       }
 
-      const usuarioActual = (req as any).user;
+      const usuarioActual = req.authUser;
       if (!usuarioActual) {
         throw new AppError("Debe iniciar sesión para acceder a esta información", 401);
       }

@@ -34,7 +34,7 @@ const api: AxiosInstance = axios.create({
 
 function token(idUsuario: number, rol: string): string {
   if (!JWT_SECRET) throw new Error("Falta JWT_SECRET para generar tokens de prueba");
-  return jwt.sign({ idUsuario, rol: { nombre: rol }, permisos: ["PACIENTE_CONSULTAR"] }, JWT_SECRET, {
+  return jwt.sign({ id_usuario: idUsuario, rol }, JWT_SECRET, {
     expiresIn: "1h",
   });
 }
@@ -202,7 +202,10 @@ async function ejecutar(): Promise<void> {
       return `lista=${datosRespuesta(lista)}; detalle=${datosRespuesta(detalle)}`;
     });
     await comprobar("ST8.12", "Paciente consulta su propio perfil", async () => {
-      const detalle = await PacienteService.consultarPorId(pacientes[0].idPaciente, usuarios[3]);
+      const detalle = await PacienteService.consultarPorId(pacientes[0].idPaciente, {
+        idUsuario: usuarios[3].idUsuario,
+        rol: usuarios[3].rol.nombre,
+      });
       assert(detalle.idPaciente === pacientes[0].idPaciente, `idPaciente=${detalle.idPaciente}`);
       const response = await api.get(`/pacientes/${pacientes[0].idPaciente}`, { headers: paciente });
       assert(response.status === 403, `Endpoint general debe rechazar PACIENTE: ${datosRespuesta(response)}`);

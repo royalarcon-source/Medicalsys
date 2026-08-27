@@ -1,7 +1,6 @@
 // src/services/PacienteService.ts
 import { PacienteRepository } from "../repositories/PacienteRepository";
 import { Paciente } from "../entities/Paciente.entity";
-import { Usuario } from "../entities/Usuario.entity";
 import {
   BuscarPacienteDTO,
   BuscarPacientesResponseDTO,
@@ -11,6 +10,11 @@ import { DetallePacienteDTO } from "../dtos/paciente/DetallePacienteDTO";
 import { AppError } from "../utils/AppError";
 
 const NOMBRE_ROL_PACIENTE = "PACIENTE";
+
+interface UsuarioAutenticado {
+  idUsuario: number;
+  rol: string;
+}
 
 function normalizarCriterio(valor?: string): string | undefined {
   if (valor === undefined) {
@@ -90,16 +94,16 @@ export const PacienteService = {
 
   async consultarPorId(
     idPaciente: number,
-    usuarioActual: Usuario
+    usuarioActual: UsuarioAutenticado
   ): Promise<DetallePacienteDTO> {
     return this.obtenerDetalle(idPaciente, usuarioActual);
   },
 
   async obtenerDetalle(
     idPaciente: number,
-    usuarioActual: Usuario
+    usuarioActual: UsuarioAutenticado
   ): Promise<DetallePacienteDTO> {
-    if (usuarioActual.rol?.nombre === NOMBRE_ROL_PACIENTE) {
+    if (usuarioActual.rol === NOMBRE_ROL_PACIENTE) {
       const pacienteDelUsuario = await PacienteRepository.buscarPorUsuario(
         usuarioActual.idUsuario
       );
