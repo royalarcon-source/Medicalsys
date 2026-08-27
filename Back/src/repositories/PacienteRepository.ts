@@ -108,4 +108,25 @@ export const PacienteRepository = AppDataSource.getRepository(Paciente).extend({
       relations: { usuario: true },
     });
   },
+
+  async crear(datos: {
+    idUsuario: number;
+    documentoIdentidad: string;
+    fechaNacimiento: string;
+    sexo?: string | null;
+    direccion?: string | null;
+    contactoEmergencia?: string | null;
+    telefonoEmergencia?: string | null;
+  }): Promise<Paciente> {
+    const paciente = this.create({
+      usuario: { idUsuario: datos.idUsuario },
+      documentoIdentidad: datos.documentoIdentidad,
+      fechaNacimiento: new Date(datos.fechaNacimiento),
+      sexo: datos.sexo ?? null,
+      direccion: datos.direccion ?? null,
+      contactoEmergencia: datos.contactoEmergencia ?? null,
+      telefonoEmergencia: datos.telefonoEmergencia ?? null,
+    });
+    return this.save(paciente);
+  },
 });

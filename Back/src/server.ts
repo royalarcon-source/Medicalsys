@@ -8,7 +8,7 @@ import medicoRoutes from "./routes/medico.routes";
 import especialidadRoutes from "./routes/especialidad.routes";
 import { errorHandler } from "./middlewares/errorHandler";
 import pacienteRoutes from "./routes/paciente.routes";
-
+import rolRoutes from "./routes/rol.routes";
 
 dotenv.config();
 
@@ -21,6 +21,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/medicos", medicoRoutes);
 app.use("/api/especialidades", especialidadRoutes);
 app.use("/api/pacientes", pacienteRoutes);
+app.use("/api/roles", rolRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

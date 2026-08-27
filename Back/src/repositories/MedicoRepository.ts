@@ -2,6 +2,7 @@
 import { AppDataSource } from "../config/database";
 import { Medico } from "../entities/Medico.entity";
 import { Especialidad } from "../entities/Especialidad.entity";
+import { AppError } from "../utils/AppError";
 
 export const MedicoRepository = AppDataSource.getRepository(Medico).extend({
   async buscarPorUsuario(idUsuario: number): Promise<Medico | null> {
@@ -32,7 +33,7 @@ export const MedicoRepository = AppDataSource.getRepository(Medico).extend({
 
   async asignarEspecialidades(idMedico: number, especialidades: Especialidad[]): Promise<Medico> {
   const medico = await this.buscarPorId(idMedico);
-  if (!medico) throw new Error("Médico no encontrado");
+  if (!medico) throw new AppError("Médico no encontrado", 404);
   medico.especialidades = especialidades;
   return this.save(medico);
 },
