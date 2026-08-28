@@ -33,24 +33,47 @@ export interface PacientesApiResponse {
   message?: string;
 }
 
+export interface RegistrarPacientePayload {
+  idUsuario: number;
+  documentoIdentidad: string;
+  fechaNacimiento: string;
+  sexo?: string;
+  direccion?: string;
+  contactoEmergencia?: string;
+  telefonoEmergencia?: string;
+}
+
+export interface PacienteRegistrado {
+  idPaciente: number;
+  idUsuario: number;
+  documentoIdentidad: string;
+  fechaNacimiento: string;
+  sexo: string | null;
+  direccion: string | null;
+  contactoEmergencia: string | null;
+  telefonoEmergencia: string | null;
+}
+
 function getAuthHeaders(): Record<string, string> {
   const token = window.localStorage.getItem('token');
 
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
+    ...init,
     headers: {
       'Content-Type': 'application/json',
       ...getAuthHeaders(),
+      ...init?.headers,
     },
   });
 
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data?.error || 'Ocurrió un error inesperado');
+    throw new Error(data?.error || data?.message || 'Ocurrió un error inesperado');
   }
 
   return data as T;
@@ -90,4 +113,13 @@ export async function buscarPacientes(params: {
 
 export async function obtenerDetallePaciente(idPaciente: number): Promise<{ paciente: PacienteDetalle }> {
   return fetchJson<{ paciente: PacienteDetalle }>(`/api/pacientes/${idPaciente}`);
+}
+
+export async function crearPaciente(
+  datos: RegistrarPacientePayload,
+): Promise<{ mensaje: string; paciente: PacienteRegistrado }> {
+  return fetchJson<{ mensaje: string; paciente: PacienteRegistrado }>('/api/pacientes', {
+    method: 'POST',
+    body: JSON.stringify(datos),
+  });
 }

@@ -247,6 +247,12 @@ td {
   font-size: 14px;
 }
 
+.hint {
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
 /* --- Página de Roles (demo de matriz de permisos) --- */
 
 .demo-layout {

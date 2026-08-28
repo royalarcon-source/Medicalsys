@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import { registrarUsuario, type RolNombre } from '../../services/authService';
+import { Link } from 'react-router-dom';
+import { registrarUsuario, type RolNombre, type UsuarioAutenticado } from '../../services/authService';
 
 const ROLES: { value: RolNombre; label: string }[] = [
   { value: 'ADMINISTRADOR', label: 'Administrador' },
@@ -22,6 +23,7 @@ export default function RegistrarUsuarioPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exito, setExito] = useState<string | null>(null);
+  const [usuarioCreado, setUsuarioCreado] = useState<UsuarioAutenticado | null>(null);
 
   const actualizarCampo = (campo: keyof typeof form) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -33,6 +35,7 @@ export default function RegistrarUsuarioPage() {
     event.preventDefault();
     setError(null);
     setExito(null);
+    setUsuarioCreado(null);
 
     if (!form.nombres.trim() || !form.apellidos.trim() || !form.email.trim() || !form.password) {
       setError('Nombres, apellidos, correo y contraseña son obligatorios.');
@@ -51,6 +54,7 @@ export default function RegistrarUsuarioPage() {
       });
 
       setExito(`Usuario ${usuario.nombres} ${usuario.apellidos} registrado con rol ${usuario.rol}.`);
+      setUsuarioCreado(usuario);
       setForm(FORM_INICIAL);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo registrar el usuario.');
@@ -120,6 +124,14 @@ export default function RegistrarUsuarioPage() {
             {loading ? 'Registrando...' : 'Registrar usuario'}
           </button>
         </form>
+
+        {usuarioCreado && usuarioCreado.rol === 'PACIENTE' && (
+          <p className="hint">
+            <Link to="/pacientes/nuevo" state={{ idUsuario: usuarioCreado.id_usuario }}>
+              Completar ficha de paciente para {usuarioCreado.nombres}
+            </Link>
+          </p>
+        )}
       </div>
     </section>
   );

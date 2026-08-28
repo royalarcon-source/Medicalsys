@@ -12,7 +12,9 @@ export type Permission =
   | "CITA_GESTIONAR"
   | "CONSULTA_GESTIONAR"
   | "HISTORIA_CLINICA_VER"
-  | "USUARIO_GESTIONAR";
+  | "USUARIO_GESTIONAR"
+  | "DISPONIBILIDAD_GESTIONAR"
+  | "DISPONIBILIDAD_VER";
 
 export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
   ADMINISTRADOR: [
@@ -28,6 +30,8 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "CONSULTA_GESTIONAR",
     "HISTORIA_CLINICA_VER",
     "USUARIO_GESTIONAR",
+    "DISPONIBILIDAD_GESTIONAR",
+    "DISPONIBILIDAD_VER",
   ],
   MEDICO: [
     "MEDICO_VER",
@@ -35,6 +39,8 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "PACIENTE_CONSULTAR",
     "CONSULTA_GESTIONAR",
     "HISTORIA_CLINICA_VER",
+    "DISPONIBILIDAD_GESTIONAR",
+    "DISPONIBILIDAD_VER",
   ],
   RECEPCIONISTA: [
     "MEDICO_VER",
@@ -43,8 +49,9 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "PACIENTE_CONSULTAR",
     "PACIENTE_CREAR",
     "CITA_GESTIONAR",
+    "DISPONIBILIDAD_VER",
   ],
-  PACIENTE: ["ESPECIALIDAD_LISTAR"],
+  PACIENTE: ["ESPECIALIDAD_LISTAR", "DISPONIBILIDAD_VER"],
 };
 
 export function hasPermission(roleName: string, permission: Permission): boolean {
