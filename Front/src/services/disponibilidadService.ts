@@ -25,12 +25,6 @@ export interface HorarioBasico {
   activo: boolean;
 }
 
-export interface Especialidad {
-  idEspecialidad: number;
-  nombre: string;
-  descripcion: string | null;
-}
-
 function getAuthHeaders(): Record<string, string> {
   const token = window.localStorage.getItem('token');
 
@@ -89,8 +83,4 @@ export async function buscarDisponibilidad(filtros: {
 
 export async function desactivarDisponibilidad(idHorario: number): Promise<{ mensaje: string }> {
   return fetchJson(`/api/disponibilidad/${idHorario}`, { method: 'DELETE' });
-}
-
-export async function listarEspecialidades(): Promise<{ especialidades: Especialidad[] }> {
-  return fetchJson('/api/especialidades');
 }

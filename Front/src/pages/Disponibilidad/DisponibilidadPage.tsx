@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react';
-import {
-  buscarDisponibilidad,
-  listarEspecialidades,
-  type DisponibilidadResultado,
-  type Especialidad,
-} from '../../services/disponibilidadService';
+import { buscarDisponibilidad, type DisponibilidadResultado } from '../../services/disponibilidadService';
+import { listarEspecialidades, type Especialidad } from '../../services/especialidadesService';
 
 const DIAS_SEMANA = [
   { value: 1, label: 'Lunes' },

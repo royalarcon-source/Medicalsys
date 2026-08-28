@@ -4,6 +4,7 @@ import RegistrarPacientePage from '../pages/Pacientes/RegistrarPacientePage';
 import RolesDemoPage from '../pages/Roles/RolesDemoPage';
 import LoginPage from '../pages/Login/LoginPage';
 import RegistrarUsuarioPage from '../pages/RegistrarUsuario/RegistrarUsuarioPage';
+import RegistrarMedicoPage from '../pages/Medicos/RegistrarMedicoPage';
 import DisponibilidadPage from '../pages/Disponibilidad/DisponibilidadPage';
 import RegistrarDisponibilidadPage from '../pages/Disponibilidad/RegistrarDisponibilidadPage';
 import RequireAuth from './RequireAuth';
@@ -34,6 +35,14 @@ export default function AppRoutes() {
         element={
           <RequireAuth rolesPermitidos={['ADMINISTRADOR']}>
             <RegistrarUsuarioPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/medicos/nuevo"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR']}>
+            <RegistrarMedicoPage />
           </RequireAuth>
         }
       />

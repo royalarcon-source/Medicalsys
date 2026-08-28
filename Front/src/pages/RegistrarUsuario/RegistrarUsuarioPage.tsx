@@ -132,6 +132,14 @@ export default function RegistrarUsuarioPage() {
             </Link>
           </p>
         )}
+
+        {usuarioCreado && usuarioCreado.rol === 'MEDICO' && (
+          <p className="hint">
+            <Link to="/medicos/nuevo" state={{ idUsuario: usuarioCreado.id_usuario }}>
+              Completar ficha de médico para {usuarioCreado.nombres}
+            </Link>
+          </p>
+        )}
       </div>
     </section>
   );
