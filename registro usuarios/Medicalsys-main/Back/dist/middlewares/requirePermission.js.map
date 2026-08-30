@@ -1,1 +1,0 @@
-{"version":3,"file":"requirePermission.js","sourceRoot":"","sources":["../../src/middlewares/requirePermission.ts"],"names":[],"mappings":";;AAGA,8CAMC;AAND,SAAgB,iBAAiB,CAAC,QAAgB;IAChD,OAAO,CAAC,GAAY,EAAE,GAAa,EAAE,IAAkB,EAAE,EAAE;QACzD,8DAA8D;QAC9D,uEAAuE;QACvE,IAAI,EAAE,CAAC;IACT,CAAC,CAAC;AACJ,CAAC"}
