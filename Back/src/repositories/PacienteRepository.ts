@@ -1,4 +1,3 @@
-// src/repositories/PacienteRepository.ts
 import { AppDataSource } from "../config/database";
 import { Paciente } from "../entities/Paciente.entity";
 import { ILike } from "typeorm";

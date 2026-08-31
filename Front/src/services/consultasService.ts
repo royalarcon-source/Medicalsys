@@ -1,22 +1,45 @@
-export type TipoIngreso = 'CONSULTA_ESPONTANEA' | 'SOBRECUPO' | 'URGENCIA_MENOR';
+export type TipoIngreso = 'CONSULTA_ESPONTANEA' | 'SOBRECUPO' | 'URGENCIA_MENOR' | 'CITA_PROGRAMADA';
 export type EstadoConsulta = 'EN_ESPERA' | 'EN_ATENCION' | 'ATENDIDA' | 'CANCELADA';
+
+export interface DiagnosticoItem {
+  idDiagnostico?: number;
+  codigo?: string | null;
+  descripcion: string;
+  tipo?: string | null;
+}
+
+export interface TratamientoItem {
+  idTratamiento?: number;
+  descripcion: string;
+  indicaciones?: string | null;
+  fechaInicio?: string | null;
+  fechaFin?: string | null;
+}
 
 export interface ConsultaItem {
   idConsulta: number;
   fechaConsulta: string;
   motivo: string | null;
+  anamnesis?: string | null;
+  examenFisico?: string | null;
+  observaciones?: string | null;
   tipoIngreso: TipoIngreso | null;
   numeroTurno: number | null;
   estadoConsulta: EstadoConsulta;
+  diagnosticos?: DiagnosticoItem[];
+  tratamientos?: TratamientoItem[];
   historia?: {
     idHistoria: number;
     paciente?: {
       idPaciente: number;
       documentoIdentidad: string;
+      fechaNacimiento?: string;
+      sexo?: string | null;
       usuario?: {
         nombres: string;
         apellidos: string;
         telefono: string | null;
+        email?: string;
       };
     };
   };
@@ -46,6 +69,24 @@ export interface RegistrarSinCitaPayload {
   motivo: string;
   tipoIngreso?: TipoIngreso;
   confirmarSobrecupo?: boolean;
+}
+
+export interface CompletarConsultaPayload {
+  motivo?: string;
+  anamnesis?: string;
+  examenFisico?: string;
+  observaciones?: string;
+  diagnosticos?: Array<{
+    codigo?: string;
+    descripcion: string;
+    tipo?: string;
+  }>;
+  tratamientos?: Array<{
+    descripcion: string;
+    indicaciones?: string;
+    fechaInicio?: string;
+    fechaFin?: string;
+  }>;
 }
 
 export interface TicketTurno {
@@ -96,11 +137,27 @@ export async function listarConsultas(filtros?: {
   return fetchJson(qs ? `/api/consultas?${qs}` : '/api/consultas');
 }
 
+export async function obtenerConsultaPorId(
+  idConsulta: number,
+): Promise<{ consulta: ConsultaItem }> {
+  return fetchJson(`/api/consultas/${idConsulta}`);
+}
+
 export async function registrarAtencionSinCita(
   datos: RegistrarSinCitaPayload,
 ): Promise<{ consulta: ConsultaItem; ticket: TicketTurno }> {
   return fetchJson('/api/consultas/sin-cita', {
     method: 'POST',
+    body: JSON.stringify(datos),
+  });
+}
+
+export async function completarConsulta(
+  idConsulta: number,
+  datos: CompletarConsultaPayload,
+): Promise<{ mensaje: string; consulta: ConsultaItem }> {
+  return fetchJson(`/api/consultas/${idConsulta}/completar`, {
+    method: 'PATCH',
     body: JSON.stringify(datos),
   });
 }

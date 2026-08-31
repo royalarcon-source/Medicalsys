@@ -6,7 +6,7 @@ export class Diagnostico {
   @PrimaryGeneratedColumn({ type: "bigint", name: "id_diagnostico" })
   idDiagnostico: number;
 
-  @ManyToOne(() => Consulta, { nullable: false })
+  @ManyToOne(() => Consulta, (consulta) => consulta.diagnosticos, { nullable: false })
   @JoinColumn({ name: "id_consulta" })
   consulta: Consulta;
 

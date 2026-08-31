@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import PacientesPage from '../pages/Pacientes/PacientesPage';
 import RegistrarPacientePage from '../pages/Pacientes/RegistrarPacientePage';
+import HistoriaClinicaPage from '../pages/Pacientes/HistoriaClinicaPage';
 import RolesDemoPage from '../pages/Roles/RolesDemoPage';
 import LoginPage from '../pages/Login/LoginPage';
 import RegistrarUsuarioPage from '../pages/RegistrarUsuario/RegistrarUsuarioPage';
@@ -12,6 +13,7 @@ import ReservarCitaPage from '../pages/Citas/ReservarCitaPage';
 import ConsultoriosPage from '../pages/Consultorios/ConsultoriosPage';
 import RegistrarAtencionPage from '../pages/Consultas/RegistrarAtencionPage';
 import ColaAtencionPage from '../pages/Consultas/ColaAtencionPage';
+import RegistrarConsultaPage from '../pages/Consultas/RegistrarConsultaPage';
 import RequireAuth from './RequireAuth';
 
 export default function AppRoutes() {
@@ -32,6 +34,14 @@ export default function AppRoutes() {
         element={
           <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'RECEPCIONISTA']}>
             <RegistrarPacientePage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/historia-clinica"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO']}>
+            <HistoriaClinicaPage />
           </RequireAuth>
         }
       />
@@ -104,6 +114,14 @@ export default function AppRoutes() {
         element={
           <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO']}>
             <ColaAtencionPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/consultas/:id/atender"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO']}>
+            <RegistrarConsultaPage />
           </RequireAuth>
         }
       />

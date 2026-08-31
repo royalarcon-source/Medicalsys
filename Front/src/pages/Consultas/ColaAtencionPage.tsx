@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   listarConsultas,
@@ -10,12 +10,12 @@ import {
 
 export default function ColaAtencionPage() {
   const { usuario } = useAuth();
+  const navigate = useNavigate();
   const [consultas, setConsultas] = useState<ConsultaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
-  const esMedico = usuario?.rol === 'MEDICO';
   const esAdminORecep = usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA';
 
   const cargarConsultas = async () => {
@@ -35,6 +35,17 @@ export default function ColaAtencionPage() {
     cargarConsultas();
   }, []);
 
+  const handleLlamarYAtender = async (idConsulta: number) => {
+    setError(null);
+    setMensajeExito(null);
+    try {
+      await actualizarEstadoConsulta(idConsulta, 'EN_ATENCION');
+      navigate(`/consultas/${idConsulta}/atender`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo llamar al paciente.');
+    }
+  };
+
   const handleCambiarEstado = async (idConsulta: number, nuevoEstado: EstadoConsulta) => {
     setError(null);
     setMensajeExito(null);
@@ -49,8 +60,10 @@ export default function ColaAtencionPage() {
 
   const badgeTipo = (tipo: string | null) => {
     switch (tipo) {
+      case 'CITA_PROGRAMADA':
+        return <span className="badge badge-confirmada" style={{ background: '#dbeafe', color: '#1e40af' }}>📅 Cita</span>;
       case 'URGENCIA_MENOR':
-        return <span className="badge badge-danger" style={{ background: '#fee2e2', color: '#991b1b' }}>🚨 Urgencia Menor</span>;
+        return <span className="badge badge-danger" style={{ background: '#fee2e2', color: '#991b1b' }}>🚨 Urgencia</span>;
       case 'SOBRECUPO':
         return <span className="badge badge-warning" style={{ background: '#fef3c7', color: '#92400e' }}>➕ Sobrecupo</span>;
       default:
@@ -75,20 +88,23 @@ export default function ColaAtencionPage() {
     <section className="page cola-atencion-page">
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <h2>Cola de Espera y Atenciones Sin Cita</h2>
+          <h2>Cola de Espera y Atenciones Clínicas</h2>
           <div style={{ display: 'flex', gap: '10px' }}>
+            <Link to="/historia-clinica" style={{ textDecoration: 'none' }}>
+              <button type="button" className="button-secondary">📖 Buscar Historia Clínica</button>
+            </Link>
             {esAdminORecep && (
               <Link to="/consultas/sin-cita" style={{ textDecoration: 'none' }}>
                 <button type="button">+ Nueva Atención Walk-in</button>
               </Link>
             )}
             <button type="button" className="button-secondary" onClick={cargarConsultas}>
-              🔄 Actualizar Cola
+              🔄 Actualizar
             </button>
           </div>
         </div>
         <p className="hint">
-          Panel de seguimiento en tiempo real para pacientes en sala de espera, clasificados por número de turno y prioridad.
+          Panel de seguimiento en tiempo real de pacientes en espera y consultorios activos.
         </p>
 
         {error && <p className="error">{error}</p>}
@@ -108,11 +124,11 @@ export default function ColaAtencionPage() {
                 <th>Paciente</th>
                 <th>Médico</th>
                 <th>Consultorio</th>
-                <th>Tipo / Ingreso</th>
+                <th>Tipo</th>
                 <th>Motivo</th>
-                <th>Hora Registro</th>
+                <th>Hora</th>
                 <th>Estado</th>
-                {(esMedico || esAdminORecep) && <th style={{ textAlign: 'right' }}>Acciones</th>}
+                <th style={{ textAlign: 'right' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -145,7 +161,16 @@ export default function ColaAtencionPage() {
                     <td>
                       <strong>{nombrePaciente}</strong>
                       <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                        CI: {paciente?.documentoIdentidad}
+                        CI: {paciente?.documentoIdentidad}{' '}
+                        {paciente?.documentoIdentidad && (
+                          <Link
+                            to={`/historia-clinica?ci=${encodeURIComponent(paciente.documentoIdentidad)}`}
+                            style={{ color: 'var(--accent)', marginLeft: '4px' }}
+                            title="Ver historia clínica"
+                          >
+                            [HC]
+                          </Link>
+                        )}
                       </div>
                     </td>
                     <td>{nombreMedico}</td>
@@ -160,25 +185,35 @@ export default function ColaAtencionPage() {
                     <td>{c.motivo || '—'}</td>
                     <td>{new Date(c.fechaConsulta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                     <td>{badgeEstado(c.estadoConsulta)}</td>
-                    {(esMedico || esAdminORecep) && (
-                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'inline-flex', gap: '6px' }}>
                         {c.estadoConsulta === 'EN_ESPERA' && (
                           <button
                             type="button"
                             className="button-secondary"
-                            style={{ fontSize: '12px', padding: '6px 10px', marginRight: '6px' }}
-                            onClick={() => handleCambiarEstado(c.idConsulta, 'EN_ATENCION')}
+                            style={{ fontSize: '12px', padding: '6px 10px' }}
+                            onClick={() => handleLlamarYAtender(c.idConsulta)}
                           >
-                            ▶️ Llamar
+                            ▶️ Llamar y Atender
                           </button>
                         )}
                         {c.estadoConsulta === 'EN_ATENCION' && (
                           <button
                             type="button"
-                            style={{ fontSize: '12px', padding: '6px 10px', marginRight: '6px' }}
-                            onClick={() => handleCambiarEstado(c.idConsulta, 'ATENDIDA')}
+                            style={{ fontSize: '12px', padding: '6px 10px' }}
+                            onClick={() => navigate(`/consultas/${c.idConsulta}/atender`)}
                           >
-                            ✅ Finalizar
+                            🩺 Atender
+                          </button>
+                        )}
+                        {c.estadoConsulta === 'ATENDIDA' && (
+                          <button
+                            type="button"
+                            className="button-secondary"
+                            style={{ fontSize: '12px', padding: '6px 10px' }}
+                            onClick={() => navigate(`/consultas/${c.idConsulta}/atender`)}
+                          >
+                            Ver Ficha
                           </button>
                         )}
                         {c.estadoConsulta !== 'ATENDIDA' && c.estadoConsulta !== 'CANCELADA' && (
@@ -191,8 +226,8 @@ export default function ColaAtencionPage() {
                             Cancelar
                           </button>
                         )}
-                      </td>
-                    )}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}

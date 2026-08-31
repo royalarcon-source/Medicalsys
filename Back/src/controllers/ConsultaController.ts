@@ -61,6 +61,45 @@ export const ConsultaController = {
     }
   },
 
+  async obtenerPorId(req: Request, res: Response, next: NextFunction) {
+    try {
+      const usuarioActual = (req as any).authUser;
+      const idConsulta = Number(req.params.id);
+      const consulta = await consultaService.obtenerPorId(idConsulta, usuarioActual);
+      return res.status(200).json({ consulta });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async completar(req: Request, res: Response, next: NextFunction) {
+    try {
+      const usuarioActual = (req as any).authUser;
+      const idConsulta = Number(req.params.id);
+      const { motivo, anamnesis, examenFisico, observaciones, diagnosticos, tratamientos } = req.body;
+
+      const consulta = await consultaService.completar(
+        idConsulta,
+        {
+          motivo,
+          anamnesis,
+          examenFisico,
+          observaciones,
+          diagnosticos,
+          tratamientos,
+        },
+        usuarioActual
+      );
+
+      return res.status(200).json({
+        mensaje: "Consulta clínica completada y registrada exitosamente.",
+        consulta,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async actualizarEstado(req: Request, res: Response, next: NextFunction) {
     try {
       const usuarioActual = (req as any).authUser;

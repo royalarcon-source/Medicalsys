@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   OneToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
 } from "typeorm";
@@ -11,8 +12,10 @@ import { HistoriaClinica } from "./HistoriaClinica.entity";
 import { Medico } from "./Medico.entity";
 import { Cita } from "./Cita.entity";
 import { Consultorio } from "./Consultorio.entity";
+import { Diagnostico } from "./Diagnostico.entity";
+import { Tratamiento } from "./Tratamiento.entity";
 
-export type TipoIngreso = "CONSULTA_ESPONTANEA" | "SOBRECUPO" | "URGENCIA_MENOR";
+export type TipoIngreso = "CONSULTA_ESPONTANEA" | "SOBRECUPO" | "URGENCIA_MENOR" | "CITA_PROGRAMADA";
 export type EstadoConsulta = "EN_ESPERA" | "EN_ATENCION" | "ATENDIDA" | "CANCELADA";
 
 @Entity({ name: "consulta" })
@@ -35,6 +38,12 @@ export class Consulta {
   @ManyToOne(() => Consultorio, { nullable: true })
   @JoinColumn({ name: "id_consultorio" })
   consultorio: Consultorio | null;
+
+  @OneToMany(() => Diagnostico, (diagnostico) => diagnostico.consulta)
+  diagnosticos: Diagnostico[];
+
+  @OneToMany(() => Tratamiento, (tratamiento) => tratamiento.consulta)
+  tratamientos: Tratamiento[];
 
   @CreateDateColumn({ type: "timestamp", name: "fecha_consulta" })
   fechaConsulta: Date;

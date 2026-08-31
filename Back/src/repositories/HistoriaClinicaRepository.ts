@@ -9,6 +9,14 @@ export const HistoriaClinicaRepository = AppDataSource.getRepository(HistoriaCli
     });
   },
 
+  async buscarPorCI(documentoIdentidad: string): Promise<HistoriaClinica | null> {
+    return this.createQueryBuilder("historia")
+      .innerJoinAndSelect("historia.paciente", "paciente")
+      .leftJoinAndSelect("paciente.usuario", "usuario")
+      .where("paciente.documentoIdentidad = :documentoIdentidad", { documentoIdentidad })
+      .getOne();
+  },
+
   async crearParaPaciente(idPaciente: number, observaciones?: string): Promise<HistoriaClinica> {
     const historia = this.create({
       paciente: { idPaciente },

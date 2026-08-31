@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   buscarPacientes,
   obtenerDetallePaciente,
@@ -167,9 +168,19 @@ export default function PacientesPage() {
                     <td>{paciente.documentoIdentidad}</td>
                     <td>{`${paciente.nombres} ${paciente.apellidos}`.trim()}</td>
                     <td>
-                      <button type="button" onClick={() => abrirDetalle(paciente.idPaciente)}>
-                        Ver
-                      </button>
+                      <div style={{ display: 'inline-flex', gap: '6px' }}>
+                        <button type="button" onClick={() => abrirDetalle(paciente.idPaciente)}>
+                          Ver
+                        </button>
+                        <Link
+                          to={`/historia-clinica?ci=${encodeURIComponent(paciente.documentoIdentidad)}`}
+                          style={{ textDecoration: 'none' }}
+                        >
+                          <button type="button" className="button-secondary">
+                            📖 Historia
+                          </button>
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -236,6 +247,16 @@ export default function PacientesPage() {
                 <div>
                   <span className="label">Dirección</span>
                   <strong>{pacienteSeleccionado.direccion || '—'}</strong>
+                </div>
+                <div style={{ gridColumn: '1 / -1', marginTop: '10px' }}>
+                  <Link
+                    to={`/historia-clinica?ci=${encodeURIComponent(pacienteSeleccionado.documentoIdentidad)}`}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <button type="button" style={{ width: '100%' }}>
+                      📖 Ir a Historia Clínica Completa
+                    </button>
+                  </Link>
                 </div>
               </div>
             )}

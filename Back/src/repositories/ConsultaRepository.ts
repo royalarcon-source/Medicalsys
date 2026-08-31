@@ -11,7 +11,23 @@ export const ConsultaRepository = AppDataSource.getRepository(Consulta).extend({
         medico: { usuario: true, especialidades: true },
         consultorio: true,
         cita: true,
+        diagnosticos: true,
+        tratamientos: true,
       },
+    });
+  },
+
+  async buscarPorHistoria(idHistoria: number): Promise<Consulta[]> {
+    return this.find({
+      where: { historia: { idHistoria } },
+      relations: {
+        medico: { usuario: true, especialidades: true },
+        consultorio: true,
+        cita: true,
+        diagnosticos: true,
+        tratamientos: true,
+      },
+      order: { fechaConsulta: "DESC" },
     });
   },
 
@@ -32,6 +48,7 @@ export const ConsultaRepository = AppDataSource.getRepository(Consulta).extend({
   async buscarTodas(filtros?: {
     idMedico?: number;
     idPaciente?: number;
+    idHistoria?: number;
     fecha?: string;
     estadoConsulta?: EstadoConsulta;
     tipoIngreso?: TipoIngreso;
@@ -45,6 +62,8 @@ export const ConsultaRepository = AppDataSource.getRepository(Consulta).extend({
       .leftJoinAndSelect("medico.especialidades", "especialidades")
       .leftJoinAndSelect("consulta.consultorio", "consultorio")
       .leftJoinAndSelect("consulta.cita", "cita")
+      .leftJoinAndSelect("consulta.diagnosticos", "diagnosticos")
+      .leftJoinAndSelect("consulta.tratamientos", "tratamientos")
       .orderBy("consulta.fechaConsulta", "DESC")
       .addOrderBy("consulta.numeroTurno", "ASC");
 
@@ -54,6 +73,10 @@ export const ConsultaRepository = AppDataSource.getRepository(Consulta).extend({
 
     if (filtros?.idPaciente) {
       qb.andWhere("paciente.idPaciente = :idPaciente", { idPaciente: filtros.idPaciente });
+    }
+
+    if (filtros?.idHistoria) {
+      qb.andWhere("historia.idHistoria = :idHistoria", { idHistoria: filtros.idHistoria });
     }
 
     if (filtros?.estadoConsulta) {

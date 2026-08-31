@@ -13,6 +13,7 @@ import disponibilidadRoutes from "./routes/disponibilidad.routes";
 import citasRoutes from "./routes/citas.routes";
 import consultoriosRoutes from "./routes/consultorios.routes";
 import consultasRoutes from "./routes/consultas.routes";
+import historiaClinicaRoutes from "./routes/historia-clinica.routes";
 
 dotenv.config();
 
@@ -20,7 +21,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Registro de endpoints de autenticación
 app.use("/api/auth", authRoutes);
 app.use("/api/medicos", medicoRoutes);
 app.use("/api/especialidades", especialidadRoutes);
@@ -30,6 +30,7 @@ app.use("/api/disponibilidad", disponibilidadRoutes);
 app.use("/api/citas", citasRoutes);
 app.use("/api/consultorios", consultoriosRoutes);
 app.use("/api/consultas", consultasRoutes);
+app.use("/api/historia-clinica", historiaClinicaRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

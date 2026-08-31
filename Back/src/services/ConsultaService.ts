@@ -3,6 +3,9 @@ import { HistoriaClinicaRepository } from "../repositories/HistoriaClinicaReposi
 import { PacienteRepository } from "../repositories/PacienteRepository";
 import { MedicoRepository } from "../repositories/MedicoRepository";
 import { ConsultorioRepository } from "../repositories/ConsultorioRepository";
+import { DiagnosticoRepository, DiagnosticoItemDTO } from "../repositories/DiagnosticoRepository";
+import { TratamientoRepository, TratamientoItemDTO } from "../repositories/TratamientoRepository";
+import { Cita } from "../entities/Cita.entity";
 import { Consulta, EstadoConsulta, TipoIngreso } from "../entities/Consulta.entity";
 import { AppError } from "../utils/AppError";
 import { AppDataSource } from "../config/database";
@@ -16,6 +19,15 @@ export interface RegistrarAtencionSinCitaDTO {
   motivo: string;
   tipoIngreso?: TipoIngreso;
   confirmarSobrecupo?: boolean;
+}
+
+export interface CompletarConsultaDTO {
+  motivo?: string;
+  anamnesis?: string;
+  examenFisico?: string;
+  observaciones?: string;
+  diagnosticos?: DiagnosticoItemDTO[];
+  tratamientos?: TratamientoItemDTO[];
 }
 
 export class ConsultaService {
@@ -119,7 +131,151 @@ export class ConsultaService {
       filtros.idPaciente = paciente.idPaciente;
     }
 
+    const citasPendientesQB = AppDataSource.getRepository(Cita).createQueryBuilder("cita")
+      .leftJoinAndSelect("cita.paciente", "paciente")
+      .leftJoinAndSelect("cita.medico", "medico")
+      .leftJoinAndSelect("cita.consultorio", "consultorio")
+      .where("cita.estado IN (:...estados)", { estados: ["PENDIENTE", "CONFIRMADA"] });
+
+    if (filtros.idMedico) {
+      citasPendientesQB.andWhere("cita.id_medico = :idMedico", { idMedico: filtros.idMedico });
+    }
+    if (filtros.idPaciente) {
+      citasPendientesQB.andWhere("cita.id_paciente = :idPaciente", { idPaciente: filtros.idPaciente });
+    }
+
+    const citasPendientes = await citasPendientesQB.getMany();
+    for (const c of citasPendientes) {
+      const existeConsulta = await AppDataSource.getRepository(Consulta).findOne({
+        where: { cita: { idCita: c.idCita } },
+      });
+
+      if (!existeConsulta) {
+        let historia = await HistoriaClinicaRepository.buscarPorPaciente(c.paciente.idPaciente);
+        if (!historia) {
+          historia = await HistoriaClinicaRepository.crearParaPaciente(
+            c.paciente.idPaciente,
+            "Apertura automática por cita programada"
+          );
+        }
+
+        const totalHoy = await ConsultaRepository.contarConsultasHoy(c.medico.idMedico, c.fechaHoraInicio);
+
+        const nuevaConsulta = AppDataSource.getRepository(Consulta).create({
+          historia,
+          medico: c.medico,
+          consultorio: c.consultorio || null,
+          cita: c,
+          fechaConsulta: c.fechaHoraInicio,
+          motivo: c.motivo || "Cita programada",
+          tipoIngreso: "CITA_PROGRAMADA",
+          numeroTurno: totalHoy + 1,
+          estadoConsulta: "EN_ESPERA",
+        });
+
+        await AppDataSource.getRepository(Consulta).save(nuevaConsulta);
+      }
+    }
+
     return ConsultaRepository.buscarTodas(filtros);
+  }
+
+  async obtenerPorId(
+    idConsulta: number,
+    usuarioActual: { idUsuario: number; rol: string }
+  ): Promise<Consulta> {
+    const consulta = await ConsultaRepository.buscarPorId(idConsulta);
+    if (!consulta) {
+      throw new AppError("La consulta indicada no existe.", 404);
+    }
+
+    if (usuarioActual.rol === "MEDICO") {
+      const medico = await MedicoRepository.buscarPorUsuario(usuarioActual.idUsuario);
+      if (!medico) {
+        throw new AppError("Perfil de médico no encontrado.", 403);
+      }
+    }
+
+    return consulta;
+  }
+
+  async completar(
+    idConsulta: number,
+    dto: CompletarConsultaDTO,
+    usuarioActual: { idUsuario: number; rol: string }
+  ): Promise<Consulta> {
+    const consulta = await ConsultaRepository.buscarPorId(idConsulta);
+    if (!consulta) {
+      throw new AppError("La consulta indicada no existe.", 404);
+    }
+
+    if (consulta.estadoConsulta === "ATENDIDA") {
+      throw new AppError("La consulta ya se encuentra finalizada y no puede ser modificada.", 409);
+    }
+
+    if (usuarioActual.rol === "MEDICO") {
+      const medico = await MedicoRepository.buscarPorUsuario(usuarioActual.idUsuario);
+      if (!medico || medico.idMedico !== consulta.medico.idMedico) {
+        throw new AppError("No tienes permiso para registrar la atención de otro médico.", 403);
+      }
+    }
+
+    if (dto.motivo !== undefined && !dto.motivo.trim()) {
+      throw new AppError("El motivo de la consulta no puede estar vacío.", 400);
+    }
+
+    return await AppDataSource.transaction(async (manager) => {
+      if (dto.motivo) consulta.motivo = dto.motivo.trim();
+      if (dto.anamnesis !== undefined) consulta.anamnesis = dto.anamnesis.trim() || null;
+      if (dto.examenFisico !== undefined) consulta.examenFisico = dto.examenFisico.trim() || null;
+      if (dto.observaciones !== undefined) consulta.observaciones = dto.observaciones.trim() || null;
+      consulta.estadoConsulta = "ATENDIDA";
+
+      await manager.save(Consulta, consulta);
+
+      if (dto.diagnosticos && dto.diagnosticos.length > 0) {
+        await manager.save(
+          dto.diagnosticos.map((item) =>
+            manager.create("Diagnostico", {
+              consulta: { idConsulta },
+              codigo: item.codigo || null,
+              descripcion: item.descripcion.trim(),
+              tipo: item.tipo || "DEFINITIVO",
+            })
+          )
+        );
+      }
+
+      if (dto.tratamientos && dto.tratamientos.length > 0) {
+        await manager.save(
+          dto.tratamientos.map((item) =>
+            manager.create("Tratamiento", {
+              consulta: { idConsulta },
+              descripcion: item.descripcion.trim(),
+              indicaciones: item.indicaciones?.trim() || null,
+              fechaInicio: item.fechaInicio ? new Date(item.fechaInicio) : null,
+              fechaFin: item.fechaFin ? new Date(item.fechaFin) : null,
+            })
+          )
+        );
+      }
+
+      if (consulta.cita) {
+        await manager.update("Cita", { idCita: consulta.cita.idCita }, { estado: "ATENDIDA" });
+      }
+
+      return (await manager.findOne(Consulta, {
+        where: { idConsulta },
+        relations: {
+          historia: { paciente: { usuario: true } },
+          medico: { usuario: true, especialidades: true },
+          consultorio: true,
+          cita: true,
+          diagnosticos: true,
+          tratamientos: true,
+        },
+      }))!;
+    });
   }
 
   async actualizarEstado(
@@ -130,6 +286,10 @@ export class ConsultaService {
     const consulta = await ConsultaRepository.buscarPorId(idConsulta);
     if (!consulta) {
       throw new AppError("La consulta indicada no existe.", 404);
+    }
+
+    if (consulta.estadoConsulta === "ATENDIDA" && nuevoEstado !== "ATENDIDA") {
+      throw new AppError("Una consulta atendida es inmutable y no puede cambiar de estado.", 409);
     }
 
     if (usuarioActual.rol === "MEDICO") {
