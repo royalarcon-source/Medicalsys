@@ -9,6 +9,9 @@ import DisponibilidadPage from '../pages/Disponibilidad/DisponibilidadPage';
 import RegistrarDisponibilidadPage from '../pages/Disponibilidad/RegistrarDisponibilidadPage';
 import GestionCitasPage from '../pages/Citas/GestionCitasPage';
 import ReservarCitaPage from '../pages/Citas/ReservarCitaPage';
+import ConsultoriosPage from '../pages/Consultorios/ConsultoriosPage';
+import RegistrarAtencionPage from '../pages/Consultas/RegistrarAtencionPage';
+import ColaAtencionPage from '../pages/Consultas/ColaAtencionPage';
 import RequireAuth from './RequireAuth';
 
 export default function AppRoutes() {
@@ -77,6 +80,30 @@ export default function AppRoutes() {
         element={
           <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'RECEPCIONISTA', 'PACIENTE']}>
             <ReservarCitaPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/consultorios"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO']}>
+            <ConsultoriosPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/consultas/sin-cita"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'RECEPCIONISTA']}>
+            <RegistrarAtencionPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/consultas/cola"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO']}>
+            <ColaAtencionPage />
           </RequireAuth>
         }
       />

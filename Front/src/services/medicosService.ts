@@ -54,3 +54,7 @@ export async function crearMedico(
 export async function obtenerMedico(idMedico: number): Promise<{ medico: MedicoDetalle }> {
   return fetchJson(`/api/medicos/${idMedico}`);
 }
+
+export async function listarMedicos(): Promise<{ medicos: MedicoDetalle[] }> {
+  return fetchJson('/api/medicos');
+}

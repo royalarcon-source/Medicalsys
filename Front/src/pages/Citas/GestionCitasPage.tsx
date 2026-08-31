@@ -7,6 +7,12 @@ import {
   reprogramarCita,
   type CitaItem,
 } from '../../services/citasService';
+import {
+  listarConsultorios,
+  asignarConsultorioACita,
+  liberarConsultorioDeCita,
+  type ConsultorioItem,
+} from '../../services/consultoriosService';
 
 export default function GestionCitasPage() {
   const { usuario } = useAuth();
@@ -15,6 +21,9 @@ export default function GestionCitasPage() {
   const [error, setError] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
+  const esAdminOGestor =
+    usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA';
+
   // Modal de reprogramación
   const [citaParaReprogramar, setCitaParaReprogramar] = useState<CitaItem | null>(null);
   const [nuevaFechaInicio, setNuevaFechaInicio] = useState('');
@@ -22,6 +31,14 @@ export default function GestionCitasPage() {
   const [nuevoMotivo, setNuevoMotivo] = useState('');
   const [reprogramando, setReprogramando] = useState(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
+
+  // Modal de asignación de Consultorio (HU-17)
+  const [citaParaConsultorio, setCitaParaConsultorio] = useState<CitaItem | null>(null);
+  const [consultorios, setConsultorios] = useState<ConsultorioItem[]>([]);
+  const [idConsultorioSeleccionado, setIdConsultorioSeleccionado] = useState<number | ''>('');
+  const [cargandoConsultorios, setCargandoConsultorios] = useState(false);
+  const [asignandoConsultorio, setAsignandoConsultorio] = useState(false);
+  const [errorModalConsultorio, setErrorModalConsultorio] = useState<string | null>(null);
 
   const cargarCitas = async () => {
     setLoading(true);
@@ -59,7 +76,6 @@ export default function GestionCitasPage() {
 
   const abrirModalReprogramar = (cita: CitaItem) => {
     setCitaParaReprogramar(cita);
-    // Convertir a formato datetime-local (YYYY-MM-DDTHH:mm)
     const inicioDate = new Date(cita.fechaHoraInicio);
     const finDate = new Date(cita.fechaHoraFin);
 
@@ -102,6 +118,71 @@ export default function GestionCitasPage() {
     }
   };
 
+  // Abrir modal de asignación de Consultorio (HU-17)
+  const abrirModalConsultorio = async (cita: CitaItem) => {
+    setCitaParaConsultorio(cita);
+    setIdConsultorioSeleccionado(cita.consultorio?.idConsultorio || '');
+    setErrorModalConsultorio(null);
+    setCargandoConsultorios(true);
+
+    try {
+      const dInicio = new Date(cita.fechaHoraInicio);
+      const dFin = new Date(cita.fechaHoraFin);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const fecha = `${dInicio.getFullYear()}-${pad(dInicio.getMonth() + 1)}-${pad(dInicio.getDate())}`;
+      const horaInicio = `${pad(dInicio.getHours())}:${pad(dInicio.getMinutes())}`;
+      const horaFin = `${pad(dFin.getHours())}:${pad(dFin.getMinutes())}`;
+
+      const res = await listarConsultorios({
+        fecha,
+        horaInicio,
+        horaFin,
+        excludeCitaId: cita.idCita,
+      });
+      setConsultorios(res.consultorios || []);
+    } catch (err) {
+      setErrorModalConsultorio('Error al consultar disponibilidad de consultorios.');
+    } finally {
+      setCargandoConsultorios(false);
+    }
+  };
+
+  const handleGuardarConsultorio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!citaParaConsultorio || !idConsultorioSeleccionado) return;
+
+    setAsignandoConsultorio(true);
+    setErrorModalConsultorio(null);
+
+    try {
+      await asignarConsultorioACita(citaParaConsultorio.idCita, Number(idConsultorioSeleccionado));
+      setMensajeExito(`Consultorio asignado exitosamente a la cita #${citaParaConsultorio.idCita}.`);
+      setCitaParaConsultorio(null);
+      await cargarCitas();
+    } catch (err) {
+      setErrorModalConsultorio(err instanceof Error ? err.message : 'No se pudo asignar el consultorio.');
+    } finally {
+      setAsignandoConsultorio(false);
+    }
+  };
+
+  const handleLiberarConsultorio = async () => {
+    if (!citaParaConsultorio) return;
+    setAsignandoConsultorio(true);
+    setErrorModalConsultorio(null);
+
+    try {
+      await liberarConsultorioDeCita(citaParaConsultorio.idCita);
+      setMensajeExito(`Consultorio liberado de la cita #${citaParaConsultorio.idCita}.`);
+      setCitaParaConsultorio(null);
+      await cargarCitas();
+    } catch (err) {
+      setErrorModalConsultorio(err instanceof Error ? err.message : 'No se pudo liberar el consultorio.');
+    } finally {
+      setAsignandoConsultorio(false);
+    }
+  };
+
   const formatearFecha = (iso: string) => {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
@@ -132,15 +213,22 @@ export default function GestionCitasPage() {
   return (
     <section className="page citas-page">
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
           <h2>Gestión de Citas Médicas</h2>
-          {(usuario?.rol === 'ADMINISTRADOR' ||
-            usuario?.rol === 'RECEPCIONISTA' ||
-            usuario?.rol === 'PACIENTE') && (
-            <Link to="/citas/reservar" style={{ textDecoration: 'none' }}>
-              <button type="button">+ Nueva reserva (HU-15)</button>
-            </Link>
-          )}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {esAdminOGestor && (
+              <Link to="/consultas/sin-cita" style={{ textDecoration: 'none' }}>
+                <button type="button" className="button-secondary">🚶 Atención sin cita (HU-18)</button>
+              </Link>
+            )}
+            {(usuario?.rol === 'ADMINISTRADOR' ||
+              usuario?.rol === 'RECEPCIONISTA' ||
+              usuario?.rol === 'PACIENTE') && (
+              <Link to="/citas/reservar" style={{ textDecoration: 'none' }}>
+                <button type="button">+ Nueva reserva (HU-15)</button>
+              </Link>
+            )}
+          </div>
         </div>
 
         {error && <p className="error">{error}</p>}
@@ -161,7 +249,7 @@ export default function GestionCitasPage() {
                 <th>Médico</th>
                 <th>Inicio</th>
                 <th>Fin</th>
-                <th>Motivo</th>
+                <th>Consultorio (HU-17)</th>
                 <th>Estado</th>
                 <th style={{ textAlign: 'right' }}>Acciones</th>
               </tr>
@@ -173,7 +261,7 @@ export default function GestionCitasPage() {
                   : `CI: ${cita.paciente?.documentoIdentidad || '—'}`;
 
                 const nombreMedico = cita.medico?.usuario
-                  ? `Dr. ${cita.medico.usuario.nombres} ${cita.medico.usuario.apellidos}`
+                  ? `Dr(a). ${cita.medico.usuario.nombres} ${cita.medico.usuario.apellidos}`
                   : `Col. ${cita.medico?.numeroColegiatura || '—'}`;
 
                 const puedeModificar =
@@ -186,16 +274,38 @@ export default function GestionCitasPage() {
                     <td>{nombreMedico}</td>
                     <td>{formatearFecha(cita.fechaHoraInicio)}</td>
                     <td>{formatearFecha(cita.fechaHoraFin)}</td>
-                    <td>{cita.motivo || 'Consulta general'}</td>
+                    <td>
+                      {cita.consultorio ? (
+                        <span className="badge badge-confirmada" style={{ fontWeight: 600 }}>
+                          🏥 {cita.consultorio.nombre}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#9ca3af', fontSize: '13px' }}>
+                          Sin asignar
+                        </span>
+                      )}
+                    </td>
                     <td>
                       <span className={badgeClase(cita.estado)}>{cita.estado}</span>
                     </td>
                     <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                       {puedeModificar ? (
-                        <div style={{ display: 'inline-flex', gap: '8px' }}>
+                        <div style={{ display: 'inline-flex', gap: '6px' }}>
+                          {esAdminOGestor && (
+                            <button
+                              type="button"
+                              className="button-secondary"
+                              style={{ fontSize: '12px', padding: '6px 10px' }}
+                              onClick={() => abrirModalConsultorio(cita)}
+                              title="Asignar o reasignar espacio físico (HU-17)"
+                            >
+                              🏥 {cita.consultorio ? 'Reasignar' : 'Asignar'}
+                            </button>
+                          )}
                           <button
                             type="button"
                             className="button-secondary"
+                            style={{ fontSize: '12px', padding: '6px 10px' }}
                             onClick={() => abrirModalReprogramar(cita)}
                           >
                             Reprogramar
@@ -203,6 +313,7 @@ export default function GestionCitasPage() {
                           <button
                             type="button"
                             className="button-danger"
+                            style={{ fontSize: '12px', padding: '6px 10px' }}
                             onClick={() => handleCancelar(cita)}
                           >
                             Cancelar
@@ -220,6 +331,7 @@ export default function GestionCitasPage() {
         )}
       </div>
 
+      {/* Modal de Reprogramación */}
       {citaParaReprogramar && (
         <div className="modal-overlay" onClick={() => setCitaParaReprogramar(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -281,6 +393,95 @@ export default function GestionCitasPage() {
                 <button type="submit" disabled={reprogramando}>
                   {reprogramando ? 'Guardando...' : 'Confirmar reprogramación'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Asignación de Consultorio (HU-17) */}
+      {citaParaConsultorio && (
+        <div className="modal-overlay" onClick={() => setCitaParaConsultorio(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '560px' }}>
+            <div className="modal-header">
+              <h3>Asignar Consultorio Físico (HU-17)</h3>
+              <button
+                type="button"
+                className="button-secondary"
+                onClick={() => setCitaParaConsultorio(null)}
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '12px', fontSize: '13px', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
+              <p style={{ margin: '2px 0' }}>
+                <strong>Cita:</strong> #{citaParaConsultorio.idCita} ({formatearFecha(citaParaConsultorio.fechaHoraInicio)} a {formatearFecha(citaParaConsultorio.fechaHoraFin)})
+              </p>
+              <p style={{ margin: '2px 0' }}>
+                <strong>Médico:</strong> {citaParaConsultorio.medico?.usuario?.nombres} {citaParaConsultorio.medico?.usuario?.apellidos}
+              </p>
+              {citaParaConsultorio.consultorio && (
+                <p style={{ margin: '2px 0', color: '#166534' }}>
+                  <strong>Consultorio actual:</strong> {citaParaConsultorio.consultorio.nombre}
+                </p>
+              )}
+            </div>
+
+            <form onSubmit={handleGuardarConsultorio} className="form">
+              <label className="form-field">
+                <span className="label">Seleccionar Consultorio Físico:</span>
+                {cargandoConsultorios ? (
+                  <p>Verificando disponibilidad de consultorios...</p>
+                ) : consultorios.length === 0 ? (
+                  <p className="empty-state">No hay consultorios registrados.</p>
+                ) : (
+                  <select
+                    value={idConsultorioSeleccionado}
+                    onChange={(e) => setIdConsultorioSeleccionado(e.target.value ? Number(e.target.value) : '')}
+                    required
+                  >
+                    <option value="">-- Seleccionar un consultorio --</option>
+                    {consultorios.map((c) => (
+                      <option
+                        key={c.idConsultorio}
+                        value={c.idConsultorio}
+                        disabled={c.disponible === false}
+                      >
+                        {c.nombre} (Piso {c.piso || '1'} - {c.tipo}) {c.disponible === false ? '❌ [OCUPADO EN ESTE HORARIO]' : '🟢 [DISPONIBLE]'}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </label>
+
+              {errorModalConsultorio && <p className="error">{errorModalConsultorio}</p>}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+                {citaParaConsultorio.consultorio ? (
+                  <button
+                    type="button"
+                    className="button-danger"
+                    onClick={handleLiberarConsultorio}
+                    disabled={asignandoConsultorio}
+                  >
+                    Liberar consultorio
+                  </button>
+                ) : <div />}
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className="button-secondary"
+                    onClick={() => setCitaParaConsultorio(null)}
+                    disabled={asignandoConsultorio}
+                  >
+                    Cancelar
+                  </button>
+                  <button type="submit" disabled={asignandoConsultorio || !idConsultorioSeleccionado}>
+                    {asignandoConsultorio ? 'Guardando...' : 'Confirmar Asignación'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

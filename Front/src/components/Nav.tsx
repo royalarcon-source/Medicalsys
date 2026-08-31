@@ -55,6 +55,18 @@ export default function Nav() {
           </NavLink>
         )}
 
+        {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA' || usuario?.rol === 'MEDICO') && (
+          <NavLink to="/consultas/cola" end>
+            Cola de Espera
+          </NavLink>
+        )}
+
+        {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA' || usuario?.rol === 'MEDICO') && (
+          <NavLink to="/consultorios" end>
+            Consultorios
+          </NavLink>
+        )}
+
         <NavLink to="/roles" end>
           Roles
         </NavLink>

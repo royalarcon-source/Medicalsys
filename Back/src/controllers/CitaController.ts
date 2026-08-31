@@ -1,6 +1,7 @@
 // src/controllers/CitaController.ts
 import { Request, Response, NextFunction } from "express";
 import { citaService } from "../services/CitaService";
+import { ConsultorioService } from "../services/ConsultorioService";
 import { ReservarCitaDTO, ReprogramarCitaDTO, CancelarCitaDTO } from "../dtos/cita.dto";
 import { AppError } from "../utils/AppError";
 
@@ -97,6 +98,41 @@ export const CitaController = {
 
       const slots = await citaService.obtenerSlotsDisponibles(idMedico, fecha);
       return res.status(200).json({ slots });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async asignarConsultorio(req: Request, res: Response, next: NextFunction) {
+    try {
+      const idCita = Number(req.params.id);
+      const idConsultorio = Number(req.body.idConsultorio);
+      const usuarioActual = (req as any).authUser;
+
+      const consultorioService = new ConsultorioService();
+      const cita = await consultorioService.asignarACita(idCita, idConsultorio, usuarioActual);
+
+      return res.status(200).json({
+        mensaje: "Consultorio asignado exitosamente.",
+        cita,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async liberarConsultorio(req: Request, res: Response, next: NextFunction) {
+    try {
+      const idCita = Number(req.params.id);
+      const usuarioActual = (req as any).authUser;
+
+      const consultorioService = new ConsultorioService();
+      const cita = await consultorioService.liberarDeCita(idCita, usuarioActual);
+
+      return res.status(200).json({
+        mensaje: "Consultorio liberado exitosamente.",
+        cita,
+      });
     } catch (error) {
       next(error);
     }

@@ -22,4 +22,8 @@ router.put("/:id/reprogramar", requirePermission("CITA_GESTIONAR"), CitaControll
 router.patch("/:id/cancelar", requirePermission("CITA_GESTIONAR"), CitaController.cancelar);
 router.delete("/:id", requirePermission("CITA_GESTIONAR"), CitaController.cancelar);
 
+// HU-17: Asignar y liberar consultorio de cita
+router.patch("/:id/asignar-consultorio", requirePermission("CONSULTORIO_GESTIONAR"), CitaController.asignarConsultorio);
+router.delete("/:id/consultorio", requirePermission("CONSULTORIO_GESTIONAR"), CitaController.liberarConsultorio);
+
 export default router;

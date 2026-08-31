@@ -25,7 +25,10 @@ export interface CitaMedico {
 
 export interface CitaConsultorio {
   idConsultorio: number;
-  codigo: string;
+  nombre: string;
+  tipo?: string;
+  piso?: string | null;
+  codigo?: string;
   ubicacion?: string;
 }
 
