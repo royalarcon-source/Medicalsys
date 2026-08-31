@@ -247,10 +247,220 @@ td {
   font-size: 14px;
 }
 
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-pendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-confirmada {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-atendida {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-cancelada {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-no_asistio {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.button-danger {
+  background: #dc2626 !important;
+  color: #fff !important;
+}
+
+.button-secondary {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+  border: 1px solid var(--border) !important;
+}
+
 .hint {
   color: #6b7280;
   font-size: 13px;
   margin-top: 12px;
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.schedule-card {
+  padding: 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.schedule-card:hover {
+  border-color: var(--accent);
+  background: #fdf8ff;
+  transform: translateY(-1px);
+}
+
+.schedule-card.active {
+  border-color: var(--accent);
+  background: #f8f0ff;
+  box-shadow: 0 0 0 2px rgba(170, 59, 255, 0.2);
+}
+
+.schedule-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.schedule-card-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-h);
+}
+
+.schedule-card-time {
+  font-size: 13px;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.schedule-card-specs {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Grilla de turnos (Slots) */
+.slots-container {
+  margin-top: 14px;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.slots-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slots-legend {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-dot.disponible {
+  background: #22c55e;
+}
+
+.legend-dot.ocupado {
+  background: #ef4444;
+}
+
+.legend-dot.seleccionado {
+  background: var(--accent);
+}
+
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.slot-btn {
+  padding: 10px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: 1.5px solid transparent;
+}
+
+.slot-btn.disponible {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border-color: #86efac !important;
+  cursor: pointer !important;
+}
+
+.slot-btn.disponible:hover {
+  background: #bbf7d0 !important;
+  border-color: #4ade80 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.15);
+}
+
+.slot-btn.ocupado {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #fca5a5 !important;
+  cursor: not-allowed !important;
+  opacity: 0.85;
+}
+
+.slot-btn.seleccionado {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(170, 59, 255, 0.25) !important;
+  transform: scale(1.02);
+}
+
+.slot-status-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .tabs {

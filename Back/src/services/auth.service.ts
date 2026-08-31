@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { UsuarioRepository } from "../repositories/usuario.repository";
 import { RolRepository } from "../repositories/rol.repository";
+import { PacienteRepository } from "../repositories/PacienteRepository";
 import { RegisterDTO, LoginDTO } from "../dtos/auth.dto";
 import { RolNombre } from "../entities/Rol.entity";
 
@@ -24,6 +25,16 @@ export class AuthService {
 
     if (!Object.values(RolNombre).includes(dto.rol)) {
       throw { status: 400, message: "El rol especificado no es válido en el sistema." };
+    }
+
+    // Si el rol es PACIENTE, CI y fecha de nacimiento son obligatorios
+    if (dto.rol === RolNombre.PACIENTE) {
+      if (!dto.documentoIdentidad?.trim()) {
+        throw { status: 400, message: "El documento de identidad (CI) es obligatorio para pacientes." };
+      }
+      if (!dto.fechaNacimiento) {
+        throw { status: 400, message: "La fecha de nacimiento es obligatoria para pacientes." };
+      }
     }
 
     const normalizedEmail = dto.email.toLowerCase().trim();
@@ -50,6 +61,19 @@ export class AuthService {
     });
 
     await UsuarioRepository.save(newUser);
+
+    // Auto-crear fila en paciente cuando el rol lo requiere
+    if (dto.rol === RolNombre.PACIENTE && dto.documentoIdentidad && dto.fechaNacimiento) {
+      await PacienteRepository.crear({
+        idUsuario: newUser.idUsuario,
+        documentoIdentidad: dto.documentoIdentidad.trim(),
+        fechaNacimiento: dto.fechaNacimiento,
+        sexo: dto.sexo ?? null,
+        direccion: dto.direccion ?? null,
+        contactoEmergencia: null,
+        telefonoEmergencia: null,
+      });
+    }
 
     return {
       id_usuario: newUser.idUsuario,

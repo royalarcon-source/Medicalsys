@@ -7,6 +7,8 @@ import RegistrarUsuarioPage from '../pages/RegistrarUsuario/RegistrarUsuarioPage
 import RegistrarMedicoPage from '../pages/Medicos/RegistrarMedicoPage';
 import DisponibilidadPage from '../pages/Disponibilidad/DisponibilidadPage';
 import RegistrarDisponibilidadPage from '../pages/Disponibilidad/RegistrarDisponibilidadPage';
+import GestionCitasPage from '../pages/Citas/GestionCitasPage';
+import ReservarCitaPage from '../pages/Citas/ReservarCitaPage';
 import RequireAuth from './RequireAuth';
 
 export default function AppRoutes() {
@@ -59,6 +61,22 @@ export default function AppRoutes() {
         element={
           <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'MEDICO']}>
             <RegistrarDisponibilidadPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/citas"
+        element={
+          <RequireAuth>
+            <GestionCitasPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/citas/reservar"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'RECEPCIONISTA', 'PACIENTE']}>
+            <ReservarCitaPage />
           </RequireAuth>
         }
       />

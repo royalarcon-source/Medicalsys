@@ -49,6 +49,12 @@ export default function Nav() {
           </NavLink>
         )}
 
+        {token && (
+          <NavLink to="/citas" end>
+            Citas
+          </NavLink>
+        )}
+
         <NavLink to="/roles" end>
           Roles
         </NavLink>

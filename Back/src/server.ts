@@ -10,6 +10,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 import pacienteRoutes from "./routes/paciente.routes";
 import rolRoutes from "./routes/rol.routes";
 import disponibilidadRoutes from "./routes/disponibilidad.routes";
+import citasRoutes from "./routes/citas.routes";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use("/api/especialidades", especialidadRoutes);
 app.use("/api/pacientes", pacienteRoutes);
 app.use("/api/roles", rolRoutes);
 app.use("/api/disponibilidad", disponibilidadRoutes);
+app.use("/api/citas", citasRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

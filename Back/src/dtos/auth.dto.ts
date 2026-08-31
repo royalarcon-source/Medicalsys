@@ -7,6 +7,11 @@ export interface RegisterDTO {
   password: string;
   rol: RolNombre;
   telefono?: string;
+  // Campos opcionales solo cuando rol === PACIENTE
+  documentoIdentidad?: string;
+  fechaNacimiento?: string;
+  sexo?: string;
+  direccion?: string;
 }
 
 export interface LoginDTO {

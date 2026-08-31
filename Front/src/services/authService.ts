@@ -20,6 +20,10 @@ export interface RegisterPayload {
   password: string;
   rol: RolNombre;
   telefono?: string;
+  // Requeridos solo cuando rol === 'PACIENTE'
+  documentoIdentidad?: string;
+  fechaNacimiento?: string;
+  sexo?: string;
 }
 
 function getAuthHeaders(): Record<string, string> {

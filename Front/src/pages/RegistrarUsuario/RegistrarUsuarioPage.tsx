@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { registrarUsuario, type RolNombre, type UsuarioAutenticado } from '../../services/authService';
 
 const ROLES: { value: RolNombre; label: string }[] = [
@@ -9,6 +8,12 @@ const ROLES: { value: RolNombre; label: string }[] = [
   { value: 'PACIENTE', label: 'Paciente' },
 ];
 
+const SEXOS = [
+  { value: '', label: 'Seleccionar...' },
+  { value: 'M', label: 'Masculino' },
+  { value: 'F', label: 'Femenino' },
+];
+
 const FORM_INICIAL = {
   nombres: '',
   apellidos: '',
@@ -16,6 +21,9 @@ const FORM_INICIAL = {
   password: '',
   telefono: '',
   rol: 'RECEPCIONISTA' as RolNombre,
+  documentoIdentidad: '',
+  fechaNacimiento: '',
+  sexo: '',
 };
 
 export default function RegistrarUsuarioPage() {
@@ -24,6 +32,8 @@ export default function RegistrarUsuarioPage() {
   const [error, setError] = useState<string | null>(null);
   const [exito, setExito] = useState<string | null>(null);
   const [usuarioCreado, setUsuarioCreado] = useState<UsuarioAutenticado | null>(null);
+
+  const esPaciente = form.rol === 'PACIENTE';
 
   const actualizarCampo = (campo: keyof typeof form) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -42,6 +52,17 @@ export default function RegistrarUsuarioPage() {
       return;
     }
 
+    if (esPaciente) {
+      if (!form.documentoIdentidad.trim()) {
+        setError('El documento de identidad (CI) es obligatorio para pacientes.');
+        return;
+      }
+      if (!form.fechaNacimiento) {
+        setError('La fecha de nacimiento es obligatoria para pacientes.');
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const usuario = await registrarUsuario({
@@ -51,9 +72,15 @@ export default function RegistrarUsuarioPage() {
         password: form.password,
         rol: form.rol,
         telefono: form.telefono.trim() || undefined,
+        documentoIdentidad: esPaciente ? form.documentoIdentidad.trim() : undefined,
+        fechaNacimiento: esPaciente ? form.fechaNacimiento : undefined,
+        sexo: esPaciente && form.sexo ? form.sexo : undefined,
       });
 
-      setExito(`Usuario ${usuario.nombres} ${usuario.apellidos} registrado con rol ${usuario.rol}.`);
+      setExito(
+        `Usuario ${usuario.nombres} ${usuario.apellidos} registrado con rol ${usuario.rol}.` +
+        (esPaciente ? ' El perfil de paciente fue creado automáticamente.' : ''),
+      );
       setUsuarioCreado(usuario);
       setForm(FORM_INICIAL);
     } catch (err) {
@@ -117,6 +144,50 @@ export default function RegistrarUsuarioPage() {
             </label>
           </div>
 
+          {/* Campos adicionales solo para PACIENTE */}
+          {esPaciente && (
+            <>
+              <hr style={{ margin: '8px 0', borderColor: 'var(--border)' }} />
+              <p className="hint" style={{ marginBottom: '8px' }}>
+                📋 Datos del perfil de paciente (se crean junto con el usuario)
+              </p>
+
+              <div className="form-row">
+                <label className="form-field">
+                  <span className="label">Documento de identidad (CI) *</span>
+                  <input
+                    type="text"
+                    value={form.documentoIdentidad}
+                    onChange={actualizarCampo('documentoIdentidad')}
+                    placeholder="Ej. 12345678"
+                    required={esPaciente}
+                  />
+                </label>
+
+                <label className="form-field">
+                  <span className="label">Fecha de nacimiento *</span>
+                  <input
+                    type="date"
+                    value={form.fechaNacimiento}
+                    onChange={actualizarCampo('fechaNacimiento')}
+                    required={esPaciente}
+                  />
+                </label>
+              </div>
+
+              <div className="form-row">
+                <label className="form-field">
+                  <span className="label">Sexo</span>
+                  <select value={form.sexo} onChange={actualizarCampo('sexo')}>
+                    {SEXOS.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </>
+          )}
+
           {error && <p className="error">{error}</p>}
           {exito && <p className="success">{exito}</p>}
 
@@ -125,19 +196,11 @@ export default function RegistrarUsuarioPage() {
           </button>
         </form>
 
-        {usuarioCreado && usuarioCreado.rol === 'PACIENTE' && (
-          <p className="hint">
-            <Link to="/pacientes/nuevo" state={{ idUsuario: usuarioCreado.id_usuario }}>
-              Completar ficha de paciente para {usuarioCreado.nombres}
-            </Link>
-          </p>
-        )}
-
         {usuarioCreado && usuarioCreado.rol === 'MEDICO' && (
-          <p className="hint">
-            <Link to="/medicos/nuevo" state={{ idUsuario: usuarioCreado.id_usuario }}>
-              Completar ficha de médico para {usuarioCreado.nombres}
-            </Link>
+          <p className="hint" style={{ marginTop: '12px' }}>
+            ➡️ Ahora podés{' '}
+            <a href="/medicos/nuevo">completar la ficha de médico</a> para{' '}
+            {usuarioCreado.nombres} (ID usuario: {usuarioCreado.id_usuario}).
           </p>
         )}
       </div>
