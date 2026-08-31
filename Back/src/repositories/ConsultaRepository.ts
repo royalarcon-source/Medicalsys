@@ -1,4 +1,3 @@
-// src/repositories/ConsultaRepository.ts
 import { Between } from "typeorm";
 import { AppDataSource } from "../config/database";
 import { Consulta, EstadoConsulta, TipoIngreso } from "../entities/Consulta.entity";

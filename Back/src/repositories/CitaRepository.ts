@@ -1,4 +1,3 @@
-// src/repositories/CitaRepository.ts
 import { AppDataSource } from "../config/database";
 import { Cita, EstadoCita } from "../entities/Cita.entity";
 

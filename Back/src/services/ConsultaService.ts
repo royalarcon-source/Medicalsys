@@ -1,4 +1,3 @@
-// src/services/ConsultaService.ts
 import { ConsultaRepository } from "../repositories/ConsultaRepository";
 import { HistoriaClinicaRepository } from "../repositories/HistoriaClinicaRepository";
 import { PacienteRepository } from "../repositories/PacienteRepository";
@@ -22,7 +21,7 @@ export interface RegistrarAtencionSinCitaDTO {
 export class ConsultaService {
   async registrarSinCita(
     dto: RegistrarAtencionSinCitaDTO,
-    usuarioActual: { idUsuario: number; rol: string }
+    _usuarioActual: { idUsuario: number; rol: string }
   ): Promise<{ consulta: Consulta; ticket: { numeroTurno: number; mensaje: string; posCola: number } }> {
     if (!dto.idPaciente || !dto.idMedico || !dto.motivo?.trim()) {
       throw new AppError("Paciente, médico y motivo de consulta son campos obligatorios.", 400);
@@ -46,7 +45,6 @@ export class ConsultaService {
       }
     }
 
-    // Validación y control de sobrecupo
     const hoy = new Date();
     const totalConsultasHoy = await ConsultaRepository.contarConsultasHoy(dto.idMedico, hoy);
 
@@ -61,7 +59,6 @@ export class ConsultaService {
       );
     }
 
-    // 1. Obtener o auto-crear Historia Clínica del paciente
     let historia = await HistoriaClinicaRepository.buscarPorPaciente(dto.idPaciente);
     if (!historia) {
       historia = await HistoriaClinicaRepository.crearParaPaciente(
@@ -70,7 +67,6 @@ export class ConsultaService {
       );
     }
 
-    // 2. Asignar número de turno en la lista de espera
     const numeroTurno = totalConsultasHoy + 1;
     const tipoIngreso: TipoIngreso = dto.tipoIngreso || "CONSULTA_ESPONTANEA";
 

@@ -1,4 +1,3 @@
-// src/pages/Consultorios/ConsultoriosPage.tsx
 import { useEffect, useState } from 'react';
 import { listarConsultorios, type ConsultorioItem } from '../../services/consultoriosService';
 
@@ -27,7 +26,7 @@ export default function ConsultoriosPage() {
   return (
     <section className="page consultorios-page">
       <div className="card">
-        <h2>Catálogo de Consultorios Físicos (HU-17)</h2>
+        <h2>Catálogo de Consultorios Físicos</h2>
         <p className="hint">
           Espacios físicos registrados en el centro médico disponibles para asignación a profesionales médicos.
         </p>

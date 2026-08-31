@@ -1,4 +1,3 @@
-// src/services/consultoriosService.ts
 export interface ConsultorioItem {
   idConsultorio: number;
   nombre: string;

@@ -30,7 +30,7 @@ export class Consulta {
 
   @OneToOne(() => Cita, { nullable: true })
   @JoinColumn({ name: "id_cita" })
-  cita: Cita | null; // NULL = atención sin cita previa (HU-18)
+  cita: Cita | null;
 
   @ManyToOne(() => Consultorio, { nullable: true })
   @JoinColumn({ name: "id_consultorio" })
@@ -51,7 +51,6 @@ export class Consulta {
   @Column({ type: "text", nullable: true })
   observaciones: string | null;
 
-  // HU-18: campos para atención sin cita
   @Column({
     type: "varchar",
     length: 30,

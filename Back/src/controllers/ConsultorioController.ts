@@ -1,4 +1,3 @@
-// src/controllers/ConsultorioController.ts
 import { Request, Response, NextFunction } from "express";
 import { ConsultorioService } from "../services/ConsultorioService";
 

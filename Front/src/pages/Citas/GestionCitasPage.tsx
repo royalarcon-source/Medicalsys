@@ -24,7 +24,6 @@ export default function GestionCitasPage() {
   const esAdminOGestor =
     usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA';
 
-  // Modal de reprogramación
   const [citaParaReprogramar, setCitaParaReprogramar] = useState<CitaItem | null>(null);
   const [nuevaFechaInicio, setNuevaFechaInicio] = useState('');
   const [nuevaFechaFin, setNuevaFechaFin] = useState('');
@@ -32,7 +31,6 @@ export default function GestionCitasPage() {
   const [reprogramando, setReprogramando] = useState(false);
   const [errorModal, setErrorModal] = useState<string | null>(null);
 
-  // Modal de asignación de Consultorio (HU-17)
   const [citaParaConsultorio, setCitaParaConsultorio] = useState<CitaItem | null>(null);
   const [consultorios, setConsultorios] = useState<ConsultorioItem[]>([]);
   const [idConsultorioSeleccionado, setIdConsultorioSeleccionado] = useState<number | ''>('');
@@ -118,7 +116,6 @@ export default function GestionCitasPage() {
     }
   };
 
-  // Abrir modal de asignación de Consultorio (HU-17)
   const abrirModalConsultorio = async (cita: CitaItem) => {
     setCitaParaConsultorio(cita);
     setIdConsultorioSeleccionado(cita.consultorio?.idConsultorio || '');
@@ -218,14 +215,14 @@ export default function GestionCitasPage() {
           <div style={{ display: 'flex', gap: '10px' }}>
             {esAdminOGestor && (
               <Link to="/consultas/sin-cita" style={{ textDecoration: 'none' }}>
-                <button type="button" className="button-secondary">🚶 Atención sin cita (HU-18)</button>
+                <button type="button" className="button-secondary">🚶 Atención sin cita</button>
               </Link>
             )}
             {(usuario?.rol === 'ADMINISTRADOR' ||
               usuario?.rol === 'RECEPCIONISTA' ||
               usuario?.rol === 'PACIENTE') && (
               <Link to="/citas/reservar" style={{ textDecoration: 'none' }}>
-                <button type="button">+ Nueva reserva (HU-15)</button>
+                <button type="button">+ Nueva reserva</button>
               </Link>
             )}
           </div>
@@ -249,7 +246,7 @@ export default function GestionCitasPage() {
                 <th>Médico</th>
                 <th>Inicio</th>
                 <th>Fin</th>
-                <th>Consultorio (HU-17)</th>
+                <th>Consultorio</th>
                 <th>Estado</th>
                 <th style={{ textAlign: 'right' }}>Acciones</th>
               </tr>
@@ -297,7 +294,6 @@ export default function GestionCitasPage() {
                               className="button-secondary"
                               style={{ fontSize: '12px', padding: '6px 10px' }}
                               onClick={() => abrirModalConsultorio(cita)}
-                              title="Asignar o reasignar espacio físico (HU-17)"
                             >
                               🏥 {cita.consultorio ? 'Reasignar' : 'Asignar'}
                             </button>
@@ -331,7 +327,6 @@ export default function GestionCitasPage() {
         )}
       </div>
 
-      {/* Modal de Reprogramación */}
       {citaParaReprogramar && (
         <div className="modal-overlay" onClick={() => setCitaParaReprogramar(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -399,12 +394,11 @@ export default function GestionCitasPage() {
         </div>
       )}
 
-      {/* Modal de Asignación de Consultorio (HU-17) */}
       {citaParaConsultorio && (
         <div className="modal-overlay" onClick={() => setCitaParaConsultorio(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '560px' }}>
             <div className="modal-header">
-              <h3>Asignar Consultorio Físico (HU-17)</h3>
+              <h3>Asignar Consultorio Físico</h3>
               <button
                 type="button"
                 className="button-secondary"

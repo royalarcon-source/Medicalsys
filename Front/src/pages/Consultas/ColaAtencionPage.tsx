@@ -1,4 +1,3 @@
-// src/pages/Consultas/ColaAtencionPage.tsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -76,7 +75,7 @@ export default function ColaAtencionPage() {
     <section className="page cola-atencion-page">
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <h2>Cola de Espera y Atenciones Sin Cita (HU-18)</h2>
+          <h2>Cola de Espera y Atenciones Sin Cita</h2>
           <div style={{ display: 'flex', gap: '10px' }}>
             {esAdminORecep && (
               <Link to="/consultas/sin-cita" style={{ textDecoration: 'none' }}>

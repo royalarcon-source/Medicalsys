@@ -1,4 +1,3 @@
-// src/repositories/ConsultorioRepository.ts
 import { AppDataSource } from "../config/database";
 import { Consultorio } from "../entities/Consultorio.entity";
 
@@ -11,10 +10,6 @@ export const ConsultorioRepository = AppDataSource.getRepository(Consultorio).ex
     return this.findOne({ where: { idConsultorio, activo: true } });
   },
 
-  /**
-   * Detecta si el consultorio ya está asignado (a través de una Cita activa)
-   * en el rango [fechaInicio, fechaFin), excluyendo opcionalmente una cita.
-   */
   async buscarSolapamiento(
     idConsultorio: number,
     fechaInicio: Date,

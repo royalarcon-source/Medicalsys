@@ -1,4 +1,3 @@
-// src/controllers/ConsultaController.ts
 import { Request, Response, NextFunction } from "express";
 import { ConsultaService } from "../services/ConsultaService";
 import { EstadoConsulta, TipoIngreso } from "../entities/Consulta.entity";

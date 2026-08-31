@@ -1,4 +1,3 @@
-// src/services/CitaService.ts
 import { CitaRepository } from "../repositories/CitaRepository";
 import { PacienteRepository } from "../repositories/PacienteRepository";
 import { MedicoRepository } from "../repositories/MedicoRepository";
@@ -8,10 +7,8 @@ import { ReservarCitaDTO, ReprogramarCitaDTO, CancelarCitaDTO, CitaFiltrosDTO } 
 import { AppError } from "../utils/AppError";
 import { Cita } from "../entities/Cita.entity";
 
-const NOMBRE_ROL_ADMINISTRADOR = "ADMINISTRADOR";
-const NOMBRE_ROL_RECEPCIONISTA = "RECEPCIONISTA";
-const NOMBRE_ROL_MEDICO = "MEDICO";
 const NOMBRE_ROL_PACIENTE = "PACIENTE";
+const NOMBRE_ROL_MEDICO = "MEDICO";
 
 export interface UsuarioAutenticado {
   idUsuario: number;
@@ -22,7 +19,6 @@ export class CitaService {
   private horarioRepo = AppDataSource.getRepository(HorarioDisponibilidad);
 
   private async validarDisponibilidadHoraria(idMedico: number, inicio: Date, fin: Date): Promise<void> {
-    // En JS getDay(): 0 = Domingo, 1 = Lunes, ..., 6 = Sábado. En BD: 1 = Lunes, ..., 7 = Domingo
     const dayOfWeek = inicio.getDay();
     const diaSemana = dayOfWeek === 0 ? 7 : dayOfWeek;
 
@@ -101,10 +97,8 @@ export class CitaService {
       throw new AppError("No se pueden agendar citas en fechas u horas pasadas", 400);
     }
 
-    // 1. Validar disponibilidad semanal del médico
     await this.validarDisponibilidadHoraria(idMedico, inicio, fin);
 
-    // 2. Validar que no haya solapamiento con otra cita activa
     const solapada = await CitaRepository.buscarSolapamientoMedico(idMedico, inicio, fin);
     if (solapada) {
       throw new AppError("El médico ya cuenta con una cita programada en ese horario", 409);
@@ -134,7 +128,6 @@ export class CitaService {
       throw new AppError(`No se puede reprogramar una cita con estado ${cita.estado}`, 400);
     }
 
-    // Aislamiento por rol
     if (usuarioActual.rol === NOMBRE_ROL_PACIENTE) {
       if (cita.paciente.usuario?.idUsuario !== usuarioActual.idUsuario) {
         throw new AppError("No tienes permisos para modificar esta cita", 403);
@@ -176,7 +169,7 @@ export class CitaService {
     return (await CitaRepository.buscarPorId(idCita))!;
   }
 
-  async cancelar(idCita: number, dto: CancelarCitaDTO, usuarioActual: UsuarioAutenticado): Promise<Cita> {
+  async cancelar(idCita: number, _dto: CancelarCitaDTO, usuarioActual: UsuarioAutenticado): Promise<Cita> {
     const cita = await CitaRepository.buscarPorId(idCita);
     if (!cita) {
       throw new AppError("Cita no encontrada", 404);
@@ -190,7 +183,6 @@ export class CitaService {
       throw new AppError("No se puede cancelar una cita ya atendida", 400);
     }
 
-    // Aislamiento por rol
     if (usuarioActual.rol === NOMBRE_ROL_PACIENTE) {
       if (cita.paciente.usuario?.idUsuario !== usuarioActual.idUsuario) {
         throw new AppError("No tienes autorización para cancelar esta cita", 403);

@@ -1,4 +1,3 @@
-// src/repositories/HistoriaClinicaRepository.ts
 import { AppDataSource } from "../config/database";
 import { HistoriaClinica } from "../entities/HistoriaClinica.entity";
 

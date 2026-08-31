@@ -1,4 +1,3 @@
-// src/services/consultasService.ts
 export type TipoIngreso = 'CONSULTA_ESPONTANEA' | 'SOBRECUPO' | 'URGENCIA_MENOR';
 export type EstadoConsulta = 'EN_ESPERA' | 'EN_ATENCION' | 'ATENDIDA' | 'CANCELADA';
 

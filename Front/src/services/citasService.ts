@@ -1,5 +1,3 @@
-// src/services/citasService.ts
-
 export interface CitaPaciente {
   idPaciente: number;
   documentoIdentidad: string;

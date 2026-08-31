@@ -1,4 +1,3 @@
-// src/controllers/CitaController.ts
 import { Request, Response, NextFunction } from "express";
 import { citaService } from "../services/CitaService";
 import { ConsultorioService } from "../services/ConsultorioService";

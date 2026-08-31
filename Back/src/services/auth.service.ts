@@ -27,7 +27,6 @@ export class AuthService {
       throw { status: 400, message: "El rol especificado no es válido en el sistema." };
     }
 
-    // Si el rol es PACIENTE, CI y fecha de nacimiento son obligatorios
     if (dto.rol === RolNombre.PACIENTE) {
       if (!dto.documentoIdentidad?.trim()) {
         throw { status: 400, message: "El documento de identidad (CI) es obligatorio para pacientes." };
@@ -62,7 +61,6 @@ export class AuthService {
 
     await UsuarioRepository.save(newUser);
 
-    // Auto-crear fila en paciente cuando el rol lo requiere
     if (dto.rol === RolNombre.PACIENTE && dto.documentoIdentidad && dto.fechaNacimiento) {
       await PacienteRepository.crear({
         idUsuario: newUser.idUsuario,
@@ -94,7 +92,6 @@ export class AuthService {
     const normalizedEmail = dto.email.toLowerCase().trim();
     const user = await UsuarioRepository.findByEmail(normalizedEmail);
 
-    // Mensaje genérico para evitar enumeración de usuarios (CA-03 Login)
     if (!user) {
       throw { status: 401, message: "Usuario o contraseña incorrectos." };
     }
@@ -104,7 +101,6 @@ export class AuthService {
       throw { status: 401, message: "Usuario o contraseña incorrectos." };
     }
 
-    // Validación de usuario deshabilitado (CA-04 Login)
     if (!user.activo) {
       throw { status: 403, message: "La cuenta no se encuentra habilitada para acceder." };
     }

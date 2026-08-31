@@ -16,20 +16,16 @@ export default function ReservarCitaPage() {
   const navigate = useNavigate();
   const esPaciente = usuario?.rol === 'PACIENTE';
 
-  // Catálogos
   const [especialidades, setEspecialidades] = useState<Especialidad[]>([]);
   const [especialidadSeleccionada, setEspecialidadSeleccionada] = useState<string>('');
   const [horariosDisponibles, setHorariosDisponibles] = useState<DisponibilidadResultado[]>([]);
   const [cargandoHorarios, setCargandoHorarios] = useState(false);
 
-  // Selección de Médico y Horario base
   const [horarioActivo, setHorarioActivo] = useState<DisponibilidadResultado | null>(null);
 
-  // Slots calculados en vivo para la fecha elegida
   const [slots, setSlots] = useState<SlotDisponibilidad[]>([]);
   const [cargandoSlots, setCargandoSlots] = useState(false);
 
-  // Formulario
   const [idPaciente, setIdPaciente] = useState('');
   const [idMedico, setIdMedico] = useState('');
   const [fechaCita, setFechaCita] = useState('');
@@ -40,7 +36,6 @@ export default function ReservarCitaPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Cargar especialidades y disponibilidad inicial
   useEffect(() => {
     async function inicializar() {
       try {
@@ -52,7 +47,6 @@ export default function ReservarCitaPage() {
       cargarDisponibilidad();
     }
     inicializar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const cargarDisponibilidad = async (idEspecialidad?: number) => {
@@ -79,7 +73,6 @@ export default function ReservarCitaPage() {
     await cargarDisponibilidad(val ? Number(val) : undefined);
   };
 
-  // Calcular la próxima fecha del día de la semana seleccionado (1=Lunes .. 7=Domingo)
   const calcularProximaFecha = (diaSemanaObjetivo: number): string => {
     const hoy = new Date();
     const diaActual = hoy.getDay() === 0 ? 7 : hoy.getDay();
@@ -93,7 +86,6 @@ export default function ReservarCitaPage() {
     return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())}`;
   };
 
-  // 2. Cargar turnos (slots) en vivo cuando cambia médico o fecha
   const cargarSlotsFecha = async (medId: number, fecha: string) => {
     if (!medId || !fecha) return;
     setCargandoSlots(true);
@@ -112,11 +104,9 @@ export default function ReservarCitaPage() {
     setHorarioActivo(horario);
     setIdMedico(String(horario.idMedico));
 
-    // Sugerir fecha correspondiente a ese día de atención
     const fechaSugerida = calcularProximaFecha(horario.diaSemana);
     setFechaCita(fechaSugerida);
 
-    // Reset de horas hasta elegir un slot específico
     setHoraInicio('');
     setHoraFin('');
     setError(null);
@@ -208,7 +198,6 @@ export default function ReservarCitaPage() {
           Paso 1: Filtrá por especialidad y seleccioná el médico de tu preferencia.
         </p>
 
-        {/* 1. Filtro por Especialidad */}
         <div className="form-field" style={{ marginTop: '8px' }}>
           <span className="label">Filtrar por Especialidad médica</span>
           <select
@@ -224,7 +213,6 @@ export default function ReservarCitaPage() {
           </select>
         </div>
 
-        {/* 2. Lista de Médicos y Horarios disponibles */}
         <div style={{ marginTop: '16px' }}>
           <span className="label">Médicos Disponibles:</span>
           {cargandoHorarios ? (
@@ -269,7 +257,6 @@ export default function ReservarCitaPage() {
         </div>
       </div>
 
-      {/* 3. Selección de Fecha y Matriz de Turnos (Slots en Verde y Rojo) */}
       {idMedico && (
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
@@ -348,7 +335,6 @@ export default function ReservarCitaPage() {
             )}
           </div>
 
-          {/* Formulario final de envío */}
           <form onSubmit={handleSubmit} className="form" style={{ marginTop: '16px' }}>
             {!esPaciente && (
               <label className="form-field">

@@ -1,4 +1,3 @@
-// src/pages/Consultas/RegistrarAtencionPage.tsx
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { buscarPacientes, type PacienteResumen } from '../../services/pacientesService';
@@ -32,17 +31,14 @@ const TIPOS_INGRESO: { value: TipoIngreso; label: string; desc: string }[] = [
 export default function RegistrarAtencionPage() {
   const navigate = useNavigate();
 
-  // Búsqueda de Paciente
   const [ciBusqueda, setCiBusqueda] = useState('');
   const [buscandoPaciente, setBuscandoPaciente] = useState(false);
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState<PacienteResumen | null>(null);
   const [mensajeBusqueda, setMensajeBusqueda] = useState<string | null>(null);
 
-  // Médicos y Consultorios
   const [medicos, setMedicos] = useState<MedicoDetalle[]>([]);
   const [consultorios, setConsultorios] = useState<ConsultorioItem[]>([]);
 
-  // Formulario
   const [idMedico, setIdMedico] = useState('');
   const [idConsultorio, setIdConsultorio] = useState('');
   const [tipoIngreso, setTipoIngreso] = useState<TipoIngreso>('CONSULTA_ESPONTANEA');
@@ -53,7 +49,6 @@ export default function RegistrarAtencionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Ticket Modal
   const [ticketGenerado, setTicketGenerado] = useState<{
     ticket: TicketTurno;
     consulta: ConsultaItem;
@@ -144,7 +139,7 @@ export default function RegistrarAtencionPage() {
     <section className="page registrar-atencion-page">
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <h2>Registro de Atención Sin Cita (Walk-in / Sobrecupo - HU-18)</h2>
+          <h2>Registro de Atención Sin Cita</h2>
           <div style={{ display: 'flex', gap: '10px' }}>
             <Link to="/consultas/cola" style={{ textDecoration: 'none' }}>
               <button type="button" className="button-secondary">📋 Ver Cola de Espera</button>
@@ -159,7 +154,6 @@ export default function RegistrarAtencionPage() {
         </p>
       </div>
 
-      {/* 1. Búsqueda de Paciente */}
       <div className="card">
         <h3>1. Identificación del Paciente</h3>
         <form onSubmit={handleBuscarPaciente} className="form" style={{ marginTop: '10px' }}>
@@ -214,7 +208,6 @@ export default function RegistrarAtencionPage() {
         )}
       </div>
 
-      {/* 2. Datos de la Atención */}
       {pacienteSeleccionado && (
         <div className="card">
           <h3>2. Asignación Médica y Tipo de Ingreso</h3>
@@ -322,7 +315,6 @@ export default function RegistrarAtencionPage() {
         </div>
       )}
 
-      {/* Modal de Ticket Generado / Comprobante de Turno */}
       {ticketGenerado && (
         <div className="modal-overlay">
           <div className="modal" style={{ maxWidth: '480px', textAlign: 'center' }}>

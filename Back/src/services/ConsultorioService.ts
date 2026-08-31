@@ -1,4 +1,3 @@
-// src/services/ConsultorioService.ts
 import { ConsultorioRepository } from "../repositories/ConsultorioRepository";
 import { CitaRepository } from "../repositories/CitaRepository";
 import { AppDataSource } from "../config/database";
@@ -46,7 +45,7 @@ export class ConsultorioService {
   async asignarACita(
     idCita: number,
     idConsultorio: number,
-    usuarioActual: { idUsuario: number; rol: string }
+    _usuarioActual: { idUsuario: number; rol: string }
   ): Promise<Cita> {
     const cita = await CitaRepository.buscarPorId(idCita);
     if (!cita) {
@@ -57,7 +56,6 @@ export class ConsultorioService {
       throw new AppError("No se puede asignar consultorio a una cita cancelada.", 400);
     }
 
-    // Validación: modificación antes de que inicie el bloque
     if (new Date(cita.fechaHoraInicio).getTime() <= Date.now()) {
       throw new AppError("No se puede modificar la asignación de un consultorio para una cita que ya inició o está en el pasado.", 400);
     }
@@ -67,7 +65,6 @@ export class ConsultorioService {
       throw new AppError("El consultorio especificado no existe o no está activo.", 404);
     }
 
-    // 1. Control de solapamiento de consultorio
     const consultorioOcupado = await ConsultorioRepository.buscarSolapamiento(
       idConsultorio,
       cita.fechaHoraInicio,
@@ -81,7 +78,6 @@ export class ConsultorioService {
       );
     }
 
-    // 2. Validación de médico: un médico no puede tener más de un consultorio asignado en el mismo bloque
     const solapamientoMedicoOtroConsultorio = await AppDataSource.getRepository(Cita)
       .createQueryBuilder("c")
       .where("c.id_medico = :idMedico", { idMedico: cita.medico.idMedico })
@@ -109,7 +105,7 @@ export class ConsultorioService {
 
   async liberarDeCita(
     idCita: number,
-    usuarioActual: { idUsuario: number; rol: string }
+    _usuarioActual: { idUsuario: number; rol: string }
   ): Promise<Cita> {
     const cita = await CitaRepository.buscarPorId(idCita);
     if (!cita) {
