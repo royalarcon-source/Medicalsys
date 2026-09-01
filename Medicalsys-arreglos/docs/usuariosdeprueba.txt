@@ -1,6 +1,6 @@
 Admin:
 admin@medicalsys.com
-Admin123*
+admin1234
 Medico:
 medico1@gmail.com
 Medico123*

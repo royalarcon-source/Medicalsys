@@ -33,14 +33,11 @@ app.use("/api/consultas", consultasRoutes);
 app.use("/api/historia-clinica", historiaClinicaRoutes);
 app.use(errorHandler);
 
-import { seedDatabase } from "./config/seed";
-
 const PORT = process.env.PORT || 3000;
 
 AppDataSource.initialize()
-  .then(async () => {
+  .then(() => {
     console.log("Conexión a PostgreSQL establecida exitosamente.");
-    await seedDatabase();
     app.listen(PORT, () => {
       console.log(`Servidor corriendo en http://localhost:${PORT}`);
     });

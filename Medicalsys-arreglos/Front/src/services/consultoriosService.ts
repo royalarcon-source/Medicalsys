@@ -48,6 +48,22 @@ export async function listarConsultorios(filtros?: {
   return fetchJson(qs ? `/api/consultorios?${qs}` : '/api/consultorios');
 }
 
+export interface CrearConsultorioPayload {
+  nombre: string;
+  tipo: string;
+  piso?: string;
+  capacidad?: number;
+}
+
+export async function crearConsultorio(
+  datos: CrearConsultorioPayload,
+): Promise<{ mensaje: string; consultorio: ConsultorioItem }> {
+  return fetchJson('/api/consultorios', {
+    method: 'POST',
+    body: JSON.stringify(datos),
+  });
+}
+
 export async function asignarConsultorioACita(
   idCita: number,
   idConsultorio: number,

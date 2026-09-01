@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import {
   listarConsultorios,
+  crearConsultorio,
   asignarConsultorioACita,
   liberarConsultorioDeCita,
   type ConsultorioItem,
 } from '../../services/consultoriosService';
 import { listarCitas, type CitaItem } from '../../services/citasService';
+import { listarEspecialidades, type Especialidad } from '../../services/especialidadesService';
 
 export default function ConsultoriosPage() {
   const { usuario } = useAuth();
@@ -17,9 +19,19 @@ export default function ConsultoriosPage() {
 
   const [consultorios, setConsultorios] = useState<ConsultorioItem[]>([]);
   const [citas, setCitas] = useState<CitaItem[]>([]);
+  const [especialidades, setEspecialidades] = useState<Especialidad[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+
+  // Formulario de alta de consultorio
+  const [mostrarFormCrear, setMostrarFormCrear] = useState(false);
+  const [nombreNuevo, setNombreNuevo] = useState('');
+  const [tipoNuevo, setTipoNuevo] = useState('');
+  const [pisoNuevo, setPisoNuevo] = useState('');
+  const [capacidadNuevo, setCapacidadNuevo] = useState(1);
+  const [creandoConsultorio, setCreandoConsultorio] = useState(false);
+  const [errorCrear, setErrorCrear] = useState<string | null>(null);
 
   // Filtro de calendario por fecha
   const hoyStr = () => {
@@ -48,12 +60,14 @@ export default function ConsultoriosPage() {
     setLoading(true);
     setError(null);
     try {
-      const [resCons, resCitas] = await Promise.all([
+      const [resCons, resCitas, resEsp] = await Promise.all([
         listarConsultorios(),
         listarCitas(),
+        listarEspecialidades(),
       ]);
       setConsultorios(resCons.consultorios || []);
       setCitas(resCitas.citas || []);
+      setEspecialidades(resEsp.especialidades || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar los datos de consultorios.');
     } finally {
@@ -64,6 +78,34 @@ export default function ConsultoriosPage() {
   useEffect(() => {
     cargarDatos();
   }, []);
+
+  const handleCrearConsultorio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nombreNuevo.trim() || !tipoNuevo) return;
+
+    setCreandoConsultorio(true);
+    setErrorCrear(null);
+
+    try {
+      await crearConsultorio({
+        nombre: nombreNuevo.trim(),
+        tipo: tipoNuevo,
+        piso: pisoNuevo.trim() || undefined,
+        capacidad: capacidadNuevo,
+      });
+      setMensajeExito(`Consultorio "${nombreNuevo.trim()}" registrado exitosamente.`);
+      setNombreNuevo('');
+      setTipoNuevo('');
+      setPisoNuevo('');
+      setCapacidadNuevo(1);
+      setMostrarFormCrear(false);
+      await cargarDatos();
+    } catch (err) {
+      setErrorCrear(err instanceof Error ? err.message : 'No se pudo registrar el consultorio.');
+    } finally {
+      setCreandoConsultorio(false);
+    }
+  };
 
   const verificarDisponibilidad = async () => {
     if (!fechaCheck || !horaInicioCheck || !horaFinCheck) return;
@@ -486,7 +528,84 @@ export default function ConsultoriosPage() {
       {/* TAB 3: CATÁLOGO */}
       {tab === 'catalogo' && (
         <div className="card">
-          <h3>Catálogo General de Consultorios Registrados</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+            <h3 style={{ margin: 0 }}>Catálogo General de Consultorios Registrados</h3>
+            {esAdminOGestor && (
+              <button
+                type="button"
+                onClick={() => {
+                  setErrorCrear(null);
+                  setMostrarFormCrear((v) => !v);
+                }}
+              >
+                {mostrarFormCrear ? 'Cancelar' : '➕ Nuevo Consultorio'}
+              </button>
+            )}
+          </div>
+
+          {esAdminOGestor && mostrarFormCrear && (
+            <form onSubmit={handleCrearConsultorio} className="form" style={{ marginTop: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px' }}>
+              <div className="form-row">
+                <label className="form-field">
+                  <span className="label">Nombre:</span>
+                  <input
+                    type="text"
+                    value={nombreNuevo}
+                    onChange={(e) => setNombreNuevo(e.target.value)}
+                    placeholder="Ej. Consultorio 501"
+                    required
+                  />
+                </label>
+
+                <label className="form-field">
+                  <span className="label">Especialidad / Tipo:</span>
+                  <select value={tipoNuevo} onChange={(e) => setTipoNuevo(e.target.value)} required>
+                    <option value="">-- Seleccionar especialidad --</option>
+                    {especialidades.map((esp) => (
+                      <option key={esp.idEspecialidad} value={esp.nombre}>
+                        {esp.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="form-field">
+                  <span className="label">Piso:</span>
+                  <input
+                    type="text"
+                    value={pisoNuevo}
+                    onChange={(e) => setPisoNuevo(e.target.value)}
+                    placeholder="Ej. 1"
+                  />
+                </label>
+
+                <label className="form-field">
+                  <span className="label">Capacidad:</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={capacidadNuevo}
+                    onChange={(e) => setCapacidadNuevo(Number(e.target.value) || 1)}
+                    required
+                  />
+                </label>
+              </div>
+
+              {errorCrear && <p className="error">{errorCrear}</p>}
+              {especialidades.length === 0 && (
+                <p className="hint">
+                  No hay especialidades registradas todavía. Primero registra una especialidad para poder crear el consultorio.
+                </p>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+                <button type="submit" disabled={creandoConsultorio || especialidades.length === 0}>
+                  {creandoConsultorio ? 'Registrando...' : 'Registrar Consultorio'}
+                </button>
+              </div>
+            </form>
+          )}
+
           {loading ? (
             <p>Cargando consultorios...</p>
           ) : consultorios.length === 0 ? (
