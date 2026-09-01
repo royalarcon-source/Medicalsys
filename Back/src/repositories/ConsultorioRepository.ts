@@ -10,6 +10,10 @@ export const ConsultorioRepository = AppDataSource.getRepository(Consultorio).ex
     return this.findOne({ where: { idConsultorio, activo: true } });
   },
 
+  async buscarPorNombre(nombre: string): Promise<Consultorio | null> {
+    return this.findOne({ where: { nombre } });
+  },
+
   async buscarSolapamiento(
     idConsultorio: number,
     fechaInicio: Date,

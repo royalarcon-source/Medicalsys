@@ -4,6 +4,26 @@ import { ConsultorioService } from "../services/ConsultorioService";
 const consultorioService = new ConsultorioService();
 
 export const ConsultorioController = {
+  async crear(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { nombre, tipo, piso, capacidad } = req.body;
+
+      const consultorio = await consultorioService.crear({
+        nombre,
+        tipo,
+        piso,
+        capacidad: capacidad !== undefined ? Number(capacidad) : undefined,
+      });
+
+      return res.status(201).json({
+        mensaje: "Consultorio registrado exitosamente.",
+        consultorio,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async listar(req: Request, res: Response, next: NextFunction) {
     try {
       const fecha = String(req.query.fecha || "");

@@ -1,11 +1,52 @@
 import { ConsultorioRepository } from "../repositories/ConsultorioRepository";
 import { CitaRepository } from "../repositories/CitaRepository";
+import { EspecialidadRepository } from "../repositories/EspecialidadRepository";
 import { AppDataSource } from "../config/database";
 import { Cita } from "../entities/Cita.entity";
 import { Consultorio } from "../entities/Consultorio.entity";
 import { AppError } from "../utils/AppError";
+import { CrearConsultorioDTO } from "../dtos/consultorio/CrearConsultorioDTO";
 
 export class ConsultorioService {
+  async crear(datos: CrearConsultorioDTO): Promise<Consultorio> {
+    const nombre = datos.nombre?.trim();
+    if (!nombre) {
+      throw new AppError("El nombre del consultorio es obligatorio.", 400);
+    }
+
+    const tipo = datos.tipo?.trim();
+    if (!tipo) {
+      throw new AppError("El tipo/especialidad del consultorio es obligatorio.", 400);
+    }
+
+    const especialidad = await EspecialidadRepository.buscarPorNombre(tipo);
+    if (!especialidad) {
+      throw new AppError(
+        `"${tipo}" no corresponde a ninguna especialidad registrada. Registra primero la especialidad o usa una existente.`,
+        400
+      );
+    }
+
+    const existente = await ConsultorioRepository.buscarPorNombre(nombre);
+    if (existente) {
+      throw new AppError("Ya existe un consultorio registrado con ese nombre.", 409);
+    }
+
+    if (datos.capacidad !== undefined && (!Number.isInteger(datos.capacidad) || datos.capacidad <= 0)) {
+      throw new AppError("La capacidad debe ser un número entero mayor a 0.", 400);
+    }
+
+    const consultorio = ConsultorioRepository.create({
+      nombre,
+      tipo: especialidad.nombre,
+      piso: datos.piso?.trim() || null,
+      capacidad: datos.capacidad ?? 1,
+      activo: true,
+    });
+
+    return ConsultorioRepository.save(consultorio);
+  }
+
   async listarTodos(): Promise<Consultorio[]> {
     return ConsultorioRepository.listar();
   }
@@ -63,6 +104,16 @@ export class ConsultorioService {
     const consultorio = await ConsultorioRepository.buscarPorId(idConsultorio);
     if (!consultorio) {
       throw new AppError("El consultorio especificado no existe o no está activo.", 404);
+    }
+
+    const especialidadesMedico = cita.medico.especialidades?.map((e) => e.nombre) ?? [];
+    if (!especialidadesMedico.includes(consultorio.tipo)) {
+      throw new AppError(
+        especialidadesMedico.length > 0
+          ? `El consultorio "${consultorio.nombre}" es de ${consultorio.tipo}, pero el médico solo tiene registrada(s): ${especialidadesMedico.join(", ")}.`
+          : `El consultorio "${consultorio.nombre}" es de ${consultorio.tipo}, pero el médico no tiene ninguna especialidad registrada.`,
+        400
+      );
     }
 
     const consultorioOcupado = await ConsultorioRepository.buscarSolapamiento(
