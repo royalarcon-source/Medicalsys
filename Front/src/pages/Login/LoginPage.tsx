@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { login as loginRequest } from '../../services/authService';
+import { Activity, LogIn, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const { token, login } = useAuth();
@@ -41,9 +42,17 @@ export default function LoginPage() {
   };
 
   return (
-    <section className="page login-page">
-      <div className="card">
-        <h2>Iniciar sesión</h2>
+    <div className="login-container">
+      <div className="login-card">
+        <div className="login-card-header">
+          <div className="login-card-icon">
+            <Activity size={28} strokeWidth={2.5} />
+          </div>
+          <h2>Acceso al Sistema Clínico</h2>
+          <p className="page-header-subtitle">
+            Ingresá tus credenciales autorizadas de Medicalsys
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="form">
           <label className="form-field">
@@ -70,13 +79,19 @@ export default function LoginPage() {
             />
           </label>
 
-          {error && <p className="error">{error}</p>}
+          {error && (
+            <div className="alert-error">
+              <AlertCircle size={16} />
+              <span>{error}</span>
+            </div>
+          )}
 
-          <button type="submit" disabled={loading}>
-            {loading ? 'Ingresando...' : 'Ingresar'}
+          <button type="submit" disabled={loading} style={{ marginTop: '8px' }}>
+            <LogIn size={16} />
+            <span>{loading ? 'Ingresando...' : 'Iniciar sesión'}</span>
           </button>
         </form>
       </div>
-    </section>
+    </div>
   );
 }

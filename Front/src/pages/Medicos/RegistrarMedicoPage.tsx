@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { crearMedico, obtenerMedico, type MedicoDetalle } from '../../services/medicosService';
 import { asignarEspecialidades, listarEspecialidades, type Especialidad } from '../../services/especialidadesService';
+import { Stethoscope, Tag, Save, CheckCircle2, AlertCircle, Search } from 'lucide-react';
 
 type Tab = 'registrar' | 'especialidades';
 
@@ -144,123 +145,197 @@ export default function RegistrarMedicoPage() {
   };
 
   return (
-    <section className="page">
+    <section className="page registrar-medico-page">
       <div className="tabs">
-        <button type="button" className={tab === 'registrar' ? 'active' : ''} onClick={() => setTab('registrar')}>
-          Registrar médico
+        <button
+          type="button"
+          className={tab === 'registrar' ? 'active' : ''}
+          onClick={() => setTab('registrar')}
+        >
+          <Stethoscope size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: '-3px' }} />
+          Registrar Médico
         </button>
         <button
           type="button"
           className={tab === 'especialidades' ? 'active' : ''}
           onClick={() => setTab('especialidades')}
         >
-          Asignar especialidades
+          <Tag size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: '-3px' }} />
+          Asignar Especialidades
         </button>
       </div>
 
       {tab === 'registrar' && (
         <div className="card">
-          <h2>Registrar médico</h2>
-          <p className="hint">
-            El médico debe tener primero un usuario con rol MEDICO (ver{' '}
-            <Link to="/registrar-usuario">Registrar usuario</Link>). Luego completa aquí su número de
-            colegiatura indicando el ID de ese usuario.
-          </p>
+          <div className="page-header">
+            <div>
+              <h2>
+                <Stethoscope size={22} className="text-primary" />
+                <span>Registrar Médico</span>
+              </h2>
+              <p className="page-header-subtitle">
+                El profesional debe tener previamente una cuenta con rol MEDICO (ver{' '}
+                <Link to="/registrar-usuario">Registrar usuario</Link>).
+              </p>
+            </div>
+          </div>
 
-          <form onSubmit={handleSubmit} className="form">
+          <form onSubmit={handleSubmit} className="form" style={{ marginTop: '12px' }}>
             <div className="form-row">
               <label className="form-field">
-                <span className="label">ID de usuario (rol MEDICO)</span>
+                <span className="label">ID de usuario (rol MEDICO) *</span>
                 <input
                   type="number"
                   min={1}
                   value={form.idUsuario}
                   onChange={actualizarCampo('idUsuario')}
+                  placeholder="Ej. 2"
                   required
                 />
               </label>
 
               <label className="form-field">
-                <span className="label">Número de colegiatura</span>
+                <span className="label">Número de colegiatura *</span>
                 <input
                   type="text"
                   value={form.numeroColegiatura}
                   onChange={actualizarCampo('numeroColegiatura')}
+                  placeholder="Ej. MED-10492"
                   required
                 />
               </label>
             </div>
 
-            {error && <p className="error">{error}</p>}
-            {exito && <p className="success">{exito}</p>}
+            {error && (
+              <div className="alert-error">
+                <AlertCircle size={16} />
+                <span>{error}</span>
+              </div>
+            )}
+            {exito && (
+              <div className="alert-success">
+                <CheckCircle2 size={16} />
+                <span>{exito}</span>
+              </div>
+            )}
 
-            <button type="submit" disabled={loading}>
-              {loading ? 'Registrando...' : 'Registrar médico'}
-            </button>
+            <div className="form-actions">
+              <button type="submit" disabled={loading}>
+                <Save size={16} />
+                <span>{loading ? 'Registrando...' : 'Registrar médico'}</span>
+              </button>
+            </div>
           </form>
 
           {medicoRecienCreado && (
-            <p className="hint">
+            <div style={{ marginTop: '16px', padding: '14px', background: 'var(--primary-bg)', borderRadius: '8px', border: '1px solid var(--primary-border)' }}>
+              <p style={{ color: 'var(--primary-text)', fontWeight: 600, margin: '0 0 8px 0' }}>
+                ¿Deseas configurar las especialidades para este nuevo médico?
+              </p>
               <button type="button" onClick={() => irAAsignarEspecialidades(medicoRecienCreado)}>
-                Asignar especialidades a este médico
+                <Tag size={15} />
+                <span>Asignar especialidades ahora</span>
               </button>
-            </p>
+            </div>
           )}
         </div>
       )}
 
       {tab === 'especialidades' && (
         <div className="card">
-          <h2>Asignar especialidades</h2>
-          <p className="hint">Indica el ID del médico para ver y editar sus especialidades.</p>
+          <div className="page-header">
+            <div>
+              <h2>
+                <Tag size={22} className="text-primary" />
+                <span>Asignar Especialidades Médicas</span>
+              </h2>
+              <p className="page-header-subtitle">
+                Indica el ID del médico para ver y editar las especialidades que puede atender.
+              </p>
+            </div>
+          </div>
 
-          <div className="search-row">
+          <div className="search-row" style={{ marginTop: '8px' }}>
             <input
               type="number"
               min={1}
               value={idMedicoInput}
               onChange={(event) => setIdMedicoInput(event.target.value)}
-              placeholder="ID de médico"
+              placeholder="Ingrese ID del médico..."
               aria-label="ID de médico"
             />
             <button type="button" onClick={() => cargarMedico(idMedicoInput)} disabled={loadingMedico}>
-              {loadingMedico ? 'Cargando...' : 'Cargar médico'}
+              <Search size={16} />
+              <span>{loadingMedico ? 'Cargando...' : 'Cargar médico'}</span>
             </button>
           </div>
 
-          {errorEspecialidades && <p className="error">{errorEspecialidades}</p>}
+          {errorEspecialidades && (
+            <div className="alert-error" style={{ marginTop: '12px' }}>
+              <AlertCircle size={16} />
+              <span>{errorEspecialidades}</span>
+            </div>
+          )}
 
           {medico && (
-            <>
-              <p className="hint">
-                {medico.usuario.nombres} {medico.usuario.apellidos} · Colegiatura {medico.numeroColegiatura}
-              </p>
+            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ padding: '12px 16px', background: 'var(--bg-subtle)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <strong>Dr(a). {medico.usuario.nombres} {medico.usuario.apellidos}</strong>
+                <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  Colegiatura: {medico.numeroColegiatura} | ID Médico: #{medico.idMedico}
+                </div>
+              </div>
 
               {catalogo.length === 0 ? (
-                <p className="empty-state">No hay especialidades registradas todavía.</p>
+                <div className="empty-state">
+                  <p>No hay especialidades registradas todavía.</p>
+                </div>
               ) : (
-                <ul className="checklist">
-                  {catalogo.map((especialidad) => (
-                    <li key={especialidad.idEspecialidad}>
-                      <label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px' }}>
+                  {catalogo.map((especialidad) => {
+                    const checked = seleccionadas.has(especialidad.idEspecialidad);
+                    return (
+                      <label
+                        key={especialidad.idEspecialidad}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          padding: '10px 14px',
+                          borderRadius: '8px',
+                          border: checked ? '1.5px solid var(--primary)' : '1px solid var(--border)',
+                          background: checked ? 'var(--primary-bg)' : 'var(--bg-surface)',
+                          cursor: 'pointer',
+                          fontWeight: checked ? 600 : 400,
+                          color: checked ? 'var(--primary-text)' : 'var(--text-main)',
+                        }}
+                      >
                         <input
                           type="checkbox"
-                          checked={seleccionadas.has(especialidad.idEspecialidad)}
+                          checked={checked}
                           onChange={() => alternarEspecialidad(especialidad.idEspecialidad)}
                         />
-                        {especialidad.nombre}
+                        <span>{especialidad.nombre}</span>
                       </label>
-                    </li>
-                  ))}
-                </ul>
+                    );
+                  })}
+                </div>
               )}
 
-              {exitoEspecialidades && <p className="success">{exitoEspecialidades}</p>}
+              {exitoEspecialidades && (
+                <div className="alert-success">
+                  <CheckCircle2 size={16} />
+                  <span>{exitoEspecialidades}</span>
+                </div>
+              )}
 
-              <button type="button" onClick={guardarEspecialidades} disabled={guardando}>
-                {guardando ? 'Guardando...' : 'Guardar especialidades'}
-              </button>
-            </>
+              <div className="form-actions">
+                <button type="button" onClick={guardarEspecialidades} disabled={guardando}>
+                  <Save size={16} />
+                  <span>{guardando ? 'Guardando...' : 'Guardar especialidades'}</span>
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}

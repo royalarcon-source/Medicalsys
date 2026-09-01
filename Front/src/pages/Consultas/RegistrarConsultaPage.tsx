@@ -5,6 +5,19 @@ import {
   completarConsulta,
   type ConsultaItem,
 } from '../../services/consultasService';
+import {
+  Stethoscope,
+  FileText,
+  Building2,
+  CheckCircle2,
+  Clock,
+  Plus,
+  Trash2,
+  Save,
+  User,
+  Activity,
+  AlertCircle,
+} from 'lucide-react';
 
 interface DiagnosticoForm {
   codigo: string;
@@ -167,7 +180,10 @@ export default function RegistrarConsultaPage() {
     return (
       <section className="page">
         <div className="card">
-          <p>Cargando información de la consulta...</p>
+          <div className="empty-state">
+            <Clock size={32} className="empty-state-icon" />
+            <p>Cargando información de la consulta...</p>
+          </div>
         </div>
       </section>
     );
@@ -177,7 +193,10 @@ export default function RegistrarConsultaPage() {
     return (
       <section className="page">
         <div className="card">
-          <p className="error">Consulta no encontrada.</p>
+          <div className="alert-error">
+            <AlertCircle size={16} />
+            <span>Consulta no encontrada.</span>
+          </div>
           <Link to="/consultas/cola">
             <button type="button" className="button-secondary">Volver a la Cola</button>
           </Link>
@@ -194,23 +213,27 @@ export default function RegistrarConsultaPage() {
   return (
     <section className="page registrar-consulta-page">
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+        <div className="page-header">
           <div>
-            <h2>Atención Médica — Consulta #{consulta.idConsulta}</h2>
-            <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
+            <h2>
+              <Stethoscope size={22} className="text-primary" />
+              <span>Atención Médica — Consulta #{consulta.idConsulta}</span>
+            </h2>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
               Turno: <strong>#{consulta.numeroTurno || consulta.idConsulta}</strong> | Tipo: <strong>{consulta.tipoIngreso}</strong>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
             {paciente?.documentoIdentidad && (
               <Link
                 to={`/historia-clinica?ci=${encodeURIComponent(paciente.documentoIdentidad)}`}
                 target="_blank"
                 style={{ textDecoration: 'none' }}
               >
-                <button type="button" className="button-secondary" style={{ border: '1.5px solid var(--accent)', color: 'var(--accent)' }}>
-                  📖 Ver Historia Clínica
+                <button type="button" className="button-secondary">
+                  <FileText size={15} />
+                  <span>Ver Historia Clínica</span>
                 </button>
               </Link>
             )}
@@ -220,32 +243,37 @@ export default function RegistrarConsultaPage() {
           </div>
         </div>
 
-        {error && <p className="error" style={{ marginTop: '10px' }}>{error}</p>}
-        {mensajeExito && <p className="success" style={{ marginTop: '10px' }}>{mensajeExito}</p>}
+        {error && <div className="alert-error">{error}</div>}
+        {mensajeExito && <div className="alert-success">{mensajeExito}</div>}
       </div>
 
-      <div className="card" style={{ background: '#f8fafc', borderLeft: '4px solid var(--accent)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+      <div className="card" style={{ background: 'var(--bg-subtle)', borderLeft: '4px solid var(--primary)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
           <div>
-            <span className="badge badge-confirmada">Paciente en Consulta</span>
-            <h3 style={{ margin: '4px 0', color: '#1e293b' }}>{nombrePaciente}</h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#475569' }}>
+            <span className="badge badge-confirmada">
+              <User size={12} />
+              <span>Paciente en Consulta</span>
+            </span>
+            <h3 style={{ margin: '6px 0 2px 0', color: 'var(--text-main)', fontSize: '1.15rem' }}>{nombrePaciente}</h3>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
               CI: <strong>{paciente?.documentoIdentidad}</strong> | Sexo: {paciente?.sexo || '—'}
             </p>
           </div>
 
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '13px', color: '#64748b' }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
               Médico: <strong>Dr(a). {consulta.medico?.usuario?.nombres} {consulta.medico?.usuario?.apellidos}</strong>
             </div>
             {consulta.consultorio && (
-              <div style={{ fontSize: '13px', color: '#166534', marginTop: '2px' }}>
-                Consultorio: 🏥 {consulta.consultorio.nombre}
+              <div style={{ fontSize: '13px', color: 'var(--primary-text)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                <Building2 size={13} />
+                <span>Consultorio: {consulta.consultorio.nombre}</span>
               </div>
             )}
-            <div style={{ marginTop: '4px' }}>
+            <div style={{ marginTop: '6px' }}>
               <span className={esAtendida ? 'badge badge-atendida' : 'badge badge-pendiente'}>
-                {esAtendida ? '✅ CONSULTA ATENDIDA (INMUTABLE)' : '🩺 EN ATENCIÓN CLÍNICA'}
+                {esAtendida ? <CheckCircle2 size={12} /> : <Stethoscope size={12} />}
+                <span>{esAtendida ? 'CONSULTA ATENDIDA' : 'EN ATENCIÓN CLÍNICA'}</span>
               </span>
             </div>
           </div>
@@ -253,27 +281,30 @@ export default function RegistrarConsultaPage() {
       </div>
 
       <div className="card">
-        <h3>Registro Clínico de la Consulta (HU-20)</h3>
+        <h3>
+          <Activity size={18} />
+          <span>Registro Clínico de la Consulta (HU-20)</span>
+        </h3>
 
         {esAtendida ? (
-          <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
               <strong>Motivo de consulta:</strong>
-              <p style={{ margin: '4px 0', background: '#f1f5f9', padding: '10px', borderRadius: '6px' }}>
+              <p style={{ margin: '6px 0', background: 'var(--bg-page)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                 {consulta.motivo || '—'}
               </p>
             </div>
 
             <div>
               <strong>Anamnesis / Historia clínica de la consulta:</strong>
-              <p style={{ margin: '4px 0', background: '#f1f5f9', padding: '10px', borderRadius: '6px', whiteSpace: 'pre-wrap' }}>
+              <p style={{ margin: '6px 0', background: 'var(--bg-page)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', whiteSpace: 'pre-wrap' }}>
                 {consulta.anamnesis || 'No registrada'}
               </p>
             </div>
 
             <div>
               <strong>Examen Físico:</strong>
-              <p style={{ margin: '4px 0', background: '#f1f5f9', padding: '10px', borderRadius: '6px', whiteSpace: 'pre-wrap' }}>
+              <p style={{ margin: '6px 0', background: 'var(--bg-page)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', whiteSpace: 'pre-wrap' }}>
                 {consulta.examenFisico || 'No registrado'}
               </p>
             </div>
@@ -281,38 +312,38 @@ export default function RegistrarConsultaPage() {
             <div>
               <strong>Diagnósticos Establecidos:</strong>
               {consulta.diagnosticos && consulta.diagnosticos.length > 0 ? (
-                <ul style={{ margin: '6px 0 0 20px', padding: 0 }}>
+                <ul style={{ margin: '8px 0 0 20px', padding: 0 }}>
                   {consulta.diagnosticos.map((dx) => (
-                    <li key={dx.idDiagnostico}>
+                    <li key={dx.idDiagnostico} style={{ marginBottom: '4px' }}>
                       <strong>{dx.codigo ? `[${dx.codigo}] ` : ''}{dx.descripcion}</strong> ({dx.tipo || 'DEFINITIVO'})
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p style={{ margin: '4px 0', color: '#64748b' }}>Sin diagnósticos registrados.</p>
+                <p style={{ margin: '4px 0', color: 'var(--text-muted)' }}>Sin diagnósticos registrados.</p>
               )}
             </div>
 
             <div>
               <strong>Tratamientos / Prescripción:</strong>
               {consulta.tratamientos && consulta.tratamientos.length > 0 ? (
-                <ul style={{ margin: '6px 0 0 20px', padding: 0 }}>
+                <ul style={{ margin: '8px 0 0 20px', padding: 0 }}>
                   {consulta.tratamientos.map((t) => (
-                    <li key={t.idTratamiento}>
+                    <li key={t.idTratamiento} style={{ marginBottom: '4px' }}>
                       <strong>{t.descripcion}</strong>
                       {t.indicaciones ? ` — Indicaciones: ${t.indicaciones}` : ''}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p style={{ margin: '4px 0', color: '#64748b' }}>Sin tratamientos registrados.</p>
+                <p style={{ margin: '4px 0', color: 'var(--text-muted)' }}>Sin tratamientos registrados.</p>
               )}
             </div>
 
             {consulta.observaciones && (
               <div>
                 <strong>Observaciones Generales:</strong>
-                <p style={{ margin: '4px 0', background: '#f1f5f9', padding: '10px', borderRadius: '6px' }}>
+                <p style={{ margin: '6px 0', background: 'var(--bg-page)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                   {consulta.observaciones}
                 </p>
               </div>
@@ -351,16 +382,16 @@ export default function RegistrarConsultaPage() {
               />
             </label>
 
-            <div style={{ marginTop: '16px', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span className="label" style={{ fontSize: '15px', margin: 0 }}>Diagnósticos Clínicos</span>
+            <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <span className="label" style={{ fontSize: '0.85rem', margin: 0 }}>Diagnósticos Clínicos</span>
                 <button
                   type="button"
-                  className="button-secondary"
-                  style={{ fontSize: '12px', padding: '4px 10px' }}
+                  className="button-secondary button-sm"
                   onClick={handleAgregarDiagnostico}
                 >
-                  + Agregar Diagnóstico
+                  <Plus size={14} />
+                  <span>Agregar Diagnóstico</span>
                 </button>
               </div>
 
@@ -371,10 +402,11 @@ export default function RegistrarConsultaPage() {
                     display: 'flex',
                     gap: '10px',
                     alignItems: 'center',
-                    marginBottom: '8px',
-                    background: '#f8fafc',
-                    padding: '8px',
-                    borderRadius: '6px',
+                    marginBottom: '10px',
+                    background: 'var(--bg-page)',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
                   }}
                 >
                   <input
@@ -402,32 +434,32 @@ export default function RegistrarConsultaPage() {
                   {diagnosticos.length > 1 && (
                     <button
                       type="button"
-                      className="button-danger"
-                      style={{ padding: '6px 10px', fontSize: '12px' }}
+                      className="button-outline-danger button-sm"
                       onClick={() => handleEliminarDiagnostico(idx)}
+                      title="Eliminar diagnóstico"
                     >
-                      ✕
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </div>
               ))}
             </div>
 
-            <div style={{ marginTop: '16px', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span className="label" style={{ fontSize: '15px', margin: 0 }}>Plan de Tratamiento y Prescripción</span>
+            <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <span className="label" style={{ fontSize: '0.85rem', margin: 0 }}>Plan de Tratamiento y Prescripción</span>
                 <button
                   type="button"
-                  className="button-secondary"
-                  style={{ fontSize: '12px', padding: '4px 10px' }}
+                  className="button-secondary button-sm"
                   onClick={handleAgregarTratamiento}
                 >
-                  + Agregar Tratamiento
+                  <Plus size={14} />
+                  <span>Agregar Tratamiento</span>
                 </button>
               </div>
 
               {tratamientos.length === 0 ? (
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0' }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '4px 0' }}>
                   No se han agregado indicaciones o tratamientos farmacológicos.
                 </p>
               ) : (
@@ -437,12 +469,12 @@ export default function RegistrarConsultaPage() {
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '6px',
+                      gap: '8px',
                       marginBottom: '10px',
-                      background: '#f8fafc',
-                      padding: '10px',
-                      borderRadius: '6px',
-                      border: '1px solid #e2e8f0',
+                      background: 'var(--bg-page)',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
                     }}
                   >
                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -455,11 +487,11 @@ export default function RegistrarConsultaPage() {
                       />
                       <button
                         type="button"
-                        className="button-danger"
-                        style={{ padding: '6px 10px', fontSize: '12px' }}
+                        className="button-outline-danger button-sm"
                         onClick={() => handleEliminarTratamiento(idx)}
+                        title="Eliminar tratamiento"
                       >
-                        ✕
+                        <Trash2 size={14} />
                       </button>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -490,7 +522,7 @@ export default function RegistrarConsultaPage() {
               )}
             </div>
 
-            <label className="form-field" style={{ marginTop: '16px', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+            <label className="form-field" style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
               <span className="label">Observaciones y Recomendaciones Generales</span>
               <textarea
                 rows={2}
@@ -507,7 +539,8 @@ export default function RegistrarConsultaPage() {
                 </button>
               </Link>
               <button type="submit" disabled={guardando}>
-                {guardando ? 'Guardando consulta...' : '✅ Finalizar Atención y Guardar en Historia Clínica'}
+                <Save size={16} />
+                <span>{guardando ? 'Guardando consulta...' : 'Finalizar Atención y Guardar en Historia Clínica'}</span>
               </button>
             </div>
           </form>

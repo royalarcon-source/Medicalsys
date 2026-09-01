@@ -6,6 +6,17 @@ import {
   abrirHistoriaManual,
   type HistoriaClinicaDetalleRespuesta,
 } from '../../services/historiaClinicaService';
+import {
+  FileText,
+  ClipboardList,
+  Search,
+  Building2,
+  Plus,
+  User,
+  Activity,
+  CheckCircle2,
+  Clock,
+} from 'lucide-react';
 
 export default function HistoriaClinicaPage() {
   const { usuario } = useAuth();
@@ -94,20 +105,28 @@ export default function HistoriaClinicaPage() {
   return (
     <section className="page historia-clinica-page">
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <h2>Historia Clínica del Paciente (HU-19)</h2>
-          <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="page-header">
+          <div>
+            <h2>
+              <FileText size={22} className="text-primary" />
+              <span>Historia Clínica del Paciente (HU-19)</span>
+            </h2>
+            <p className="page-header-subtitle">
+              Búsqueda de historial clínico completo por Documento de Identidad (CI / DNI).
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <Link to="/consultas/cola" style={{ textDecoration: 'none' }}>
-              <button type="button" className="button-secondary">📋 Cola de Espera</button>
+              <button type="button" className="button-secondary">
+                <ClipboardList size={16} />
+                <span>Cola de Espera</span>
+              </button>
             </Link>
             <Link to="/pacientes" style={{ textDecoration: 'none' }}>
               <button type="button" className="button-secondary">Volver a Pacientes</button>
             </Link>
           </div>
         </div>
-        <p className="hint">
-          Búsqueda de historial clínico completo por Documento de Identidad (CI / DNI).
-        </p>
 
         <form onSubmit={handleBuscar} className="form" style={{ marginTop: '12px' }}>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
@@ -122,27 +141,31 @@ export default function HistoriaClinicaPage() {
               />
             </label>
             <button type="submit" disabled={loading}>
-              {loading ? 'Buscando...' : '🔍 Buscar Historia'}
+              <Search size={16} />
+              <span>{loading ? 'Buscando...' : 'Buscar Historia'}</span>
             </button>
           </div>
         </form>
 
-        {error && <p className="error" style={{ marginTop: '12px' }}>{error}</p>}
-        {mensajeExito && <p className="success" style={{ marginTop: '12px' }}>{mensajeExito}</p>}
+        {error && <div className="alert-error" style={{ marginTop: '12px' }}>{error}</div>}
+        {mensajeExito && <div className="alert-success" style={{ marginTop: '12px' }}>{mensajeExito}</div>}
       </div>
 
       {resultado && (
         <>
-          <div className="card" style={{ background: '#f8fafc', borderLeft: '4px solid var(--accent)' }}>
+          <div className="card" style={{ background: 'var(--bg-subtle)', borderLeft: '4px solid var(--primary)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <span className="badge badge-confirmada" style={{ marginBottom: '6px' }}>Ficha del Paciente</span>
-                <h3 style={{ margin: '4px 0', color: '#1e293b' }}>
+                <span className="badge badge-confirmada" style={{ marginBottom: '6px' }}>
+                  <User size={12} />
+                  <span>Ficha del Paciente</span>
+                </span>
+                <h3 style={{ margin: '4px 0', color: 'var(--text-main)', fontSize: '1.2rem' }}>
                   {resultado.paciente.usuario
                     ? `${resultado.paciente.usuario.nombres} ${resultado.paciente.usuario.apellidos}`
                     : `Paciente #${resultado.paciente.idPaciente}`}
                 </h3>
-                <div style={{ fontSize: '14px', color: '#475569', display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '6px' }}>
+                <div style={{ fontSize: '14px', color: 'var(--text-muted)', display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '6px' }}>
                   <span><strong>CI:</strong> {resultado.paciente.documentoIdentidad}</span>
                   <span><strong>Edad:</strong> {calcularEdad(resultado.paciente.fechaNacimiento)}</span>
                   <span><strong>Sexo:</strong> {resultado.paciente.sexo || '—'}</span>
@@ -153,11 +176,11 @@ export default function HistoriaClinicaPage() {
 
               {resultado.historia ? (
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '12px', color: '#64748b' }}>Historia Clínica #</div>
-                  <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--accent)' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Historia Clínica #</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--primary)' }}>
                     HC-{resultado.historia.idHistoria}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                     Apertura: {new Date(resultado.historia.fechaApertura).toLocaleDateString()}
                   </div>
                 </div>
@@ -171,7 +194,8 @@ export default function HistoriaClinicaPage() {
                         onClick={handleAbrirHistoria}
                         disabled={abriendoHistoria}
                       >
-                        {abriendoHistoria ? 'Abriendo...' : '+ Abrir Historia Clínica'}
+                        <Plus size={15} />
+                        <span>{abriendoHistoria ? 'Abriendo...' : 'Abrir Historia Clínica'}</span>
                       </button>
                     </div>
                   )}
@@ -182,12 +206,16 @@ export default function HistoriaClinicaPage() {
 
           {resultado.historia && (
             <div className="card">
-              <h3>Historial de Atenciones y Consultas Médicas ({resultado.consultas.length})</h3>
+              <h3>
+                <Activity size={18} />
+                <span>Historial de Atenciones y Consultas Médicas ({resultado.consultas.length})</span>
+              </h3>
 
               {resultado.consultas.length === 0 ? (
-                <p className="empty-state" style={{ marginTop: '12px' }}>
-                  No se registran atenciones clínicas previas para este paciente.
-                </p>
+                <div className="empty-state">
+                  <Clock size={32} className="empty-state-icon" />
+                  <p>No se registran atenciones clínicas previas para este paciente.</p>
+                </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '14px' }}>
                   {resultado.consultas.map((c) => {
@@ -200,38 +228,42 @@ export default function HistoriaClinicaPage() {
                       <div
                         key={c.idConsulta}
                         style={{
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '8px',
-                          padding: '16px',
-                          background: '#ffffff',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '10px',
+                          padding: '18px',
+                          background: 'var(--bg-surface)',
+                          boxShadow: 'var(--shadow-sm)',
                         }}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
                           <div>
                             <span style={{ fontWeight: 700, fontSize: '15px' }}>
                               Consulta #{c.idConsulta} — {formatearFecha(c.fechaConsulta)}
                             </span>
-                            <div style={{ fontSize: '13px', color: '#64748b' }}>
+                            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                               Atendido por: <strong>{medicoNombre}</strong> {specs ? `(${specs})` : ''}
                             </div>
                           </div>
-                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                             {c.consultorio && (
-                              <span className="badge badge-confirmada">🏥 {c.consultorio.nombre}</span>
+                              <span className="badge badge-confirmada">
+                                <Building2 size={13} />
+                                <span>{c.consultorio.nombre}</span>
+                              </span>
                             )}
                             <span className={c.estadoConsulta === 'ATENDIDA' ? 'badge badge-atendida' : 'badge badge-pendiente'}>
-                              {c.estadoConsulta}
+                              {c.estadoConsulta === 'ATENDIDA' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
+                              <span>{c.estadoConsulta}</span>
                             </span>
                             <Link to={`/consultas/${c.idConsulta}/atender`} style={{ textDecoration: 'none' }}>
-                              <button type="button" className="button-secondary" style={{ fontSize: '12px', padding: '4px 8px' }}>
+                              <button type="button" className="button-secondary button-sm">
                                 Ver detalle
                               </button>
                             </Link>
                           </div>
                         </div>
 
-                        <div style={{ marginTop: '10px', fontSize: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ marginTop: '12px', fontSize: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                           <div>
                             <strong>Motivo de consulta:</strong> {c.motivo || '—'}
                           </div>
@@ -239,7 +271,7 @@ export default function HistoriaClinicaPage() {
                           {c.anamnesis && (
                             <div>
                               <strong>Anamnesis / Evolución:</strong>
-                              <p style={{ margin: '4px 0 0 0', color: '#334155', whiteSpace: 'pre-wrap', background: '#f8fafc', padding: '8px', borderRadius: '6px' }}>
+                              <p style={{ margin: '4px 0 0 0', color: 'var(--text-main)', whiteSpace: 'pre-wrap', background: 'var(--bg-page)', padding: '10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                                 {c.anamnesis}
                               </p>
                             </div>
@@ -248,7 +280,7 @@ export default function HistoriaClinicaPage() {
                           {c.examenFisico && (
                             <div>
                               <strong>Examen Físico:</strong>
-                              <p style={{ margin: '4px 0 0 0', color: '#334155', whiteSpace: 'pre-wrap', background: '#f8fafc', padding: '8px', borderRadius: '6px' }}>
+                              <p style={{ margin: '4px 0 0 0', color: 'var(--text-main)', whiteSpace: 'pre-wrap', background: 'var(--bg-page)', padding: '10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                                 {c.examenFisico}
                               </p>
                             </div>
@@ -257,17 +289,18 @@ export default function HistoriaClinicaPage() {
                           {c.diagnosticos && c.diagnosticos.length > 0 && (
                             <div style={{ marginTop: '4px' }}>
                               <strong>Diagnósticos:</strong>
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
                                 {c.diagnosticos.map((dx, idx) => (
                                   <span
                                     key={dx.idDiagnostico || idx}
                                     style={{
-                                      background: '#ecfdf5',
-                                      color: '#065f46',
-                                      border: '1px solid #a7f3d0',
+                                      background: 'var(--primary-bg)',
+                                      color: 'var(--primary-text)',
+                                      border: '1px solid var(--primary-border)',
                                       borderRadius: '6px',
                                       padding: '4px 8px',
                                       fontSize: '13px',
+                                      fontWeight: 500,
                                     }}
                                   >
                                     {dx.codigo ? `[${dx.codigo}] ` : ''}{dx.descripcion} ({dx.tipo || 'DEFINITIVO'})
@@ -280,9 +313,9 @@ export default function HistoriaClinicaPage() {
                           {c.tratamientos && c.tratamientos.length > 0 && (
                             <div style={{ marginTop: '4px' }}>
                               <strong>Tratamientos / Indicaciones:</strong>
-                              <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+                              <ul style={{ margin: '6px 0 0 16px', padding: 0 }}>
                                 {c.tratamientos.map((tto, idx) => (
-                                  <li key={tto.idTratamiento || idx} style={{ color: '#1e293b' }}>
+                                  <li key={tto.idTratamiento || idx} style={{ color: 'var(--text-main)', marginBottom: '4px' }}>
                                     <strong>{tto.descripcion}</strong>
                                     {tto.indicaciones ? ` — ${tto.indicaciones}` : ''}
                                   </li>
@@ -292,7 +325,7 @@ export default function HistoriaClinicaPage() {
                           )}
 
                           {c.observaciones && (
-                            <div style={{ fontSize: '13px', color: '#64748b' }}>
+                            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                               <strong>Observaciones adicionales:</strong> {c.observaciones}
                             </div>
                           )}

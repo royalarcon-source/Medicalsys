@@ -6,6 +6,7 @@ import {
   registrarTratamiento,
   type TratamientoItem,
 } from '../../services/tratamientoService';
+import { Pill, Plus, Save, CheckCircle2, AlertCircle, ArrowRight, Calendar } from 'lucide-react';
 
 export default function TratamientosPage() {
   const { usuario } = useAuth();
@@ -92,53 +93,71 @@ export default function TratamientosPage() {
   const tabla = useMemo(() => tratamientos, [tratamientos]);
 
   return (
-    <section className="page">
+    <section className="page tratamientos-page">
       <div className="card">
-        <h2>Tratamientos</h2>
-        <p style={{ marginTop: '6px' }}>Registro y consulta de tratamientos indicados en atención.</p>
+        <div className="page-header">
+          <div>
+            <h2>
+              <Pill size={22} className="text-primary" />
+              <span>Tratamientos y Prescripciones</span>
+            </h2>
+            <p className="page-header-subtitle">
+              Registro y consulta de planes de tratamiento e indicaciones farmacológicas emitidas en consulta.
+            </p>
+          </div>
+          <Link to="/consultas/cola" style={{ textDecoration: 'none' }}>
+            <button type="button" className="button-secondary">
+              <span>Ir a Cola de Atención</span>
+              <ArrowRight size={15} />
+            </button>
+          </Link>
+        </div>
       </div>
 
       {puedeRegistrar && (
         <div className="card">
-          <h3>Registrar tratamiento</h3>
-          <form onSubmit={handleSubmit} className="form">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-              <label className="form-field" style={{ minWidth: '180px', flex: '1' }}>
+          <h3>
+            <Plus size={18} className="text-primary" />
+            <span>Registrar Nuevo Tratamiento</span>
+          </h3>
+          <form onSubmit={handleSubmit} className="form" style={{ marginTop: '12px' }}>
+            <div className="form-row">
+              <label className="form-field">
                 <span className="label">ID de consulta *</span>
                 <input
                   type="number"
                   min="1"
                   value={form.idConsulta}
                   onChange={(event) => setForm((current) => ({ ...current, idConsulta: event.target.value }))}
-                  placeholder="Ej: 14"
+                  placeholder="Ej. 14"
                   required
                 />
               </label>
             </div>
 
             <label className="form-field">
-              <span className="label">Descripción *</span>
+              <span className="label">Descripción o Medicamento *</span>
               <textarea
-                rows={3}
+                rows={2}
                 value={form.descripcion}
                 onChange={(event) => setForm((current) => ({ ...current, descripcion: event.target.value }))}
-                placeholder="Ej: Metformina 850 mg cada 12 horas"
+                placeholder="Ej. Amoxicilina 500mg cápsulas / Fisioterapia kinesiológica..."
                 required
               />
             </label>
 
             <label className="form-field">
-              <span className="label">Indicaciones</span>
+              <span className="label">Indicaciones / Posología</span>
               <textarea
-                rows={3}
+                rows={2}
                 value={form.indicaciones}
                 onChange={(event) => setForm((current) => ({ ...current, indicaciones: event.target.value }))}
-                placeholder="Instrucciones, dosis, horario, precauciones..."
+                placeholder="Instrucciones, dosis, frecuencia, precauciones..."
               />
             </label>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-              <label className="form-field" style={{ minWidth: '180px', flex: '1' }}>
+            <div className="form-row">
+              <label className="form-field">
                 <span className="label">Fecha de inicio</span>
                 <input
                   type="date"
@@ -147,7 +166,7 @@ export default function TratamientosPage() {
                 />
               </label>
 
-              <label className="form-field" style={{ minWidth: '180px', flex: '1' }}>
+              <label className="form-field">
                 <span className="label">Fecha de fin</span>
                 <input
                   type="date"
@@ -157,59 +176,89 @@ export default function TratamientosPage() {
               </label>
             </div>
 
-            {error && <p className="error">{error}</p>}
-            {exito && <p className="success">{exito}</p>}
+            {error && (
+              <div className="alert-error">
+                <AlertCircle size={16} />
+                <span>{error}</span>
+              </div>
+            )}
+            {exito && (
+              <div className="alert-success">
+                <CheckCircle2 size={16} />
+                <span>{exito}</span>
+              </div>
+            )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="form-actions">
               <button type="submit" disabled={guardando}>
-                {guardando ? 'Guardando...' : 'Registrar tratamiento'}
+                <Save size={16} />
+                <span>{guardando ? 'Guardando...' : 'Registrar tratamiento'}</span>
               </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <h3>Listado</h3>
-          <Link to="/consultas/cola">
-            <button type="button" className="button-secondary">Ir a atención</button>
-          </Link>
+      <div className="card" style={{ padding: 0 }}>
+        <div style={{ padding: '20px 24px 10px', borderBottom: '1px solid var(--border)' }}>
+          <h3>
+            <Pill size={18} className="text-primary" />
+            <span>Listado de Tratamientos</span>
+          </h3>
         </div>
 
         {loading ? (
-          <p>Cargando tratamientos...</p>
+          <div className="empty-state">
+            <p>Cargando tratamientos...</p>
+          </div>
         ) : tabla.length === 0 ? (
-          <p>No hay tratamientos registrados.</p>
+          <div className="empty-state">
+            <Pill size={32} className="empty-state-icon" />
+            <p>No hay tratamientos registrados.</p>
+          </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="table-container" style={{ border: 'none', borderRadius: '12px' }}>
+            <table>
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>ID</th>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>Consulta</th>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>Descripción</th>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>Indicaciones</th>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>Desde</th>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>Hasta</th>
+                  <th>ID</th>
+                  <th>Consulta</th>
+                  <th>Descripción</th>
+                  <th>Indicaciones</th>
+                  <th>Desde</th>
+                  <th>Hasta</th>
                 </tr>
               </thead>
               <tbody>
                 {tabla.map((tratamiento) => (
                   <tr key={tratamiento.idTratamiento}>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>{tratamiento.idTratamiento}</td>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>
-                      {tratamiento.consulta?.idConsulta ?? '—'}
+                    <td><strong>#{tratamiento.idTratamiento}</strong></td>
+                    <td>
+                      <span className="badge badge-neutral">
+                        Consulta #{tratamiento.consulta?.idConsulta ?? '—'}
+                      </span>
                     </td>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>{tratamiento.descripcion}</td>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>
-                      {tratamiento.indicaciones || '—'}
+                    <td><strong>{tratamiento.descripcion}</strong></td>
+                    <td>{tratamiento.indicaciones || '—'}</td>
+                    <td>
+                      {tratamiento.fechaInicio ? (
+                        <span className="badge badge-confirmada">
+                          <Calendar size={11} />
+                          <span>{tratamiento.fechaInicio.slice(0, 10)}</span>
+                        </span>
+                      ) : (
+                        '—'
+                      )}
                     </td>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>
-                      {tratamiento.fechaInicio ? tratamiento.fechaInicio.slice(0, 10) : '—'}
-                    </td>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>
-                      {tratamiento.fechaFin ? tratamiento.fechaFin.slice(0, 10) : '—'}
+                    <td>
+                      {tratamiento.fechaFin ? (
+                        <span className="badge badge-confirmada">
+                          <Calendar size={11} />
+                          <span>{tratamiento.fechaFin.slice(0, 10)}</span>
+                        </span>
+                      ) : (
+                        '—'
+                      )}
                     </td>
                   </tr>
                 ))}

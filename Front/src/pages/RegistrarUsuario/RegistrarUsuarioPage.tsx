@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { registrarUsuario, type RolNombre, type UsuarioAutenticado } from '../../services/authService';
+import { UserPlus, FileText, CheckCircle2, AlertCircle, Save, ArrowRight } from 'lucide-react';
 
 const ROLES: { value: RolNombre; label: string }[] = [
   { value: 'ADMINISTRADOR', label: 'Administrador' },
@@ -91,49 +93,60 @@ export default function RegistrarUsuarioPage() {
   };
 
   return (
-    <section className="page">
+    <section className="page registrar-usuario-page">
       <div className="card">
-        <h2>Registrar usuario</h2>
+        <div className="page-header">
+          <div>
+            <h2>
+              <UserPlus size={22} className="text-primary" />
+              <span>Registrar Nuevo Usuario</span>
+            </h2>
+            <p className="page-header-subtitle">
+              Creación de cuentas de acceso al sistema para administradores, médicos, recepcionistas y pacientes.
+            </p>
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit} className="form">
+        <form onSubmit={handleSubmit} className="form" style={{ marginTop: '12px' }}>
           <div className="form-row">
             <label className="form-field">
-              <span className="label">Nombres</span>
-              <input type="text" value={form.nombres} onChange={actualizarCampo('nombres')} required />
+              <span className="label">Nombres *</span>
+              <input type="text" value={form.nombres} onChange={actualizarCampo('nombres')} placeholder="Ej. Carlos" required />
             </label>
 
             <label className="form-field">
-              <span className="label">Apellidos</span>
-              <input type="text" value={form.apellidos} onChange={actualizarCampo('apellidos')} required />
+              <span className="label">Apellidos *</span>
+              <input type="text" value={form.apellidos} onChange={actualizarCampo('apellidos')} placeholder="Ej. Gómez" required />
             </label>
           </div>
 
           <div className="form-row">
             <label className="form-field">
-              <span className="label">Correo electrónico</span>
-              <input type="email" value={form.email} onChange={actualizarCampo('email')} required />
+              <span className="label">Correo electrónico *</span>
+              <input type="email" value={form.email} onChange={actualizarCampo('email')} placeholder="carlos.gomez@clinica.com" required />
             </label>
 
             <label className="form-field">
               <span className="label">Teléfono</span>
-              <input type="tel" value={form.telefono} onChange={actualizarCampo('telefono')} />
+              <input type="tel" value={form.telefono} onChange={actualizarCampo('telefono')} placeholder="Ej. 0981234567" />
             </label>
           </div>
 
           <div className="form-row">
             <label className="form-field">
-              <span className="label">Contraseña</span>
+              <span className="label">Contraseña *</span>
               <input
                 type="password"
                 value={form.password}
                 onChange={actualizarCampo('password')}
                 autoComplete="new-password"
+                placeholder="••••••••"
                 required
               />
             </label>
 
             <label className="form-field">
-              <span className="label">Rol</span>
+              <span className="label">Rol del Usuario *</span>
               <select value={form.rol} onChange={actualizarCampo('rol')}>
                 {ROLES.map((rol) => (
                   <option key={rol.value} value={rol.value}>
@@ -146,11 +159,11 @@ export default function RegistrarUsuarioPage() {
 
           {/* Campos adicionales solo para PACIENTE */}
           {esPaciente && (
-            <>
-              <hr style={{ margin: '8px 0', borderColor: 'var(--border)' }} />
-              <p className="hint" style={{ marginBottom: '8px' }}>
-                📋 Datos del perfil de paciente (se crean junto con el usuario)
-              </p>
+            <div style={{ background: 'var(--bg-subtle)', padding: '16px', borderRadius: '10px', border: '1px solid var(--border)', marginTop: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', color: 'var(--text-main)', fontWeight: 600 }}>
+                <FileText size={16} className="text-primary" />
+                <span>Datos del perfil de paciente (se crean junto con el usuario)</span>
+              </div>
 
               <div className="form-row">
                 <label className="form-field">
@@ -175,7 +188,7 @@ export default function RegistrarUsuarioPage() {
                 </label>
               </div>
 
-              <div className="form-row">
+              <div className="form-row" style={{ marginTop: '10px' }}>
                 <label className="form-field">
                   <span className="label">Sexo</span>
                   <select value={form.sexo} onChange={actualizarCampo('sexo')}>
@@ -185,23 +198,37 @@ export default function RegistrarUsuarioPage() {
                   </select>
                 </label>
               </div>
-            </>
+            </div>
           )}
 
-          {error && <p className="error">{error}</p>}
-          {exito && <p className="success">{exito}</p>}
+          {error && (
+            <div className="alert-error">
+              <AlertCircle size={16} />
+              <span>{error}</span>
+            </div>
+          )}
+          {exito && (
+            <div className="alert-success">
+              <CheckCircle2 size={16} />
+              <span>{exito}</span>
+            </div>
+          )}
 
-          <button type="submit" disabled={loading}>
-            {loading ? 'Registrando...' : 'Registrar usuario'}
-          </button>
+          <div className="form-actions">
+            <button type="submit" disabled={loading}>
+              <Save size={16} />
+              <span>{loading ? 'Registrando...' : 'Registrar usuario'}</span>
+            </button>
+          </div>
         </form>
 
         {usuarioCreado && usuarioCreado.rol === 'MEDICO' && (
-          <p className="hint" style={{ marginTop: '12px' }}>
-            ➡️ Ahora podés{' '}
-            <a href="/medicos/nuevo">completar la ficha de médico</a> para{' '}
-            {usuarioCreado.nombres} (ID usuario: {usuarioCreado.id_usuario}).
-          </p>
+          <div style={{ marginTop: '14px', padding: '12px 16px', background: 'var(--primary-bg)', borderRadius: '8px', border: '1px solid var(--primary-border)' }}>
+            <Link to="/medicos/nuevo" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: 'var(--primary-text)' }}>
+              <span>Completar la ficha de médico para {usuarioCreado.nombres} (ID: {usuarioCreado.id_usuario})</span>
+              <ArrowRight size={15} />
+            </Link>
+          </div>
         )}
       </div>
     </section>

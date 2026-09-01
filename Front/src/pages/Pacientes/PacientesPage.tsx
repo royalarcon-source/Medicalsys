@@ -7,9 +7,19 @@ import {
   type PacienteDetalle,
   type PacienteResumen,
 } from '../../services/pacientesService';
+import {
+  Users,
+  Search,
+  Eye,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  User,
+} from 'lucide-react';
 
 const CRITERIOS: { value: CriterioBusqueda; label: string }[] = [
-  { value: 'ci', label: 'CI' },
+  { value: 'ci', label: 'Documento CI' },
   { value: 'nombre', label: 'Nombre' },
   { value: 'apellido', label: 'Apellido' },
 ];
@@ -110,7 +120,17 @@ export default function PacientesPage() {
   return (
     <section className="page pacientes-page">
       <div className="card">
-        <h2>Consultar paciente</h2>
+        <div className="page-header">
+          <div>
+            <h2>
+              <Users size={22} className="text-primary" />
+              <span>Consultar Pacientes</span>
+            </h2>
+            <p className="page-header-subtitle">
+              Búsqueda en el padrón de pacientes registrados y acceso directo a historias clínicas.
+            </p>
+          </div>
+        </div>
 
         <div className="search-row">
           <select
@@ -131,74 +151,105 @@ export default function PacientesPage() {
             onChange={(event) => setValorBusqueda(event.target.value)}
             placeholder={
               criterio === 'ci'
-                ? 'Ingrese el CI'
+                ? 'Ingrese el documento CI...'
                 : criterio === 'nombre'
-                  ? 'Ingrese el nombre'
-                  : 'Ingrese el apellido'
+                  ? 'Ingrese el nombre del paciente...'
+                  : 'Ingrese el apellido del paciente...'
             }
             aria-label="Buscar paciente"
           />
 
           <button type="button" onClick={() => ejecutarBusqueda(1, valorBusqueda)}>
-            Buscar
+            <Search size={16} />
+            <span>Buscar</span>
           </button>
         </div>
       </div>
 
-      <div className="card">
+      <div className="card" style={{ padding: 0 }}>
         {loading ? (
-          <p>Cargando pacientes...</p>
+          <div className="empty-state">
+            <Search size={32} className="empty-state-icon" />
+            <p>Cargando pacientes...</p>
+          </div>
         ) : error ? (
-          <p className="error">{error}</p>
+          <div style={{ padding: '24px' }}>
+            <div className="alert-error">{error}</div>
+          </div>
         ) : resultados.length === 0 ? (
-          <p className="empty-state">No se encontraron pacientes.</p>
+          <div className="empty-state">
+            <Users size={32} className="empty-state-icon" />
+            <p>No se encontraron pacientes para mostrar.</p>
+          </div>
         ) : (
-          <>
-            <table>
-              <thead>
-                <tr>
-                  <th>CI</th>
-                  <th>Nombre Completo</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {resultados.map((paciente) => (
-                  <tr key={paciente.idPaciente}>
-                    <td>{paciente.documentoIdentidad}</td>
-                    <td>{`${paciente.nombres} ${paciente.apellidos}`.trim()}</td>
-                    <td>
-                      <div style={{ display: 'inline-flex', gap: '6px' }}>
-                        <button type="button" onClick={() => abrirDetalle(paciente.idPaciente)}>
-                          Ver
-                        </button>
-                        <Link
-                          to={`/historia-clinica?ci=${encodeURIComponent(paciente.documentoIdentidad)}`}
-                          style={{ textDecoration: 'none' }}
-                        >
-                          <button type="button" className="button-secondary">
-                            📖 Historia
-                          </button>
-                        </Link>
-                      </div>
-                    </td>
+          <div style={{ padding: '20px' }}>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Documento CI</th>
+                    <th>Nombre Completo</th>
+                    <th style={{ textAlign: 'right' }}>Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {resultados.map((paciente) => (
+                    <tr key={paciente.idPaciente}>
+                      <td>
+                        <strong>{paciente.documentoIdentidad}</strong>
+                      </td>
+                      <td>{`${paciente.nombres} ${paciente.apellidos}`.trim()}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'inline-flex', gap: '8px', justifyContent: 'flex-end' }}>
+                          <button
+                            type="button"
+                            className="button-secondary button-sm"
+                            onClick={() => abrirDetalle(paciente.idPaciente)}
+                          >
+                            <Eye size={14} />
+                            <span>Ver Ficha</span>
+                          </button>
+                          <Link
+                            to={`/historia-clinica?ci=${encodeURIComponent(paciente.documentoIdentidad)}`}
+                            style={{ textDecoration: 'none' }}
+                          >
+                            <button type="button" className="button-sm">
+                              <FileText size={14} />
+                              <span>Historia</span>
+                            </button>
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             <div className="pagination">
-              <button type="button" onClick={() => cambiarPagina(page - 1)} disabled={page <= 1}>
-                Anterior
+              <button
+                type="button"
+                className="button-secondary button-sm"
+                onClick={() => cambiarPagina(page - 1)}
+                disabled={page <= 1}
+              >
+                <ChevronLeft size={15} />
+                <span>Anterior</span>
               </button>
               <span>
                 Página {page} de {totalPages || 1}
               </span>
-              <button type="button" onClick={() => cambiarPagina(page + 1)} disabled={page >= totalPages}>
-                Siguiente
+              <button
+                type="button"
+                className="button-secondary button-sm"
+                onClick={() => cambiarPagina(page + 1)}
+                disabled={page >= totalPages}
+              >
+                <span>Siguiente</span>
+                <ChevronRight size={15} />
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
 
@@ -206,14 +257,19 @@ export default function PacientesPage() {
         <div className="modal-overlay" onClick={() => setPacienteSeleccionado(null)}>
           <div className="modal" onClick={(event) => event.stopPropagation()}>
             <div className="modal-header">
-              <h3>Detalle del paciente</h3>
-              <button type="button" onClick={() => setPacienteSeleccionado(null)}>
-                Volver
+              <h3>
+                <User size={20} className="text-primary" />
+                <span>Detalle del Paciente</span>
+              </h3>
+              <button type="button" className="button-secondary button-sm button-icon" onClick={() => setPacienteSeleccionado(null)}>
+                <X size={16} />
               </button>
             </div>
 
             {loadingDetalle ? (
-              <p>Cargando detalle...</p>
+              <div className="empty-state">
+                <p>Cargando detalle...</p>
+              </div>
             ) : (
               <div className="detail-grid">
                 <div>
@@ -248,13 +304,14 @@ export default function PacientesPage() {
                   <span className="label">Dirección</span>
                   <strong>{pacienteSeleccionado.direccion || '—'}</strong>
                 </div>
-                <div style={{ gridColumn: '1 / -1', marginTop: '10px' }}>
+                <div style={{ gridColumn: '1 / -1', marginTop: '12px', background: 'transparent', border: 'none', padding: 0 }}>
                   <Link
                     to={`/historia-clinica?ci=${encodeURIComponent(pacienteSeleccionado.documentoIdentidad)}`}
                     style={{ textDecoration: 'none' }}
                   >
-                    <button type="button" style={{ width: '100%' }}>
-                      📖 Ir a Historia Clínica Completa
+                    <button type="button" style={{ width: '100%', justifyContent: 'center' }}>
+                      <FileText size={16} />
+                      <span>Ir a Historia Clínica Completa</span>
                     </button>
                   </Link>
                 </div>

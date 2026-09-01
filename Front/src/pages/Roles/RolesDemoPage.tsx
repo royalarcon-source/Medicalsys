@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check, X } from 'lucide-react';
 
 // --- Permission matrix (mirrors Back/src/permissions/rolePermissions.ts) ---
 type RoleName = 'ADMINISTRADOR' | 'MEDICO' | 'RECEPCIONISTA' | 'PACIENTE';
@@ -69,17 +70,17 @@ const PERMISSION_META: Record<Permission, { label: string; endpoint: string; met
 const ALL_PERMISSIONS = Object.keys(PERMISSION_META) as Permission[];
 
 const ROLE_META: Record<RoleName, { color: string; bg: string; abbr: string; description: string }> = {
-  ADMINISTRADOR: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', abbr: 'ADM', description: 'Acceso completo al sistema' },
-  MEDICO: { color: '#10b981', bg: 'rgba(16,185,129,0.12)', abbr: 'MED', description: 'Funciones clínicas y consultas' },
-  RECEPCIONISTA: { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)', abbr: 'REC', description: 'Gestión administrativa y citas' },
-  PACIENTE: { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', abbr: 'PAC', description: 'Acceso a sus propios datos' },
+  ADMINISTRADOR: { color: '#0f172a', bg: '#f1f5f9', abbr: 'ADM', description: 'Acceso completo al sistema' },
+  MEDICO: { color: '#059669', bg: '#ecfdf5', abbr: 'MED', description: 'Funciones clínicas y consultas' },
+  RECEPCIONISTA: { color: '#0284c7', bg: '#f0f9ff', abbr: 'REC', description: 'Gestión administrativa y citas' },
+  PACIENTE: { color: '#475569', bg: '#f8fafc', abbr: 'PAC', description: 'Acceso a sus propios datos' },
 };
 
 const METHOD_COLOR: Record<string, string> = {
-  GET: '#10b981',
-  POST: '#3b82f6',
-  PUT: '#f59e0b',
-  DELETE: '#ef4444',
+  GET: '#059669',
+  POST: '#0284c7',
+  PUT: '#d97706',
+  DELETE: '#dc2626',
 };
 
 export default function RolesDemoPage() {
@@ -93,7 +94,7 @@ export default function RolesDemoPage() {
       <main className="demo-main">
         {/* Role selector */}
         <section className="demo-roles-section">
-          <p className="demo-section-label">Seleccioná un rol para ver sus permisos</p>
+          <p className="demo-section-label">Seleccioná un rol para ver su matriz de permisos clínicos</p>
           <div className="demo-roles-grid">
             {(Object.keys(ROLE_PERMISSIONS) as RoleName[]).map((role) => {
               const m = ROLE_META[role];
@@ -139,7 +140,9 @@ export default function RolesDemoPage() {
               const m = PERMISSION_META[perm];
               return (
                 <div key={perm} className={`demo-perm-row ${allowed ? 'allowed' : 'denied'}`}>
-                  <span className="demo-perm-status">{allowed ? '✓' : '✗'}</span>
+                  <span className="demo-perm-status">
+                    {allowed ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
+                  </span>
                   <div className="demo-perm-info">
                     <span className="demo-perm-label">{m.label}</span>
                     <code className="demo-perm-endpoint">{m.endpoint}</code>

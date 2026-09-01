@@ -9,6 +9,20 @@ import {
 } from '../../services/consultoriosService';
 import { listarCitas, type CitaItem } from '../../services/citasService';
 import { listarEspecialidades, type Especialidad } from '../../services/especialidadesService';
+import {
+  Building2,
+  Calendar,
+  Search,
+  RefreshCw,
+  Clock,
+  User,
+  Tag,
+  Plus,
+  CheckCircle2,
+  XCircle,
+  X,
+  Layers,
+} from 'lucide-react';
 
 export default function ConsultoriosPage() {
   const { usuario } = useAuth();
@@ -223,46 +237,53 @@ export default function ConsultoriosPage() {
   return (
     <section className="page consultorios-page">
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+        <div className="page-header">
           <div>
-            <h2>Gestión y Asignación de Consultorios</h2>
-            <p className="hint">
+            <h2>
+              <Building2 size={22} className="text-primary" />
+              <span>Gestión y Asignación de Consultorios</span>
+            </h2>
+            <p className="page-header-subtitle">
               Asignación de espacios físicos a profesionales médicos, control de solapamiento y consulta de disponibilidad.
             </p>
           </div>
           <button type="button" onClick={cargarDatos} className="button-secondary">
-            🔄 Actualizar
+            <RefreshCw size={15} />
+            <span>Actualizar</span>
           </button>
         </div>
 
-        {error && <p className="error" style={{ marginTop: '8px' }}>{error}</p>}
-        {mensajeExito && <p className="success" style={{ marginTop: '8px' }}>{mensajeExito}</p>}
+        {error && <div className="alert-error">{error}</div>}
+        {mensajeExito && <div className="alert-success">{mensajeExito}</div>}
 
         {/* Barra de pestañas */}
-        <div style={{ display: 'flex', gap: '8px', marginTop: '16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
+        <div className="tabs" style={{ marginTop: '8px' }}>
           <button
             type="button"
-            className={tab === 'calendario' ? '' : 'button-secondary'}
+            className={tab === 'calendario' ? 'active' : ''}
             onClick={() => setTab('calendario')}
           >
-            📅 Calendario y Asignaciones
+            <Calendar size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: '-3px' }} />
+            Calendario y Asignaciones
           </button>
           <button
             type="button"
-            className={tab === 'disponibilidad' ? '' : 'button-secondary'}
+            className={tab === 'disponibilidad' ? 'active' : ''}
             onClick={() => {
               setTab('disponibilidad');
               verificarDisponibilidad();
             }}
           >
-            🔍 Verificador de Disponibilidad
+            <Search size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: '-3px' }} />
+            Verificador de Disponibilidad
           </button>
           <button
             type="button"
-            className={tab === 'catalogo' ? '' : 'button-secondary'}
+            className={tab === 'catalogo' ? 'active' : ''}
             onClick={() => setTab('catalogo')}
           >
-            🏥 Catálogo de Consultorios ({consultorios.length})
+            <Building2 size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: '-3px' }} />
+            Catálogo de Consultorios ({consultorios.length})
           </button>
         </div>
       </div>
@@ -270,23 +291,26 @@ export default function ConsultoriosPage() {
       {/* TAB 1: CALENDARIO Y ASIGNACIONES */}
       {tab === 'calendario' && (
         <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <label style={{ fontWeight: 600, fontSize: '14px' }}>Fecha a visualizar:</label>
+              <label style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-main)' }}>Fecha a visualizar:</label>
               <input
                 type="date"
                 value={fechaCalendario}
                 onChange={(e) => setFechaCalendario(e.target.value)}
-                style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-surface)' }}
               />
             </div>
-            <span style={{ fontSize: '13px', color: '#64748b' }}>
+            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
               Mostrando citas y atenciones del día seleccionado
             </span>
           </div>
 
           {loading ? (
-            <p>Cargando asignaciones...</p>
+            <div className="empty-state">
+              <Clock size={32} className="empty-state-icon" />
+              <p>Cargando asignaciones...</p>
+            </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
               {consultorios.map((cons) => {
@@ -298,33 +322,34 @@ export default function ConsultoriosPage() {
                   <div
                     key={cons.idConsultorio}
                     style={{
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      padding: '14px',
-                      background: '#ffffff',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '10px',
+                      padding: '16px',
+                      background: 'var(--bg-surface)',
+                      boxShadow: 'var(--shadow-sm)',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border)', paddingBottom: '10px', marginBottom: '12px' }}>
                       <div>
-                        <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>
-                          🏥 {cons.nombre}
+                        <h4 style={{ margin: 0, fontSize: '15px', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Building2 size={16} className="text-primary" />
+                          <span>{cons.nombre}</span>
                         </h4>
-                        <span style={{ fontSize: '12px', color: '#64748b' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                           Piso {cons.piso || '1'} • {cons.tipo}
                         </span>
                       </div>
-                      <span className={asignaciones.length > 0 ? 'badge badge-confirmada' : 'badge badge-pendiente'}>
+                      <span className={asignaciones.length > 0 ? 'badge badge-confirmada' : 'badge badge-atendida'}>
                         {asignaciones.length > 0 ? `${asignaciones.length} Ocupación(es)` : 'Libre'}
                       </span>
                     </div>
 
                     {asignaciones.length === 0 ? (
-                      <p style={{ fontSize: '13px', color: '#94a3b8', fontStyle: 'italic', margin: '12px 0' }}>
+                      <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontStyle: 'italic', margin: '14px 0' }}>
                         Sin asignaciones programadas para esta fecha.
                       </p>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {asignaciones.map((asig) => {
                           const medNombre = asig.medico?.usuario
                             ? `Dr(a). ${asig.medico.usuario.nombres} ${asig.medico.usuario.apellidos}`
@@ -336,41 +361,44 @@ export default function ConsultoriosPage() {
                             <div
                               key={asig.idCita}
                               style={{
-                                background: '#f8fafc',
-                                borderLeft: '3px solid #2563eb',
-                                padding: '8px 10px',
-                                borderRadius: '4px',
+                                background: 'var(--bg-page)',
+                                borderLeft: '3px solid var(--primary)',
+                                padding: '10px 12px',
+                                borderRadius: '6px',
                                 fontSize: '13px',
+                                border: '1px solid var(--border)',
+                                borderLeftWidth: '3px',
                               }}
                             >
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <strong style={{ color: '#1e293b' }}>
-                                  🕒 {formatearHora(asig.fechaHoraInicio)} - {formatearHora(asig.fechaHoraFin)}
+                                <strong style={{ color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <Clock size={12} />
+                                  <span>{formatearHora(asig.fechaHoraInicio)} - {formatearHora(asig.fechaHoraFin)}</span>
                                 </strong>
                                 <span className="badge badge-confirmada" style={{ fontSize: '10px' }}>
                                   Cita #{asig.idCita}
                                 </span>
                               </div>
-                              <div style={{ marginTop: '2px', fontWeight: 500 }}>
-                                👨‍⚕️ {medNombre}
+                              <div style={{ marginTop: '4px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <User size={13} />
+                                <span>{medNombre}</span>
                               </div>
-                              <div style={{ fontSize: '12px', color: '#64748b' }}>
-                                🏷️ {esp}
+                              <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                                <Tag size={12} />
+                                <span>{esp}</span>
                               </div>
                               {esAdminOGestor && (
-                                <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                                <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
                                   <button
                                     type="button"
-                                    className="button-secondary"
-                                    style={{ fontSize: '11px', padding: '3px 6px' }}
+                                    className="button-secondary button-sm"
                                     onClick={() => abrirModalAsignar(asig)}
                                   >
                                     Reasignar
                                   </button>
                                   <button
                                     type="button"
-                                    className="button-danger"
-                                    style={{ fontSize: '11px', padding: '3px 6px' }}
+                                    className="button-outline-danger button-sm"
                                     onClick={() => handleLiberar(asig)}
                                   >
                                     Liberar
@@ -389,53 +417,58 @@ export default function ConsultoriosPage() {
           )}
 
           {/* Citas pendientes de asignación de consultorio */}
-          <div style={{ marginTop: '24px', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
-            <h3 style={{ fontSize: '15px', marginBottom: '8px' }}>
-              📋 Citas pendientes de asignación de espacio físico ({citasDelDia.filter((c) => !c.consultorio).length})
+          <div style={{ marginTop: '24px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+            <h3 style={{ fontSize: '15px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Layers size={16} />
+              <span>Citas pendientes de asignación de espacio físico ({citasDelDia.filter((c) => !c.consultorio).length})</span>
             </h3>
             {citasDelDia.filter((c) => !c.consultorio).length === 0 ? (
-              <p style={{ fontSize: '13px', color: '#166534' }}>
-                ✅ Todas las citas activas de la fecha ya cuentan con consultorio asignado.
-              </p>
+              <div className="alert-success" style={{ padding: '10px 14px' }}>
+                <CheckCircle2 size={15} />
+                <span>Todas las citas activas de la fecha ya cuentan con consultorio asignado.</span>
+              </div>
             ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Cita</th>
-                    <th>Médico</th>
-                    <th>Horario</th>
-                    <th>Estado</th>
-                    <th style={{ textAlign: 'right' }}>Acción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {citasDelDia
-                    .filter((c) => !c.consultorio)
-                    .map((c) => (
-                      <tr key={c.idCita}>
-                        <td><strong>#{c.idCita}</strong></td>
-                        <td>
-                          {c.medico?.usuario
-                            ? `Dr(a). ${c.medico.usuario.nombres} ${c.medico.usuario.apellidos}`
-                            : `Médico #${c.medico?.idMedico}`}
-                        </td>
-                        <td>{formatearHora(c.fechaHoraInicio)} - {formatearHora(c.fechaHoraFin)}</td>
-                        <td><span className="badge badge-pendiente">Sin Consultorio</span></td>
-                        <td style={{ textAlign: 'right' }}>
-                          {esAdminOGestor && (
-                            <button
-                              type="button"
-                              style={{ fontSize: '12px', padding: '4px 8px' }}
-                              onClick={() => abrirModalAsignar(c)}
-                            >
-                              🏥 Asignar Consultorio
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Cita</th>
+                      <th>Médico</th>
+                      <th>Horario</th>
+                      <th>Estado</th>
+                      <th style={{ textAlign: 'right' }}>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {citasDelDia
+                      .filter((c) => !c.consultorio)
+                      .map((c) => (
+                        <tr key={c.idCita}>
+                          <td><strong>#{c.idCita}</strong></td>
+                          <td>
+                            {c.medico?.usuario
+                              ? `Dr(a). ${c.medico.usuario.nombres} ${c.medico.usuario.apellidos}`
+                              : `Médico #${c.medico?.idMedico}`}
+                          </td>
+                          <td>{formatearHora(c.fechaHoraInicio)} - {formatearHora(c.fechaHoraFin)}</td>
+                          <td><span className="badge badge-pendiente">Sin Consultorio</span></td>
+                          <td style={{ textAlign: 'right' }}>
+                            {esAdminOGestor && (
+                              <button
+                                type="button"
+                                className="button-sm"
+                                onClick={() => abrirModalAsignar(c)}
+                              >
+                                <Building2 size={13} />
+                                <span>Asignar Consultorio</span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
@@ -444,7 +477,10 @@ export default function ConsultoriosPage() {
       {/* TAB 2: VERIFICADOR DE DISPONIBILIDAD */}
       {tab === 'disponibilidad' && (
         <div className="card">
-          <h3>Comprobar Disponibilidad de Consultorios por Rango Horario</h3>
+          <h3>
+            <Search size={18} />
+            <span>Comprobar Disponibilidad de Consultorios por Rango Horario</span>
+          </h3>
           <p className="hint">
             Permite filtrar qué consultorios están libres para un bloque específico y evitar cruces de horarios.
           </p>
@@ -484,42 +520,54 @@ export default function ConsultoriosPage() {
               type="button"
               onClick={verificarDisponibilidad}
               disabled={verificandoDisp}
-              style={{ marginBottom: '8px' }}
+              style={{ marginBottom: '2px' }}
             >
-              {verificandoDisp ? 'Verificando...' : '🔍 Consultar Disponibilidad'}
+              <Search size={16} />
+              <span>{verificandoDisp ? 'Verificando...' : 'Consultar Disponibilidad'}</span>
             </button>
           </div>
 
           <div style={{ marginTop: '16px' }}>
             {consultoriosDisponibilidad.length === 0 ? (
-              <p>Presioná "Consultar Disponibilidad" para ver el estado de los consultorios.</p>
+              <div className="empty-state">
+                <Search size={32} className="empty-state-icon" />
+                <p>Presioná "Consultar Disponibilidad" para ver el estado de los consultorios.</p>
+              </div>
             ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Consultorio</th>
-                    <th>Tipo</th>
-                    <th>Piso</th>
-                    <th>Capacidad</th>
-                    <th>Disponibilidad ({horaInicioCheck} - {horaFinCheck})</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {consultoriosDisponibilidad.map((c) => (
-                    <tr key={c.idConsultorio}>
-                      <td><strong>🏥 {c.nombre}</strong></td>
-                      <td>{c.tipo}</td>
-                      <td>Piso {c.piso || '1'}</td>
-                      <td>{c.capacidad} paciente(s)</td>
-                      <td>
-                        <span className={c.disponible !== false ? 'badge badge-confirmada' : 'badge badge-cancelada'}>
-                          {c.disponible !== false ? '🟢 DISPONIBLE' : '🔴 OCUPADO EN ESTE HORARIO'}
-                        </span>
-                      </td>
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Consultorio</th>
+                      <th>Tipo</th>
+                      <th>Piso</th>
+                      <th>Capacidad</th>
+                      <th>Disponibilidad ({horaInicioCheck} - {horaFinCheck})</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {consultoriosDisponibilidad.map((c) => (
+                      <tr key={c.idConsultorio}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Building2 size={15} className="text-primary" />
+                            <strong>{c.nombre}</strong>
+                          </div>
+                        </td>
+                        <td>{c.tipo}</td>
+                        <td>Piso {c.piso || '1'}</td>
+                        <td>{c.capacidad} paciente(s)</td>
+                        <td>
+                          <span className={c.disponible !== false ? 'badge badge-atendida' : 'badge badge-danger'}>
+                            {c.disponible !== false ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                            <span>{c.disponible !== false ? 'DISPONIBLE' : 'OCUPADO EN ESTE HORARIO'}</span>
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
@@ -533,18 +581,29 @@ export default function ConsultoriosPage() {
             {esAdminOGestor && (
               <button
                 type="button"
+                className={mostrarFormCrear ? 'button-secondary' : ''}
                 onClick={() => {
                   setErrorCrear(null);
                   setMostrarFormCrear((v) => !v);
                 }}
               >
-                {mostrarFormCrear ? 'Cancelar' : '➕ Nuevo Consultorio'}
+                {mostrarFormCrear ? (
+                  <>
+                    <X size={15} />
+                    <span>Cancelar</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus size={15} />
+                    <span>Nuevo Consultorio</span>
+                  </>
+                )}
               </button>
             )}
           </div>
 
           {esAdminOGestor && mostrarFormCrear && (
-            <form onSubmit={handleCrearConsultorio} className="form" style={{ marginTop: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px' }}>
+            <form onSubmit={handleCrearConsultorio} className="form" style={{ marginTop: '16px', background: 'var(--bg-page)', padding: '18px', borderRadius: '10px', border: '1px solid var(--border)' }}>
               <div className="form-row">
                 <label className="form-field">
                   <span className="label">Nombre:</span>
@@ -591,7 +650,7 @@ export default function ConsultoriosPage() {
                 </label>
               </div>
 
-              {errorCrear && <p className="error">{errorCrear}</p>}
+              {errorCrear && <div className="alert-error" style={{ marginTop: '8px' }}>{errorCrear}</div>}
               {especialidades.length === 0 && (
                 <p className="hint">
                   No hay especialidades registradas todavía. Primero registra una especialidad para poder crear el consultorio.
@@ -600,45 +659,60 @@ export default function ConsultoriosPage() {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
                 <button type="submit" disabled={creandoConsultorio || especialidades.length === 0}>
-                  {creandoConsultorio ? 'Registrando...' : 'Registrar Consultorio'}
+                  <Plus size={15} />
+                  <span>{creandoConsultorio ? 'Registrando...' : 'Registrar Consultorio'}</span>
                 </button>
               </div>
             </form>
           )}
 
           {loading ? (
-            <p>Cargando consultorios...</p>
+            <div className="empty-state">
+              <Clock size={32} className="empty-state-icon" />
+              <p>Cargando consultorios...</p>
+            </div>
           ) : consultorios.length === 0 ? (
-            <p className="empty-state">No hay consultorios registrados.</p>
+            <div className="empty-state">
+              <Building2 size={32} className="empty-state-icon" />
+              <p>No hay consultorios registrados.</p>
+            </div>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Tipo / Especialidad</th>
-                  <th>Piso</th>
-                  <th>Capacidad</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {consultorios.map((c) => (
-                  <tr key={c.idConsultorio}>
-                    <td><strong>#{c.idConsultorio}</strong></td>
-                    <td><strong>🏥 {c.nombre}</strong></td>
-                    <td>{c.tipo}</td>
-                    <td>Piso {c.piso || '1'}</td>
-                    <td>{c.capacidad} paciente(s)</td>
-                    <td>
-                      <span className={c.activo ? 'badge badge-confirmada' : 'badge badge-cancelada'}>
-                        {c.activo ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </td>
+            <div className="table-container" style={{ marginTop: '12px' }}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Tipo / Especialidad</th>
+                    <th>Piso</th>
+                    <th>Capacidad</th>
+                    <th>Estado</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {consultorios.map((c) => (
+                    <tr key={c.idConsultorio}>
+                      <td><strong>#{c.idConsultorio}</strong></td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Building2 size={15} className="text-primary" />
+                          <strong>{c.nombre}</strong>
+                        </div>
+                      </td>
+                      <td>{c.tipo}</td>
+                      <td>Piso {c.piso || '1'}</td>
+                      <td>{c.capacidad} paciente(s)</td>
+                      <td>
+                        <span className={c.activo ? 'badge badge-atendida' : 'badge badge-cancelada'}>
+                          {c.activo ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                          <span>{c.activo ? 'Activo' : 'Inactivo'}</span>
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
@@ -648,17 +722,20 @@ export default function ConsultoriosPage() {
         <div className="modal-overlay" onClick={() => setCitaSeleccionada(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '560px' }}>
             <div className="modal-header">
-              <h3>Asignación de Consultorio Físico</h3>
+              <h3>
+                <Building2 size={20} className="text-primary" />
+                <span>Asignación de Consultorio Físico</span>
+              </h3>
               <button
                 type="button"
-                className="button-secondary"
+                className="button-secondary button-sm button-icon"
                 onClick={() => setCitaSeleccionada(null)}
               >
-                Cerrar
+                <X size={16} />
               </button>
             </div>
 
-            <div style={{ marginBottom: '12px', fontSize: '13px', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
+            <div style={{ marginBottom: '12px', fontSize: '13px', background: 'var(--bg-page)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border)' }}>
               <p style={{ margin: '2px 0' }}>
                 <strong>Cita:</strong> #{citaSeleccionada.idCita}
               </p>
@@ -666,11 +743,11 @@ export default function ConsultoriosPage() {
                 <strong>Médico asignado:</strong> {citaSeleccionada.medico?.usuario?.nombres} {citaSeleccionada.medico?.usuario?.apellidos} (Col. {citaSeleccionada.medico?.numeroColegiatura})
               </p>
               <p style={{ margin: '2px 0' }}>
-                <strong>Fecha y Rango de Horario:</strong> {formatearFechaHora(citaSeleccionada.fechaHoraInicio)} a {formatearHora(citaSeleccionada.fechaHoraFin)}
+                <strong>Fecha y Rango de Horario:</strong> {formatearFechaHora(citaSeleccionada.fechaHoraInicio)} a {formatearFechaHora(citaSeleccionada.fechaHoraFin)}
               </p>
               {citaSeleccionada.consultorio && (
-                <p style={{ margin: '2px 0', color: '#166534' }}>
-                  <strong>Consultorio actual:</strong> {citaSeleccionada.consultorio.nombre}
+                <p style={{ margin: '2px 0', color: 'var(--primary-text)', fontWeight: 600 }}>
+                  Consultorio actual: {citaSeleccionada.consultorio.nombre}
                 </p>
               )}
             </div>
@@ -679,7 +756,7 @@ export default function ConsultoriosPage() {
               <label className="form-field">
                 <span className="label">Seleccionar Consultorio Físico Disponible:</span>
                 {cargandoModal ? (
-                  <p>Comprobando disponibilidad de consultorios...</p>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Comprobando disponibilidad de consultorios...</p>
                 ) : (
                   <select
                     value={idConsultorioModal}
@@ -693,14 +770,14 @@ export default function ConsultoriosPage() {
                         value={c.idConsultorio}
                         disabled={c.disponible === false}
                       >
-                        {c.nombre} (Piso {c.piso || '1'} - {c.tipo}) {c.disponible === false ? '❌ [OCUPADO EN ESTE HORARIO]' : '🟢 [DISPONIBLE]'}
+                        {c.nombre} (Piso {c.piso || '1'} - {c.tipo}) {c.disponible === false ? '[OCUPADO EN ESTE HORARIO]' : '[DISPONIBLE]'}
                       </option>
                     ))}
                   </select>
                 )}
               </label>
 
-              {errorModal && <p className="error">{errorModal}</p>}
+              {errorModal && <div className="alert-error">{errorModal}</div>}
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
                 <button
@@ -712,7 +789,8 @@ export default function ConsultoriosPage() {
                   Cancelar
                 </button>
                 <button type="submit" disabled={guardandoAsignacion || !idConsultorioModal}>
-                  {guardandoAsignacion ? 'Guardando...' : 'Confirmar Asignación'}
+                  <CheckCircle2 size={16} />
+                  <span>{guardandoAsignacion ? 'Guardando...' : 'Confirmar Asignación'}</span>
                 </button>
               </div>
             </form>

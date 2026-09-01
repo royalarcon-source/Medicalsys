@@ -6,6 +6,7 @@ import {
   registrarDiagnostico,
   type DiagnosticoItem,
 } from '../../services/diagnosticoService';
+import { FileText, Plus, Save, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function DiagnosticosPage() {
   const { usuario } = useAuth();
@@ -79,40 +80,58 @@ export default function DiagnosticosPage() {
   const tabla = useMemo(() => diagnosticos, [diagnosticos]);
 
   return (
-    <section className="page">
+    <section className="page diagnosticos-page">
       <div className="card">
-        <h2>Diagnósticos</h2>
-        <p style={{ marginTop: '6px' }}>Registro y consulta de diagnósticos clínicos por consulta.</p>
+        <div className="page-header">
+          <div>
+            <h2>
+              <FileText size={22} className="text-primary" />
+              <span>Diagnósticos Clínicos</span>
+            </h2>
+            <p className="page-header-subtitle">
+              Registro y consulta de diagnósticos clínicos asociados a consultas médicas.
+            </p>
+          </div>
+          <Link to="/consultas/cola" style={{ textDecoration: 'none' }}>
+            <button type="button" className="button-secondary">
+              <span>Ir a Cola de Atención</span>
+              <ArrowRight size={15} />
+            </button>
+          </Link>
+        </div>
       </div>
 
       {puedeRegistrar && (
         <div className="card">
-          <h3>Registrar diagnóstico</h3>
-          <form onSubmit={handleSubmit} className="form">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-              <label className="form-field" style={{ minWidth: '180px', flex: '1' }}>
+          <h3>
+            <Plus size={18} className="text-primary" />
+            <span>Registrar Nuevo Diagnóstico</span>
+          </h3>
+          <form onSubmit={handleSubmit} className="form" style={{ marginTop: '12px' }}>
+            <div className="form-row">
+              <label className="form-field">
                 <span className="label">ID de consulta *</span>
                 <input
                   type="number"
                   min="1"
                   value={form.idConsulta}
                   onChange={(event) => setForm((current) => ({ ...current, idConsulta: event.target.value }))}
-                  placeholder="Ej: 12"
+                  placeholder="Ej. 12"
                   required
                 />
               </label>
 
-              <label className="form-field" style={{ minWidth: '160px', flex: '1' }}>
-                <span className="label">Código</span>
+              <label className="form-field">
+                <span className="label">Código (CIE-10)</span>
                 <input
                   type="text"
                   value={form.codigo}
                   onChange={(event) => setForm((current) => ({ ...current, codigo: event.target.value }))}
-                  placeholder="E10.9"
+                  placeholder="Ej. E10.9"
                 />
               </label>
 
-              <label className="form-field" style={{ minWidth: '180px', flex: '1' }}>
+              <label className="form-field">
                 <span className="label">Tipo</span>
                 <select
                   value={form.tipo}
@@ -127,7 +146,7 @@ export default function DiagnosticosPage() {
             <label className="form-field">
               <span className="label">Descripción *</span>
               <textarea
-                rows={4}
+                rows={3}
                 value={form.descripcion}
                 onChange={(event) => setForm((current) => ({ ...current, descripcion: event.target.value }))}
                 placeholder="Describa el diagnóstico clínico..."
@@ -135,58 +154,80 @@ export default function DiagnosticosPage() {
               />
             </label>
 
-            {error && <p className="error">{error}</p>}
-            {exito && <p className="success">{exito}</p>}
+            {error && (
+              <div className="alert-error">
+                <AlertCircle size={16} />
+                <span>{error}</span>
+              </div>
+            )}
+            {exito && (
+              <div className="alert-success">
+                <CheckCircle2 size={16} />
+                <span>{exito}</span>
+              </div>
+            )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="form-actions">
               <button type="submit" disabled={guardando}>
-                {guardando ? 'Guardando...' : 'Registrar diagnóstico'}
+                <Save size={16} />
+                <span>{guardando ? 'Guardando...' : 'Registrar diagnóstico'}</span>
               </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <h3>Listado</h3>
-          <Link to="/consultas/cola">
-            <button type="button" className="button-secondary">Ir a atención</button>
-          </Link>
+      <div className="card" style={{ padding: 0 }}>
+        <div style={{ padding: '20px 24px 10px', borderBottom: '1px solid var(--border)' }}>
+          <h3>
+            <FileText size={18} className="text-primary" />
+            <span>Listado de Diagnósticos</span>
+          </h3>
         </div>
 
         {loading ? (
-          <p>Cargando diagnósticos...</p>
+          <div className="empty-state">
+            <p>Cargando diagnósticos...</p>
+          </div>
         ) : tabla.length === 0 ? (
-          <p>No hay diagnósticos registrados.</p>
+          <div className="empty-state">
+            <FileText size={32} className="empty-state-icon" />
+            <p>No hay diagnósticos registrados.</p>
+          </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="table-container" style={{ border: 'none', borderRadius: '12px' }}>
+            <table>
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>ID</th>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>Consulta</th>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>Código</th>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>Tipo</th>
-                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e2e8f0' }}>Descripción</th>
+                  <th>ID</th>
+                  <th>Consulta</th>
+                  <th>Código</th>
+                  <th>Tipo</th>
+                  <th>Descripción</th>
                 </tr>
               </thead>
               <tbody>
                 {tabla.map((diagnostico) => (
                   <tr key={diagnostico.idDiagnostico}>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>{diagnostico.idDiagnostico}</td>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>
-                      {diagnostico.consulta?.idConsulta ?? '—'}
+                    <td><strong>#{diagnostico.idDiagnostico}</strong></td>
+                    <td>
+                      <span className="badge badge-neutral">
+                        Consulta #{diagnostico.consulta?.idConsulta ?? '—'}
+                      </span>
                     </td>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>
-                      {diagnostico.codigo || '—'}
+                    <td>
+                      {diagnostico.codigo ? (
+                        <code>{diagnostico.codigo}</code>
+                      ) : (
+                        '—'
+                      )}
                     </td>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>
-                      {diagnostico.tipo || 'DEFINITIVO'}
+                    <td>
+                      <span className={diagnostico.tipo === 'DEFINITIVO' ? 'badge badge-atendida' : 'badge badge-pendiente'}>
+                        {diagnostico.tipo || 'DEFINITIVO'}
+                      </span>
                     </td>
-                    <td style={{ padding: '8px', borderBottom: '1px solid #e2e8f0' }}>
-                      {diagnostico.descripcion}
-                    </td>
+                    <td>{diagnostico.descripcion}</td>
                   </tr>
                 ))}
               </tbody>

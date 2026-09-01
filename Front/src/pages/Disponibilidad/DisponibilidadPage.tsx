@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { buscarDisponibilidad, type DisponibilidadResultado } from '../../services/disponibilidadService';
 import { listarEspecialidades, type Especialidad } from '../../services/especialidadesService';
+import { Clock, Search, Calendar, User } from 'lucide-react';
 
 const DIAS_SEMANA = [
   { value: 1, label: 'Lunes' },
@@ -58,9 +59,19 @@ export default function DisponibilidadPage() {
   }, [ejecutarBusqueda]);
 
   return (
-    <section className="page">
+    <section className="page disponibilidad-page">
       <div className="card">
-        <h2>Consultar disponibilidad</h2>
+        <div className="page-header">
+          <div>
+            <h2>
+              <Clock size={22} className="text-primary" />
+              <span>Consultar Disponibilidad Horaria</span>
+            </h2>
+            <p className="page-header-subtitle">
+              Filtro y visualización de franjas horarias y turnos de atención del cuerpo médico.
+            </p>
+          </div>
+        </div>
 
         <div className="search-row">
           <select
@@ -99,43 +110,67 @@ export default function DisponibilidadPage() {
           />
 
           <button type="button" onClick={ejecutarBusqueda}>
-            Buscar
+            <Search size={16} />
+            <span>Buscar</span>
           </button>
         </div>
       </div>
 
-      <div className="card">
+      <div className="card" style={{ padding: 0 }}>
         {loading ? (
-          <p>Cargando disponibilidad...</p>
+          <div className="empty-state">
+            <Clock size={32} className="empty-state-icon" />
+            <p>Cargando disponibilidad...</p>
+          </div>
         ) : error ? (
-          <p className="error">{error}</p>
+          <div style={{ padding: '24px' }}>
+            <div className="alert-error">{error}</div>
+          </div>
         ) : resultados.length === 0 ? (
-          <p className="empty-state">No se encontró disponibilidad.</p>
+          <div className="empty-state">
+            <Calendar size={32} className="empty-state-icon" />
+            <p>No se encontró disponibilidad médica con los filtros seleccionados.</p>
+          </div>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Médico</th>
-                <th>Colegiatura</th>
-                <th>Especialidades</th>
-                <th>Día</th>
-                <th>Horario</th>
-              </tr>
-            </thead>
-            <tbody>
-              {resultados.map((horario) => (
-                <tr key={horario.idHorario}>
-                  <td>{horario.medicoNombre}</td>
-                  <td>{horario.numeroColegiatura}</td>
-                  <td>{horario.especialidades.join(', ') || '—'}</td>
-                  <td>{nombreDia(horario.diaSemana)}</td>
-                  <td>
-                    {horario.horaInicio} - {horario.horaFin}
-                  </td>
+          <div className="table-container" style={{ border: 'none', borderRadius: '12px' }}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Médico</th>
+                  <th>Colegiatura</th>
+                  <th>Especialidades</th>
+                  <th>Día</th>
+                  <th>Horario</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {resultados.map((horario) => (
+                  <tr key={horario.idHorario}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <User size={15} className="text-primary" />
+                        <strong>{horario.medicoNombre}</strong>
+                      </div>
+                    </td>
+                    <td>{horario.numeroColegiatura}</td>
+                    <td>{horario.especialidades.join(', ') || '—'}</td>
+                    <td>
+                      <span className="badge badge-neutral">
+                        <Calendar size={12} />
+                        <span>{nombreDia(horario.diaSemana)}</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge badge-confirmada">
+                        <Clock size={12} />
+                        <span>{horario.horaInicio} - {horario.horaFin}</span>
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </section>

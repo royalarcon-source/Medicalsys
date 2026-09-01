@@ -9,22 +9,37 @@ import {
   type TicketTurno,
   type ConsultaItem,
 } from '../../services/consultasService';
+import {
+  UserPlus,
+  PlusCircle,
+  AlertTriangle,
+  ClipboardList,
+  Search,
+  Ticket,
+  Stethoscope,
+  UserCheck,
+  Plus,
+  ArrowRight,
+} from 'lucide-react';
 
-const TIPOS_INGRESO: { value: TipoIngreso; label: string; desc: string }[] = [
+const TIPOS_INGRESO: { value: TipoIngreso; label: string; desc: string; icon: typeof UserPlus }[] = [
   {
     value: 'CONSULTA_ESPONTANEA',
-    label: '🚶 Consulta Espontánea (Walk-in)',
+    label: 'Consulta Espontánea (Walk-in)',
     desc: 'Paciente sin cita que acude directamente a recepción.',
+    icon: UserPlus,
   },
   {
     value: 'SOBRECUPO',
-    label: '➕ Sobrecupo Adicional',
+    label: 'Sobrecupo Adicional',
     desc: 'Atención agregada por encima de los cupos estándar del médico.',
+    icon: PlusCircle,
   },
   {
     value: 'URGENCIA_MENOR',
-    label: '🚨 Urgencia Menor',
+    label: 'Urgencia Menor',
     desc: 'Atención prioritaria para síntomas agudos no críticos.',
+    icon: AlertTriangle,
   },
 ];
 
@@ -138,24 +153,37 @@ export default function RegistrarAtencionPage() {
   return (
     <section className="page registrar-atencion-page">
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <h2>Registro de Atención Sin Cita</h2>
-          <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="page-header">
+          <div>
+            <h2>
+              <UserPlus size={22} className="text-primary" />
+              <span>Registro de Atención Sin Cita</span>
+            </h2>
+            <p className="page-header-subtitle">
+              Registrá el ingreso inmediato de pacientes sin cita previa para integrarlos en la cola de atención del médico en turno.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <Link to="/consultas/cola" style={{ textDecoration: 'none' }}>
-              <button type="button" className="button-secondary">📋 Ver Cola de Espera</button>
+              <button type="button" className="button-secondary">
+                <ClipboardList size={16} />
+                <span>Ver Cola de Espera</span>
+              </button>
             </Link>
             <Link to="/citas" style={{ textDecoration: 'none' }}>
-              <button type="button" className="button-secondary">Volver a Citas</button>
+              <button type="button" className="button-secondary">
+                <span>Volver a Citas</span>
+              </button>
             </Link>
           </div>
         </div>
-        <p className="hint">
-          Registrá el ingreso inmediato de pacientes sin cita previa para integrarlos en la cola de atención del médico en turno.
-        </p>
       </div>
 
       <div className="card">
-        <h3>1. Identificación del Paciente</h3>
+        <h3>
+          <Search size={18} />
+          <span>1. Identificación del Paciente</span>
+        </h3>
         <form onSubmit={handleBuscarPaciente} className="form" style={{ marginTop: '10px' }}>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <label className="form-field" style={{ flex: '1', minWidth: '240px', margin: 0 }}>
@@ -169,36 +197,42 @@ export default function RegistrarAtencionPage() {
               />
             </label>
             <button type="submit" disabled={buscandoPaciente}>
-              {buscandoPaciente ? 'Buscando...' : '🔍 Buscar Paciente'}
+              <Search size={16} />
+              <span>{buscandoPaciente ? 'Buscando...' : 'Buscar Paciente'}</span>
             </button>
           </div>
         </form>
 
         {mensajeBusqueda && (
-          <div style={{ marginTop: '12px', padding: '12px', background: '#fffbeb', borderRadius: '8px', border: '1px solid #fef3c7' }}>
-            <p style={{ margin: 0, color: '#92400e', fontWeight: 600 }}>{mensajeBusqueda}</p>
-            <Link to="/pacientes/nuevo" style={{ marginTop: '6px', display: 'inline-block', color: '#b45309' }}>
-              + Crear ficha rápida de nuevo paciente
-            </Link>
+          <div className="alert-error" style={{ background: 'var(--warning-bg)', borderColor: 'var(--warning-border)', color: 'var(--warning-text)' }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontWeight: 600 }}>{mensajeBusqueda}</p>
+              <Link to="/pacientes/nuevo" style={{ marginTop: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', color: 'var(--warning-text)', fontWeight: 600 }}>
+                <Plus size={14} />
+                <span>Crear ficha rápida de nuevo paciente</span>
+              </Link>
+            </div>
           </div>
         )}
 
         {pacienteSeleccionado && (
-          <div style={{ marginTop: '14px', padding: '14px', background: '#f0fdf4', borderRadius: '8px', border: '1.5px solid #86efac' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ marginTop: '14px', padding: '16px', background: 'var(--primary-bg)', borderRadius: '10px', border: '1.5px solid var(--primary-border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
               <div>
-                <span className="badge badge-confirmada">Paciente seleccionado</span>
-                <h4 style={{ margin: '6px 0 2px 0', color: '#166534' }}>
+                <span className="badge badge-atendida">
+                  <UserCheck size={12} />
+                  <span>Paciente seleccionado</span>
+                </span>
+                <h4 style={{ margin: '6px 0 2px 0', color: 'var(--primary-text)', fontSize: '1.05rem' }}>
                   {pacienteSeleccionado.nombres} {pacienteSeleccionado.apellidos}
                 </h4>
-                <p style={{ margin: 0, fontSize: '13px', color: '#15803d' }}>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--primary-text)', opacity: 0.9 }}>
                   CI: {pacienteSeleccionado.documentoIdentidad} | ID Paciente: #{pacienteSeleccionado.idPaciente}
                 </p>
               </div>
               <button
                 type="button"
-                className="button-secondary"
-                style={{ fontSize: '12px' }}
+                className="button-secondary button-sm"
                 onClick={() => setPacienteSeleccionado(null)}
               >
                 Cambiar paciente
@@ -210,7 +244,10 @@ export default function RegistrarAtencionPage() {
 
       {pacienteSeleccionado && (
         <div className="card">
-          <h3>2. Asignación Médica y Tipo de Ingreso</h3>
+          <h3>
+            <Stethoscope size={18} />
+            <span>2. Asignación Médica y Tipo de Ingreso</span>
+          </h3>
 
           <form onSubmit={handleSubmit} className="form" style={{ marginTop: '12px' }}>
             <div className="form-row">
@@ -252,26 +289,28 @@ export default function RegistrarAtencionPage() {
 
             <div className="form-field">
               <span className="label">Clasificación / Tipo de Ingreso *</span>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginTop: '6px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginTop: '6px' }}>
                 {TIPOS_INGRESO.map((t) => {
                   const seleccionado = tipoIngreso === t.value;
+                  const IconComp = t.icon;
                   return (
                     <div
                       key={t.value}
                       onClick={() => setTipoIngreso(t.value)}
                       style={{
-                        padding: '12px',
-                        border: seleccionado ? '2px solid var(--accent)' : '1px solid var(--border)',
-                        borderRadius: '8px',
-                        background: seleccionado ? '#f5f3ff' : '#ffffff',
+                        padding: '14px',
+                        border: seleccionado ? '2px solid var(--primary)' : '1px solid var(--border)',
+                        borderRadius: '10px',
+                        background: seleccionado ? 'var(--primary-bg)' : 'var(--bg-surface)',
                         cursor: 'pointer',
                         transition: 'all 0.15s ease',
                       }}
                     >
-                      <div style={{ fontWeight: 700, fontSize: '14px', color: seleccionado ? 'var(--accent)' : 'inherit' }}>
-                        {t.label}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '0.9rem', color: seleccionado ? 'var(--primary-text)' : 'var(--text-main)' }}>
+                        <IconComp size={16} />
+                        <span>{t.label}</span>
                       </div>
-                      <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                         {t.desc}
                       </div>
                     </div>
@@ -292,24 +331,25 @@ export default function RegistrarAtencionPage() {
             </label>
 
             {requiereConfirmacionSobrecupo && (
-              <div style={{ padding: '12px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '8px' }}>
+              <div className="alert-error">
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={confirmarSobrecupo}
                     onChange={(e) => setConfirmarSobrecupo(e.target.checked)}
                   />
-                  <span style={{ fontWeight: 600, color: '#991b1b', fontSize: '13px' }}>
+                  <span style={{ fontWeight: 600, fontSize: '13px' }}>
                     Autorizar sobrecupo adicional para este médico.
                   </span>
                 </label>
               </div>
             )}
 
-            {error && <p className="error">{error}</p>}
+            {error && <div className="alert-error">{error}</div>}
 
             <button type="submit" disabled={loading} style={{ marginTop: '10px' }}>
-              {loading ? 'Generando ticket y asignando turno...' : '🎫 Confirmar e Ingresar a la Cola de Espera'}
+              <Ticket size={16} />
+              <span>{loading ? 'Generando ticket y asignando turno...' : 'Confirmar e Ingresar a la Cola de Espera'}</span>
             </button>
           </form>
         </div>
@@ -318,30 +358,34 @@ export default function RegistrarAtencionPage() {
       {ticketGenerado && (
         <div className="modal-overlay">
           <div className="modal" style={{ maxWidth: '480px', textAlign: 'center' }}>
-            <div style={{ fontSize: '40px', marginBottom: '8px' }}>🎫</div>
-            <h2 style={{ margin: '0 0 4px 0', color: '#166534' }}>¡Turno Asignado con Éxito!</h2>
-            <p style={{ color: '#4b5563', fontSize: '14px', margin: '0 0 16px 0' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '56px', height: '56px', borderRadius: '50%', background: 'var(--primary-bg)', color: 'var(--primary)', margin: '0 auto 8px' }}>
+              <Ticket size={32} />
+            </div>
+            <h2 style={{ margin: '0 0 4px 0', color: 'var(--primary-text)', justifyContent: 'center' }}>
+              ¡Turno Asignado con Éxito!
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: '0 0 16px 0' }}>
               El paciente fue integrado a la cola de atención médica.
             </p>
 
             <div
               style={{
-                background: '#f8fafc',
-                border: '2px dashed #94a3b8',
+                background: 'var(--bg-page)',
+                border: '2px dashed var(--border-strong)',
                 borderRadius: '12px',
                 padding: '20px',
                 marginBottom: '16px',
                 textAlign: 'center',
               }}
             >
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Número de Turno
               </div>
-              <div style={{ fontSize: '48px', fontWeight: 900, color: 'var(--accent)', margin: '8px 0' }}>
+              <div style={{ fontSize: '44px', fontWeight: 900, color: 'var(--primary)', margin: '6px 0' }}>
                 #{ticketGenerado.ticket.numeroTurno}
               </div>
 
-              <hr style={{ borderColor: '#e2e8f0', margin: '14px 0' }} />
+              <hr style={{ borderColor: 'var(--border)', margin: '14px 0' }} />
 
               <div style={{ textAlign: 'left', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div><strong>Paciente:</strong> {pacienteSeleccionado?.nombres} {pacienteSeleccionado?.apellidos} (CI: {pacienteSeleccionado?.documentoIdentidad})</div>
@@ -349,7 +393,9 @@ export default function RegistrarAtencionPage() {
                 {ticketGenerado.consulta.consultorio && (
                   <div><strong>Consultorio:</strong> {ticketGenerado.consulta.consultorio.nombre}</div>
                 )}
-                <div><strong>Tipo:</strong> <span className="badge badge-confirmada">{ticketGenerado.consulta.tipoIngreso}</span></div>
+                <div>
+                  <strong>Tipo:</strong> <span className="badge badge-confirmada">{ticketGenerado.consulta.tipoIngreso}</span>
+                </div>
                 <div><strong>Hora de Registro:</strong> {new Date().toLocaleTimeString()}</div>
               </div>
             </div>
@@ -365,13 +411,15 @@ export default function RegistrarAtencionPage() {
                   setMotivo('');
                 }}
               >
-                + Registrar Otro Paciente
+                <Plus size={15} />
+                <span>Registrar Otro Paciente</span>
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/consultas/cola')}
               >
-                Ir a la Cola de Espera
+                <span>Ir a la Cola de Espera</span>
+                <ArrowRight size={15} />
               </button>
             </div>
           </div>

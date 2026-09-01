@@ -8,6 +8,7 @@ import {
 } from '../../services/citasService';
 import { listarEspecialidades, type Especialidad } from '../../services/especialidadesService';
 import { buscarDisponibilidad, type DisponibilidadResultado } from '../../services/disponibilidadService';
+import { Calendar, Clock, User, Tag, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const DIAS = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
@@ -150,7 +151,7 @@ export default function ReservarCitaPage() {
     }
 
     if (!fechaCita || !horaInicio || !horaFin) {
-      setError('Debes seleccionar un turno disponible (en verde) de la lista.');
+      setError('Debes seleccionar un turno disponible de la lista.');
       return;
     }
 
@@ -188,15 +189,20 @@ export default function ReservarCitaPage() {
   return (
     <section className="page reservar-cita-page">
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2>Reservar Cita Médica (HU-15)</h2>
+        <div className="page-header">
+          <div>
+            <h2>
+              <Calendar size={22} className="text-primary" />
+              <span>Reservar Cita Médica (HU-15)</span>
+            </h2>
+            <p className="page-header-subtitle">
+              Paso 1: Filtrá por especialidad y seleccioná el profesional de tu preferencia.
+            </p>
+          </div>
           <Link to="/citas" style={{ textDecoration: 'none' }}>
             <button type="button" className="button-secondary">Volver al listado</button>
           </Link>
         </div>
-        <p className="hint">
-          Paso 1: Filtrá por especialidad y seleccioná el médico de tu preferencia.
-        </p>
 
         <div className="form-field" style={{ marginTop: '8px' }}>
           <span className="label">Filtrar por Especialidad médica</span>
@@ -214,13 +220,17 @@ export default function ReservarCitaPage() {
         </div>
 
         <div style={{ marginTop: '16px' }}>
-          <span className="label">Médicos Disponibles:</span>
+          <span className="label">Médicos con Horarios Disponibles:</span>
           {cargandoHorarios ? (
-            <p>Cargando disponibilidad...</p>
+            <div className="empty-state">
+              <Clock size={32} className="empty-state-icon" />
+              <p>Cargando disponibilidad...</p>
+            </div>
           ) : horariosDisponibles.length === 0 ? (
-            <p className="empty-state" style={{ marginTop: '8px' }}>
-              No hay médicos con horarios disponibles para esta especialidad.
-            </p>
+            <div className="empty-state">
+              <User size={32} className="empty-state-icon" />
+              <p>No hay médicos con horarios disponibles para esta especialidad.</p>
+            </div>
           ) : (
             <div className="schedule-grid">
               {horariosDisponibles.map((h) => {
@@ -241,12 +251,14 @@ export default function ReservarCitaPage() {
                     </div>
 
                     <div className="schedule-card-time">
-                      🕒 {h.horaInicio.slice(0, 5)} a {h.horaFin.slice(0, 5)}
+                      <Clock size={13} />
+                      <span>{h.horaInicio.slice(0, 5)} a {h.horaFin.slice(0, 5)}</span>
                     </div>
 
                     {h.especialidades && h.especialidades.length > 0 && (
                       <div className="schedule-card-specs">
-                        🏷️ {h.especialidades.join(', ')}
+                        <Tag size={12} />
+                        <span>{h.especialidades.join(', ')}</span>
                       </div>
                     )}
                   </div>
@@ -260,7 +272,10 @@ export default function ReservarCitaPage() {
       {idMedico && (
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-            <h3>Paso 2: Elegí Fecha y Turno</h3>
+            <h3>
+              <Clock size={18} className="text-primary" />
+              <span>Paso 2: Elegí Fecha y Turno de Atención</span>
+            </h3>
             <div className="form-field" style={{ minWidth: '220px' }}>
               <span className="label">Fecha a consultar</span>
               <input
@@ -280,25 +295,25 @@ export default function ReservarCitaPage() {
               <div className="slots-legend">
                 <span className="legend-item">
                   <span className="legend-dot disponible"></span>
-                  <span>🟢 Disponible</span>
+                  <span>Disponible</span>
                 </span>
                 <span className="legend-item">
                   <span className="legend-dot ocupado"></span>
-                  <span>🔴 Ocupado / No disp.</span>
+                  <span>Ocupado</span>
                 </span>
                 <span className="legend-item">
                   <span className="legend-dot seleccionado"></span>
-                  <span>🟣 Seleccionado</span>
+                  <span>Seleccionado</span>
                 </span>
               </div>
             </div>
 
             {cargandoSlots ? (
-              <p>Consultando disponibilidad de turnos...</p>
+              <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Consultando disponibilidad de turnos...</p>
             ) : slots.length === 0 ? (
-              <p className="empty-state">
-                El médico no tiene turno de atención configurado para la fecha seleccionada. Probá con otro día de la semana.
-              </p>
+              <div className="empty-state">
+                <p>El médico no tiene turno de atención configurado para la fecha seleccionada. Probá con otro día de la semana.</p>
+              </div>
             ) : (
               <div className="slots-grid">
                 {slots.map((slot) => {
@@ -326,7 +341,7 @@ export default function ReservarCitaPage() {
                     >
                       <span>{slot.horaInicio} - {slot.horaFin}</span>
                       <span className="slot-status-label">
-                        {esSeleccionado ? 'ELEGIDO' : slot.disponible ? 'LIBRE' : 'OCUPADO'}
+                        {esSeleccionado ? 'SELECCIONADO' : slot.disponible ? 'LIBRE' : 'OCUPADO'}
                       </span>
                     </button>
                   );
@@ -355,9 +370,9 @@ export default function ReservarCitaPage() {
                 <span className="label">Horario seleccionado</span>
                 <input
                   type="text"
-                  value={horaInicio && horaFin ? `${horaInicio} a ${horaFin} (${fechaCita})` : 'Hacé clic en un turno verde arriba'}
+                  value={horaInicio && horaFin ? `${horaInicio} a ${horaFin} (${fechaCita})` : 'Hacé clic en un turno disponible arriba'}
                   readOnly
-                  style={{ background: '#f3f4f6', fontWeight: horaInicio ? 600 : 400 }}
+                  style={{ background: 'var(--bg-subtle)', fontWeight: horaInicio ? 600 : 400 }}
                   required
                 />
               </label>
@@ -373,15 +388,22 @@ export default function ReservarCitaPage() {
               </label>
             </div>
 
-            {error && <p className="error">{error}</p>}
+            {error && (
+              <div className="alert-error">
+                <AlertCircle size={16} />
+                <span>{error}</span>
+              </div>
+            )}
 
-            <button
-              type="submit"
-              disabled={loading || !idMedico || !horaInicio || !horaFin}
-              style={{ marginTop: '8px' }}
-            >
-              {loading ? 'Confirmando reserva...' : 'Confirmar Reserva de Cita'}
-            </button>
+            <div className="form-actions">
+              <button
+                type="submit"
+                disabled={loading || !idMedico || !horaInicio || !horaFin}
+              >
+                <CheckCircle2 size={16} />
+                <span>{loading ? 'Confirmando reserva...' : 'Confirmar Reserva de Cita'}</span>
+              </button>
+            </div>
           </form>
         </div>
       )}

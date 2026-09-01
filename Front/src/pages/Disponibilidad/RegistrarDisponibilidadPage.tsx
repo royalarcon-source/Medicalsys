@@ -6,6 +6,7 @@ import {
   registrarDisponibilidad,
   type DisponibilidadResultado,
 } from '../../services/disponibilidadService';
+import { Clock, Calendar, CheckCircle2, AlertCircle, XCircle, Save, Eye } from 'lucide-react';
 
 const DIAS_SEMANA = [
   { value: 1, label: 'Lunes' },
@@ -120,25 +121,33 @@ export default function RegistrarDisponibilidadPage() {
   };
 
   return (
-    <section className="page">
+    <section className="page registrar-disponibilidad-page">
       <div className="card">
-        <h2>Registrar disponibilidad</h2>
-        <p className="hint">
-          {esAdministrador
-            ? 'Indica el ID del médico y el bloque horario que deseas registrar en su agenda.'
-            : 'Registra los bloques horarios en los que estarás disponible para atender citas.'}
-        </p>
+        <div className="page-header">
+          <div>
+            <h2>
+              <Clock size={22} className="text-primary" />
+              <span>Registrar Disponibilidad Médica</span>
+            </h2>
+            <p className="page-header-subtitle">
+              {esAdministrador
+                ? 'Indica el ID del médico y el bloque horario que deseas registrar en su agenda.'
+                : 'Registra los bloques horarios en los que estarás disponible para atender citas.'}
+            </p>
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit} className="form">
+        <form onSubmit={handleSubmit} className="form" style={{ marginTop: '12px' }}>
           {esAdministrador && (
             <div className="form-row">
               <label className="form-field">
-                <span className="label">ID de médico</span>
+                <span className="label">ID de médico *</span>
                 <input
                   type="number"
                   min={1}
                   value={form.idMedico}
                   onChange={(event) => setForm((prev) => ({ ...prev, idMedico: event.target.value }))}
+                  placeholder="Ej. 3"
                   required
                 />
               </label>
@@ -147,7 +156,7 @@ export default function RegistrarDisponibilidadPage() {
 
           <div className="form-row">
             <label className="form-field">
-              <span className="label">Día de la semana</span>
+              <span className="label">Día de la semana *</span>
               <select
                 value={form.diaSemana}
                 onChange={(event) =>
@@ -163,7 +172,7 @@ export default function RegistrarDisponibilidadPage() {
             </label>
 
             <label className="form-field">
-              <span className="label">Hora de inicio</span>
+              <span className="label">Hora de inicio *</span>
               <input
                 type="time"
                 value={form.horaInicio}
@@ -173,7 +182,7 @@ export default function RegistrarDisponibilidadPage() {
             </label>
 
             <label className="form-field">
-              <span className="label">Hora de fin</span>
+              <span className="label">Hora de fin *</span>
               <input
                 type="time"
                 value={form.horaFin}
@@ -183,59 +192,107 @@ export default function RegistrarDisponibilidadPage() {
             </label>
           </div>
 
-          {error && <p className="error">{error}</p>}
-          {exito && <p className="success">{exito}</p>}
-
-          <button type="submit" disabled={loading}>
-            {loading ? 'Registrando...' : 'Registrar disponibilidad'}
-          </button>
-
-          {esAdministrador && (
-            <button type="button" onClick={() => cargarHorarios(Number(form.idMedico))}>
-              Ver horarios de este médico
-            </button>
+          {error && (
+            <div className="alert-error">
+              <AlertCircle size={16} />
+              <span>{error}</span>
+            </div>
           )}
+          {exito && (
+            <div className="alert-success">
+              <CheckCircle2 size={16} />
+              <span>{exito}</span>
+            </div>
+          )}
+
+          <div className="form-actions">
+            <button type="submit" disabled={loading}>
+              <Save size={16} />
+              <span>{loading ? 'Registrando...' : 'Registrar disponibilidad'}</span>
+            </button>
+
+            {esAdministrador && (
+              <button
+                type="button"
+                className="button-secondary"
+                onClick={() => cargarHorarios(Number(form.idMedico))}
+              >
+                <Eye size={15} />
+                <span>Ver horarios de este médico</span>
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
-      <div className="card">
-        <h3>Horarios registrados</h3>
+      <div className="card" style={{ padding: 0 }}>
+        <div style={{ padding: '20px 24px 10px', borderBottom: '1px solid var(--border)' }}>
+          <h3>
+            <Calendar size={18} className="text-primary" />
+            <span>Horarios Registrados</span>
+          </h3>
+        </div>
 
         {loadingHorarios ? (
-          <p>Cargando horarios...</p>
+          <div className="empty-state">
+            <Clock size={32} className="empty-state-icon" />
+            <p>Cargando horarios...</p>
+          </div>
         ) : errorHorarios ? (
-          <p className="error">{errorHorarios}</p>
+          <div style={{ padding: '20px' }}>
+            <div className="alert-error">{errorHorarios}</div>
+          </div>
         ) : horarios.length === 0 ? (
-          <p className="empty-state">No hay horarios registrados todavía.</p>
+          <div className="empty-state">
+            <Clock size={32} className="empty-state-icon" />
+            <p>No hay horarios registrados todavía.</p>
+          </div>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Día</th>
-                <th>Hora inicio</th>
-                <th>Hora fin</th>
-                <th>Estado</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {horarios.map((horario) => (
-                <tr key={horario.idHorario}>
-                  <td>{nombreDia(horario.diaSemana)}</td>
-                  <td>{horario.horaInicio}</td>
-                  <td>{horario.horaFin}</td>
-                  <td>{horario.activo ? 'Activo' : 'Inactivo'}</td>
-                  <td>
-                    {horario.activo && (
-                      <button type="button" onClick={() => handleDesactivar(horario.idHorario)}>
-                        Desactivar
-                      </button>
-                    )}
-                  </td>
+          <div className="table-container" style={{ border: 'none', borderRadius: '12px' }}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Día</th>
+                  <th>Hora inicio</th>
+                  <th>Hora fin</th>
+                  <th>Estado</th>
+                  <th style={{ textAlign: 'right' }}>Acción</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {horarios.map((horario) => (
+                  <tr key={horario.idHorario}>
+                    <td>
+                      <span className="badge badge-neutral">
+                        <Calendar size={12} />
+                        <span>{nombreDia(horario.diaSemana)}</span>
+                      </span>
+                    </td>
+                    <td>{horario.horaInicio}</td>
+                    <td>{horario.horaFin}</td>
+                    <td>
+                      <span className={horario.activo ? 'badge badge-atendida' : 'badge badge-cancelada'}>
+                        {horario.activo ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                        <span>{horario.activo ? 'Activo' : 'Inactivo'}</span>
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      {horario.activo && (
+                        <button
+                          type="button"
+                          className="button-outline-danger button-sm"
+                          onClick={() => handleDesactivar(horario.idHorario)}
+                        >
+                          <XCircle size={13} />
+                          <span>Desactivar</span>
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </section>

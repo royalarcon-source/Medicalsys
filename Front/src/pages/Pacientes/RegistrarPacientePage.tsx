@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { crearPaciente } from '../../services/pacientesService';
+import { UserPlus, Save, Users, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const SEXOS = [
-  { value: '', label: 'Seleccionar...' },
+  { value: '', label: 'Seleccionar sexo...' },
   { value: 'M', label: 'Masculino' },
   { value: 'F', label: 'Femenino' },
 ];
@@ -86,33 +87,47 @@ export default function RegistrarPacientePage() {
   };
 
   return (
-    <section className="page">
+    <section className="page registrar-paciente-page">
       <div className="card">
-        <h2>Registrar paciente</h2>
-        <p className="hint">
-          El paciente debe tener primero un usuario con rol PACIENTE (ver "Registrar usuario").
-          Luego completa aquí su ficha clínica básica indicando el ID de ese usuario.
-        </p>
+        <div className="page-header">
+          <div>
+            <h2>
+              <UserPlus size={22} className="text-primary" />
+              <span>Registrar Ficha de Paciente</span>
+            </h2>
+            <p className="page-header-subtitle">
+              El paciente debe tener primero un usuario con rol PACIENTE. Luego completa aquí su ficha clínica básica.
+            </p>
+          </div>
+          <Link to="/pacientes" style={{ textDecoration: 'none' }}>
+            <button type="button" className="button-secondary">
+              <Users size={16} />
+              <span>Ver Pacientes</span>
+            </button>
+          </Link>
+        </div>
 
-        <form onSubmit={handleSubmit} className="form">
+        <form onSubmit={handleSubmit} className="form" style={{ marginTop: '12px' }}>
           <div className="form-row">
             <label className="form-field">
-              <span className="label">ID de usuario (rol PACIENTE)</span>
+              <span className="label">ID de usuario (rol PACIENTE) *</span>
               <input
                 type="number"
                 min={1}
                 value={form.idUsuario}
                 onChange={actualizarCampo('idUsuario')}
+                placeholder="Ej. 5"
                 required
               />
             </label>
 
             <label className="form-field">
-              <span className="label">CI</span>
+              <span className="label">Documento CI *</span>
               <input
                 type="text"
                 value={form.documentoIdentidad}
                 onChange={actualizarCampo('documentoIdentidad')}
+                placeholder="Ej. 12345678"
                 required
               />
             </label>
@@ -120,7 +135,7 @@ export default function RegistrarPacientePage() {
 
           <div className="form-row">
             <label className="form-field">
-              <span className="label">Fecha de nacimiento</span>
+              <span className="label">Fecha de nacimiento *</span>
               <input
                 type="date"
                 value={form.fechaNacimiento}
@@ -144,17 +159,23 @@ export default function RegistrarPacientePage() {
           <div className="form-row">
             <label className="form-field">
               <span className="label">Dirección</span>
-              <input type="text" value={form.direccion} onChange={actualizarCampo('direccion')} />
+              <input
+                type="text"
+                value={form.direccion}
+                onChange={actualizarCampo('direccion')}
+                placeholder="Calle, número, ciudad..."
+              />
             </label>
           </div>
 
           <div className="form-row">
             <label className="form-field">
-              <span className="label">Contacto de emergencia</span>
+              <span className="label">Contacto de emergencia (Nombre)</span>
               <input
                 type="text"
                 value={form.contactoEmergencia}
                 onChange={actualizarCampo('contactoEmergencia')}
+                placeholder="Nombre del familiar o contacto"
               />
             </label>
 
@@ -164,16 +185,30 @@ export default function RegistrarPacientePage() {
                 type="tel"
                 value={form.telefonoEmergencia}
                 onChange={actualizarCampo('telefonoEmergencia')}
+                placeholder="Ej. 098123456"
               />
             </label>
           </div>
 
-          {error && <p className="error">{error}</p>}
-          {exito && <p className="success">{exito}</p>}
+          {error && (
+            <div className="alert-error">
+              <AlertCircle size={16} />
+              <span>{error}</span>
+            </div>
+          )}
+          {exito && (
+            <div className="alert-success">
+              <CheckCircle2 size={16} />
+              <span>{exito}</span>
+            </div>
+          )}
 
-          <button type="submit" disabled={loading}>
-            {loading ? 'Registrando...' : 'Registrar paciente'}
-          </button>
+          <div className="form-actions">
+            <button type="submit" disabled={loading}>
+              <Save size={16} />
+              <span>{loading ? 'Registrando...' : 'Registrar paciente'}</span>
+            </button>
+          </div>
         </form>
       </div>
     </section>
