@@ -1,5 +1,20 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import {
+  Activity,
+  Users,
+  UserPlus,
+  FileText,
+  Calendar,
+  Clock,
+  Building2,
+  Stethoscope,
+  Pill,
+  Shield,
+  LogOut,
+  LogIn,
+  UserCheck,
+} from 'lucide-react';
 
 export default function Nav() {
   const { token, usuario, logout } = useAuth();
@@ -12,97 +27,115 @@ export default function Nav() {
 
   return (
     <nav className="nav" aria-label="Navegación principal">
-      <div className="nav-links">
-        {token && (
-          <NavLink to="/pacientes" end>
-            Pacientes
-          </NavLink>
-        )}
-
-        {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA') && (
-          <NavLink to="/pacientes/nuevo" end>
-            Registrar paciente
-          </NavLink>
-        )}
-
-        {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA' || usuario?.rol === 'MEDICO') && (
-          <NavLink to="/historia-clinica" end>
-            Historia Clínica
-          </NavLink>
-        )}
-
-        {token && usuario?.rol === 'ADMINISTRADOR' && (
-          <NavLink to="/registrar-usuario" end>
-            Registrar usuario
-          </NavLink>
-        )}
-
-        {token && usuario?.rol === 'ADMINISTRADOR' && (
-          <NavLink to="/medicos/nuevo" end>
-            Registrar médico
-          </NavLink>
-        )}
-
-        {token && (
-          <NavLink to="/disponibilidad" end>
-            Disponibilidad
-          </NavLink>
-        )}
-
-        {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'MEDICO') && (
-          <NavLink to="/disponibilidad/nueva" end>
-            Registrar disponibilidad
-          </NavLink>
-        )}
-
-        {token && (
-          <NavLink to="/citas" end>
-            Citas
-          </NavLink>
-        )}
-
-        {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA' || usuario?.rol === 'MEDICO') && (
-          <NavLink to="/consultas/cola" end>
-            Cola de Espera
-          </NavLink>
-        )}
-
-        {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA' || usuario?.rol === 'MEDICO') && (
-          <NavLink to="/consultorios" end>
-            Consultorios
-          </NavLink>
-        )}
-
-        {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'MEDICO' || usuario?.rol === 'PACIENTE') && (
-          <NavLink to="/diagnosticos" end>
-            Diagnósticos
-          </NavLink>
-        )}
-
-        {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'MEDICO' || usuario?.rol === 'PACIENTE') && (
-          <NavLink to="/tratamientos" end>
-            Tratamientos
-          </NavLink>
-        )}
-
-        <NavLink to="/roles" end>
-          Roles
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <NavLink to={token ? "/pacientes" : "/login"} className="nav-brand">
+          <div className="nav-brand-icon">
+            <Activity size={20} strokeWidth={2.5} />
+          </div>
+          <span>MedicalSys</span>
         </NavLink>
+
+        <div className="nav-links">
+          {token && (
+            <NavLink to="/pacientes" end>
+              <Users size={16} />
+              <span>Pacientes</span>
+            </NavLink>
+          )}
+
+          {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA') && (
+            <NavLink to="/pacientes/nuevo" end>
+              <UserPlus size={16} />
+              <span>Registrar paciente</span>
+            </NavLink>
+          )}
+
+          {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA' || usuario?.rol === 'MEDICO') && (
+            <NavLink to="/historia-clinica" end>
+              <FileText size={16} />
+              <span>Historia Clínica</span>
+            </NavLink>
+          )}
+
+          {token && usuario?.rol === 'ADMINISTRADOR' && (
+            <NavLink to="/registrar-usuario" end>
+              <UserCheck size={16} />
+              <span>Registrar usuario</span>
+            </NavLink>
+          )}
+
+          {token && usuario?.rol === 'ADMINISTRADOR' && (
+            <NavLink to="/medicos/nuevo" end>
+              <Stethoscope size={16} />
+              <span>Registrar médico</span>
+            </NavLink>
+          )}
+
+          {token && (
+            <NavLink to="/disponibilidad" end>
+              <Clock size={16} />
+              <span>Disponibilidad</span>
+            </NavLink>
+          )}
+
+          {token && (
+            <NavLink to="/citas" end>
+              <Calendar size={16} />
+              <span>Citas</span>
+            </NavLink>
+          )}
+
+          {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA' || usuario?.rol === 'MEDICO') && (
+            <NavLink to="/consultas/cola" end>
+              <Users size={16} />
+              <span>Cola de Espera</span>
+            </NavLink>
+          )}
+
+          {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'RECEPCIONISTA' || usuario?.rol === 'MEDICO') && (
+            <NavLink to="/consultorios" end>
+              <Building2 size={16} />
+              <span>Consultorios</span>
+            </NavLink>
+          )}
+
+          {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'MEDICO' || usuario?.rol === 'PACIENTE') && (
+            <NavLink to="/diagnosticos" end>
+              <FileText size={16} />
+              <span>Diagnósticos</span>
+            </NavLink>
+          )}
+
+          {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'MEDICO' || usuario?.rol === 'PACIENTE') && (
+            <NavLink to="/tratamientos" end>
+              <Pill size={16} />
+              <span>Tratamientos</span>
+            </NavLink>
+          )}
+
+          <NavLink to="/roles" end>
+            <Shield size={16} />
+            <span>Roles</span>
+          </NavLink>
+        </div>
       </div>
 
       <div className="nav-account">
         {token && usuario ? (
           <>
-            <span className="label">
-              {usuario.nombres} · {usuario.rol}
-            </span>
-            <button type="button" onClick={handleLogout}>
-              Salir
+            <div className="nav-user-badge">
+              <span>{usuario.nombres}</span>
+              <span className="nav-user-role">{usuario.rol}</span>
+            </div>
+            <button type="button" className="button-secondary button-sm" onClick={handleLogout} title="Cerrar sesión">
+              <LogOut size={15} />
+              <span>Salir</span>
             </button>
           </>
         ) : (
-          <NavLink to="/login" end>
-            Iniciar sesión
+          <NavLink to="/login" className="btn btn-primary button-sm" end>
+            <LogIn size={15} />
+            <span>Iniciar sesión</span>
           </NavLink>
         )}
       </div>
