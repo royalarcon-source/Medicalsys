@@ -14,6 +14,8 @@ import ConsultoriosPage from '../pages/Consultorios/ConsultoriosPage';
 import RegistrarAtencionPage from '../pages/Consultas/RegistrarAtencionPage';
 import ColaAtencionPage from '../pages/Consultas/ColaAtencionPage';
 import RegistrarConsultaPage from '../pages/Consultas/RegistrarConsultaPage';
+import DiagnosticosPage from '../pages/Diagnosticos/DiagnosticosPage';
+import TratamientosPage from '../pages/Tratamientos/TratamientosPage';
 import RequireAuth from './RequireAuth';
 
 export default function AppRoutes() {
@@ -122,6 +124,22 @@ export default function AppRoutes() {
         element={
           <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO']}>
             <RegistrarConsultaPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/diagnosticos"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'MEDICO', 'PACIENTE']}>
+            <DiagnosticosPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/tratamientos"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'MEDICO', 'PACIENTE']}>
+            <TratamientosPage />
           </RequireAuth>
         }
       />

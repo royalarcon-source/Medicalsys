@@ -36,19 +36,6 @@ export default function ReservarCitaPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function inicializar() {
-      try {
-        const resEsp = await listarEspecialidades();
-        setEspecialidades(resEsp.especialidades || []);
-      } catch (err) {
-        console.error('Error al cargar especialidades:', err);
-      }
-      cargarDisponibilidad();
-    }
-    inicializar();
-  }, []);
-
   const cargarDisponibilidad = async (idEspecialidad?: number) => {
     setCargandoHorarios(true);
     setError(null);
@@ -61,6 +48,19 @@ export default function ReservarCitaPage() {
       setCargandoHorarios(false);
     }
   };
+
+  useEffect(() => {
+    async function inicializar() {
+      try {
+        const resEsp = await listarEspecialidades();
+        setEspecialidades(resEsp.especialidades || []);
+      } catch (err) {
+        console.error('Error al cargar especialidades:', err);
+      }
+      await cargarDisponibilidad();
+    }
+    inicializar();
+  }, []);
 
   const handleCambioEspecialidad = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import {
   buscarDisponibilidad,
@@ -45,32 +45,33 @@ export default function RegistrarDisponibilidadPage() {
   const [loadingHorarios, setLoadingHorarios] = useState(false);
   const [errorHorarios, setErrorHorarios] = useState<string | null>(null);
 
-  const cargarHorarios = async (idMedico?: number) => {
-    if (esAdministrador && !idMedico) {
-      setHorarios([]);
-      return;
-    }
+  const cargarHorarios = useCallback(
+    async (idMedico?: number) => {
+      if (esAdministrador && !idMedico) {
+        setHorarios([]);
+        return;
+      }
 
-    setLoadingHorarios(true);
-    setErrorHorarios(null);
+      setLoadingHorarios(true);
+      setErrorHorarios(null);
 
-    try {
-      const respuesta = await buscarDisponibilidad(idMedico ? { idMedico } : {});
-      setHorarios(respuesta.resultados);
-    } catch (err) {
-      setErrorHorarios(err instanceof Error ? err.message : 'No se pudieron cargar los horarios.');
-    } finally {
-      setLoadingHorarios(false);
-    }
-  };
+      try {
+        const respuesta = await buscarDisponibilidad(idMedico ? { idMedico } : {});
+        setHorarios(respuesta.resultados);
+      } catch (err) {
+        setErrorHorarios(err instanceof Error ? err.message : 'No se pudieron cargar los horarios.');
+      } finally {
+        setLoadingHorarios(false);
+      }
+    },
+    [esAdministrador],
+  );
 
   useEffect(() => {
     if (!esAdministrador) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial de resultados, no deriva estado de props
-      cargarHorarios();
+      void cargarHorarios();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [esAdministrador]);
+  }, [esAdministrador, cargarHorarios]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();

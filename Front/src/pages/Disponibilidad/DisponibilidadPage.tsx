@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { buscarDisponibilidad, type DisponibilidadResultado } from '../../services/disponibilidadService';
 import { listarEspecialidades, type Especialidad } from '../../services/especialidadesService';
 
@@ -26,7 +26,7 @@ export default function DisponibilidadPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const ejecutarBusqueda = async () => {
+  const ejecutarBusqueda = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -47,17 +47,15 @@ export default function DisponibilidadPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [diaSemana, idEspecialidad, idMedico]);
 
   useEffect(() => {
     listarEspecialidades()
       .then((respuesta) => setEspecialidades(respuesta.especialidades))
       .catch(() => setEspecialidades([]));
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial de resultados, no deriva estado de props
-    ejecutarBusqueda();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    void ejecutarBusqueda();
+  }, [ejecutarBusqueda]);
 
   return (
     <section className="page">
