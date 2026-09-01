@@ -1,0 +1,14 @@
+{
+  "name": "medicalsys-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix Back && npm install --prefix Front",
+    "dev:back": "npm run dev --prefix Back",
+    "dev:front": "npm run dev --prefix Front",
+    "build:back": "npm run build --prefix Back",
+    "build:front": "npm run build --prefix Front",
+    "build": "npm run build:back && npm run build:front"
+  }
+}
+

@@ -1,0 +1,33 @@
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+    // File Layout
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Environment Settings — backend Node + CommonJS
+    // node16 + package.json sin "type" => emite CommonJS (TS 7 eliminó "module": "commonjs" + "moduleResolution": "node")
+    "module": "node16",
+    "moduleResolution": "node16",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    // TypeORM necesita decoradores legacy + metadata en runtime
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // Other Outputs
+    "sourceMap": true,
+
+    // Recommended Options
+    "strict": true,
+    "strictPropertyInitialization": false, // las entidades TypeORM no inicializan sus columnas
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

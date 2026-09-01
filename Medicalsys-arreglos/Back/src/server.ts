@@ -1,0 +1,50 @@
+import "reflect-metadata";
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import { AppDataSource } from "./config/database";
+import authRoutes from "./routes/auth.routes";
+import medicoRoutes from "./routes/medico.routes";
+import especialidadRoutes from "./routes/especialidad.routes";
+import { errorHandler } from "./middlewares/errorHandler";
+import pacienteRoutes from "./routes/paciente.routes";
+import rolRoutes from "./routes/rol.routes";
+import disponibilidadRoutes from "./routes/disponibilidad.routes";
+import citasRoutes from "./routes/citas.routes";
+import consultoriosRoutes from "./routes/consultorios.routes";
+import consultasRoutes from "./routes/consultas.routes";
+import historiaClinicaRoutes from "./routes/historia-clinica.routes";
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.use("/api/auth", authRoutes);
+app.use("/api/medicos", medicoRoutes);
+app.use("/api/especialidades", especialidadRoutes);
+app.use("/api/pacientes", pacienteRoutes);
+app.use("/api/roles", rolRoutes);
+app.use("/api/disponibilidad", disponibilidadRoutes);
+app.use("/api/citas", citasRoutes);
+app.use("/api/consultorios", consultoriosRoutes);
+app.use("/api/consultas", consultasRoutes);
+app.use("/api/historia-clinica", historiaClinicaRoutes);
+app.use(errorHandler);
+
+import { seedDatabase } from "./config/seed";
+
+const PORT = process.env.PORT || 3000;
+
+AppDataSource.initialize()
+  .then(async () => {
+    console.log("Conexión a PostgreSQL establecida exitosamente.");
+    await seedDatabase();
+    app.listen(PORT, () => {
+      console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Error al conectar con la base de datos:", error);
+  });
