@@ -16,6 +16,7 @@ import ColaAtencionPage from '../pages/Consultas/ColaAtencionPage';
 import RegistrarConsultaPage from '../pages/Consultas/RegistrarConsultaPage';
 import DiagnosticosPage from '../pages/Diagnosticos/DiagnosticosPage';
 import TratamientosPage from '../pages/Tratamientos/TratamientosPage';
+import ConsentimientosPage from '../pages/Consentimientos/ConsentimientosPage';
 import RequireAuth from './RequireAuth';
 
 export default function AppRoutes() {
@@ -140,6 +141,14 @@ export default function AppRoutes() {
         element={
           <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'MEDICO', 'PACIENTE']}>
             <TratamientosPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/consentimientos"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR', 'MEDICO', 'PACIENTE']}>
+            <ConsentimientosPage />
           </RequireAuth>
         }
       />
