@@ -2,7 +2,7 @@ import { AppDataSource } from "../config/database";
 import { Consentimiento } from "../entities/Consentimiento.entity"; // o "../entities/Consentimiento" si no lleva .entity
 import { Paciente } from "../entities/Paciente.entity";
 import { Consulta } from "../entities/Consulta.entity";
-
+//agregado
 export class ConsentimientoService {
   private consentimientoRepo = AppDataSource.getRepository(Consentimiento);
   private pacienteRepo = AppDataSource.getRepository(Paciente);
