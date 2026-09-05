@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { AppDataSource } from "./config/database";
+import consentimientosRoutes from "./routes/consentimientos.routes";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 
 app.use("/api/medicos", medicoRoutes);
 app.use("/api/especialidades", especialidadRoutes);
+app.use("/api/consentimientos", consentimientosRoutes);
 
 app.use(errorHandler);
 
