@@ -1,10 +1,12 @@
 import { AppDataSource } from "../config/database";
-import { Consentimiento } from "../entities/Consentimiento";
-import { Paciente } from "../entities/Paciente";
+import { Consentimiento } from "../entities/Consentimiento.entity"; // o "../entities/Consentimiento" si no lleva .entity
+import { Paciente } from "../entities/Paciente.entity";
+import { Consulta } from "../entities/Consulta.entity";
 
 export class ConsentimientoService {
   private consentimientoRepo = AppDataSource.getRepository(Consentimiento);
   private pacienteRepo = AppDataSource.getRepository(Paciente);
+  private consultaRepo = AppDataSource.getRepository(Consulta);
 
   async emitirConsentimiento(datos: {
     idPaciente: number;
@@ -13,7 +15,7 @@ export class ConsentimientoService {
     version: string;
   }) {
     const paciente = await this.pacienteRepo.findOne({
-      where: { idPaciente: datos.idPaciente },
+      where: { idPaciente: datos.idPaciente } as any,
     });
 
     if (!paciente) {
@@ -22,9 +24,16 @@ export class ConsentimientoService {
       throw error;
     }
 
+    let consulta: Consulta | null = null;
+    if (datos.idConsulta) {
+      consulta = await this.consultaRepo.findOne({
+        where: { idConsulta: datos.idConsulta } as any,
+      });
+    }
+
     const nuevo = this.consentimientoRepo.create({
-      idPaciente: datos.idPaciente,
-      idConsulta: datos.idConsulta || null,
+      paciente,
+      consulta: consulta || null,
       tipo: datos.tipo,
       version: datos.version,
       estado: "PENDIENTE",
@@ -36,7 +45,7 @@ export class ConsentimientoService {
 
   async firmarConsentimiento(idConsentimiento: number, firmadoPor: string) {
     const consentimiento = await this.consentimientoRepo.findOne({
-      where: { idConsentimiento },
+      where: { idConsentimiento } as any,
     });
 
     if (!consentimiento) {
@@ -60,7 +69,8 @@ export class ConsentimientoService {
 
   async obtenerPorPaciente(idPaciente: number) {
     return await this.consentimientoRepo.find({
-      where: { idPaciente },
+      where: { paciente: { idPaciente } } as any,
+      relations: ["paciente", "consulta"],
       order: { fechaEmision: "DESC" },
     });
   }
