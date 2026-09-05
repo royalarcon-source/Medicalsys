@@ -95,6 +95,23 @@ async function validarAccesoConsulta(
 }
 
 function respuestaDocumento(documento: Documento) {
+  let format: string | undefined = undefined;
+  if (documento.nombreArchivo && documento.nombreArchivo.includes(".")) {
+    const ext = documento.nombreArchivo.split(".").pop()?.toLowerCase();
+    if (ext) format = ext;
+  }
+  if (!format && documento.mimeType?.toLowerCase().includes("pdf")) {
+    format = "pdf";
+  }
+
+  const isPdf = documento.mimeType?.toLowerCase().includes("pdf") || format === "pdf";
+
+  const url = cloudinary.url(documento.storageKey, {
+    secure: true,
+    resource_type: isPdf ? "image" : "auto",
+    format,
+  });
+
   return {
     idDocumento: documento.idDocumento,
     idConsulta: documento.consulta?.idConsulta ?? null,
@@ -106,7 +123,7 @@ function respuestaDocumento(documento: Documento) {
     storageKey: documento.storageKey,
     fechaSubida: documento.fechaSubida,
     activo: documento.activo,
-    url: cloudinary.url(documento.storageKey, { secure: true, resource_type: "auto" }),
+    url,
   };
 }
 

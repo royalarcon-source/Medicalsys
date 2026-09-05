@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { DocumentoItem } from '../services/documentosService';
 import {
   X,
@@ -7,6 +7,7 @@ import {
   Download,
   ExternalLink,
   AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 
 interface Props {
@@ -15,6 +16,14 @@ interface Props {
 }
 
 export default function ModalVisorDocumento({ documento, onClose }: Props) {
+  const [errorCarga, setErrorCarga] = useState(false);
+  const [usarVisorGoogle, setUsarVisorGoogle] = useState(false);
+
+  useEffect(() => {
+    setErrorCarga(false);
+    setUsarVisorGoogle(false);
+  }, [documento]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -43,6 +52,9 @@ export default function ModalVisorDocumento({ documento, onClose }: Props) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
+  // Google Docs Viewer fallback for PDFs in case of strict CORS / sandbox
+  const urlGoogleDocs = `https://docs.google.com/viewer?url=${encodeURIComponent(documento.url)}&embedded=true`;
+
   return (
     <div
       style={{
@@ -57,7 +69,7 @@ export default function ModalVisorDocumento({ documento, onClose }: Props) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
+        padding: '16px',
       }}
       onClick={onClose}
     >
@@ -66,8 +78,8 @@ export default function ModalVisorDocumento({ documento, onClose }: Props) {
           background: 'var(--bg-surface, #ffffff)',
           borderRadius: '12px',
           width: '100%',
-          maxWidth: '900px',
-          maxHeight: '92vh',
+          maxWidth: '950px',
+          maxHeight: '94vh',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
@@ -79,12 +91,14 @@ export default function ModalVisorDocumento({ documento, onClose }: Props) {
         {/* Cabecera */}
         <div
           style={{
-            padding: '16px 20px',
+            padding: '14px 20px',
             borderBottom: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             background: 'var(--bg-page)',
+            flexWrap: 'wrap',
+            gap: '10px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
@@ -102,7 +116,7 @@ export default function ModalVisorDocumento({ documento, onClose }: Props) {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  maxWidth: '500px',
+                  maxWidth: '450px',
                 }}
               >
                 {documento.nombreArchivo}
@@ -119,14 +133,27 @@ export default function ModalVisorDocumento({ documento, onClose }: Props) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {esPdf && (
+              <button
+                type="button"
+                className="button-secondary button-sm"
+                onClick={() => setUsarVisorGoogle(!usarVisorGoogle)}
+                style={{ fontSize: '12px', padding: '4px 8px' }}
+                title="Alternar entre visor directo y visor alternativo"
+              >
+                <RefreshCw size={12} />
+                <span>{usarVisorGoogle ? 'Visor Directo' : 'Visor Google'}</span>
+              </button>
+            )}
+
             <a
               href={documento.url}
               target="_blank"
               rel="noopener noreferrer"
               download={documento.nombreArchivo}
               style={{ textDecoration: 'none' }}
-              title="Descargar o abrir en pestaña nueva"
+              title="Abrir en pestaña nueva"
             >
               <button
                 type="button"
@@ -134,15 +161,16 @@ export default function ModalVisorDocumento({ documento, onClose }: Props) {
                 style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
               >
                 <ExternalLink size={14} />
-                <span>Abrir enlace</span>
+                <span>Abrir en Pestaña</span>
               </button>
             </a>
+
             <button
               type="button"
               onClick={onClose}
               className="button-secondary button-sm"
               style={{ padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              title="Cerrar vista previa (Esc)"
+              title="Cerrar (Esc)"
             >
               <X size={18} />
             </button>
@@ -159,17 +187,41 @@ export default function ModalVisorDocumento({ documento, onClose }: Props) {
             alignItems: 'center',
             justifyContent: 'center',
             background: 'var(--bg-subtle, #f8fafc)',
-            minHeight: '400px',
+            minHeight: '450px',
           }}
         >
-          {esImagen ? (
+          {errorCarga ? (
+            <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
+              <AlertCircle size={40} style={{ margin: '0 auto 10px', opacity: 0.6, color: 'var(--danger)' }} />
+              <p style={{ fontWeight: 600, fontSize: '15px', margin: '0 0 6px 0', color: 'var(--text-main)' }}>
+                No se pudo renderizar la vista previa directa.
+              </p>
+              <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>
+                Podés acceder al archivo o descargarlo con los botones a continuación.
+              </p>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                <a
+                  href={documento.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={documento.nombreArchivo}
+                >
+                  <button type="button" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Download size={16} />
+                    <span>Descargar Archivo</span>
+                  </button>
+                </a>
+              </div>
+            </div>
+          ) : esImagen ? (
             <div style={{ textAlign: 'center', maxWidth: '100%' }}>
               <img
                 src={documento.url}
                 alt={documento.nombreArchivo}
+                onError={() => setErrorCarga(true)}
                 style={{
                   maxWidth: '100%',
-                  maxHeight: '70vh',
+                  maxHeight: '74vh',
                   objectFit: 'contain',
                   borderRadius: '8px',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
@@ -178,11 +230,12 @@ export default function ModalVisorDocumento({ documento, onClose }: Props) {
             </div>
           ) : esPdf ? (
             <iframe
-              src={documento.url}
+              src={usarVisorGoogle ? urlGoogleDocs : documento.url}
               title={documento.nombreArchivo}
+              onError={() => setErrorCarga(true)}
               style={{
                 width: '100%',
-                height: '70vh',
+                height: '74vh',
                 border: 'none',
                 borderRadius: '8px',
                 background: '#ffffff',
@@ -193,7 +246,7 @@ export default function ModalVisorDocumento({ documento, onClose }: Props) {
             <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
               <AlertCircle size={40} style={{ margin: '0 auto 10px', opacity: 0.6 }} />
               <p style={{ fontWeight: 600, fontSize: '15px', margin: '0 0 6px 0' }}>
-                Vista previa no disponible para este tipo de archivo.
+                Vista previa no soportada para este formato.
               </p>
               <p style={{ fontSize: '13px', margin: '0 0 16px 0' }}>
                 Podés descargarlo o abrirlo directamente con el botón de abajo.
