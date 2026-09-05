@@ -91,9 +91,6 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "DISPONIBILIDAD_VER",
     "CONSULTORIO_VER",
     "CONSULTORIO_GESTIONAR",
-    // HU-24/HU-25: recepción digitaliza/sube exámenes físicos que trae el paciente
-    "DOCUMENTO_SUBIR",
-    "DOCUMENTO_VER",
   ],
   PACIENTE: [
     "ESPECIALIDAD_LISTAR",

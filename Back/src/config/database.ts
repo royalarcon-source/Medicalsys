@@ -1,7 +1,29 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
-import path from "path";
+import { Campana } from "../entities/Campana.entity";
+import { Cita } from "../entities/Cita.entity";
+import { Consentimiento } from "../entities/Consentimiento.entity";
+import { Consulta } from "../entities/Consulta.entity";
+import { Consultorio } from "../entities/Consultorio.entity";
+import { DetalleFactura } from "../entities/DetalleFactura.entity";
+import { Diagnostico } from "../entities/Diagnostico.entity";
+import { Documento } from "../entities/Documento.entity";
+import { Especialidad } from "../entities/Especialidad.entity";
+import { Factura } from "../entities/Factura.entity";
+import { HistoriaClinica } from "../entities/HistoriaClinica.entity";
+import { HorarioDisponibilidad } from "../entities/HorarioDisponibilidad.entity";
+import { Medico } from "../entities/Medico.entity";
+import { Notificacion } from "../entities/Notificacion.entity";
+import { Paciente } from "../entities/Paciente.entity";
+import { Promocion } from "../entities/Promocion.entity";
+import { Rol } from "../entities/Rol.entity";
+import { Servicio } from "../entities/Servicio.entity";
+import { Tratamiento } from "../entities/Tratamiento.entity";
+import { Usuario } from "../entities/Usuario.entity";
+import { InitialSchemaBaseline1787529278750 } from "../migrations/1787529278750-InitialSchemaBaseline";
+import { CreateDocumentoTable1788566400000 } from "../migrations/1788566400000-CreateDocumentoTable";
+import { AddConsultaToDocumento1788566500000 } from "../migrations/1788566500000-AddConsultaToDocumento";
 
 dotenv.config();
 
@@ -13,9 +35,6 @@ function env(key: string, fallback?: string): string {
   }
   return value;
 }
-
-// Resuelve rutas desde este archivo, así funciona igual con ts-node (.ts) que compilado (.js)
-const extension = path.extname(__filename); // ".ts" o ".js"
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -30,6 +49,15 @@ export const AppDataSource = new DataSource({
   {
     rejectUnauthorized: false,
   },
-  entities: [path.join(__dirname, "..", "entities", `*.entity${extension}`)],
-  migrations: [path.join(__dirname, "..", "migrations", `*${extension}`)],
+  entities: [
+    Campana, Cita, Consentimiento, Consulta, Consultorio, DetalleFactura,
+    Diagnostico, Documento, Especialidad, Factura, HistoriaClinica,
+    HorarioDisponibilidad, Medico, Notificacion, Paciente, Promocion, Rol,
+    Servicio, Tratamiento, Usuario,
+  ],
+  migrations: [
+    InitialSchemaBaseline1787529278750,
+    CreateDocumentoTable1788566400000,
+    AddConsultaToDocumento1788566500000,
+  ],
 });

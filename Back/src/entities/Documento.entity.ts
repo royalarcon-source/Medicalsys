@@ -8,6 +8,7 @@ import {
 } from "typeorm";
 import { Paciente } from "./Paciente.entity";
 import { HistoriaClinica } from "./HistoriaClinica.entity";
+import { Consulta } from "./Consulta.entity";
 
 @Entity({ name: "documento" })
 export class Documento {
@@ -21,6 +22,10 @@ export class Documento {
   @ManyToOne(() => HistoriaClinica, { nullable: true })
   @JoinColumn({ name: "id_historia" })
   historia: HistoriaClinica | null;
+
+  @ManyToOne(() => Consulta, { nullable: true })
+  @JoinColumn({ name: "id_consulta" })
+  consulta: Consulta | null;
 
   @Column({ type: "varchar", length: 50 })
   tipo: string;
