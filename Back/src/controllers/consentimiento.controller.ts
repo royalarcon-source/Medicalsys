@@ -24,7 +24,7 @@ export class ConsentimientoController {
 
   firmarConsentimiento = async (req: Request, res: Response) => {
     try {
-      const idConsentimiento = parseInt(req.params.id, 10);
+      const idConsentimiento = Number(req.params.id);
       const { firmadoPor } = req.body;
       const consentimiento = await this.service.firmarConsentimiento(
         idConsentimiento,
@@ -41,7 +41,7 @@ export class ConsentimientoController {
 
   obtenerPorPaciente = async (req: Request, res: Response) => {
     try {
-      const idPaciente = parseInt(req.params.idPaciente, 10);
+      const idPaciente = Number(req.params.idPaciente);
       const consentimientos = await this.service.obtenerPorPaciente(idPaciente);
       return res.status(200).json(consentimientos);
     } catch (error: any) {
