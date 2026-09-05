@@ -10,6 +10,7 @@ import {
   Building2,
   Stethoscope,
   Pill,
+  FileCheck,
   Shield,
   LogOut,
   LogIn,
@@ -110,6 +111,13 @@ export default function Nav() {
             <NavLink to="/tratamientos" end>
               <Pill size={16} />
               <span>Tratamientos</span>
+            </NavLink>
+          )}
+
+          {token && (usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'MEDICO' || usuario?.rol === 'PACIENTE') && (
+            <NavLink to="/consentimientos" end>
+              <FileCheck size={16} />
+              <span>Consentimientos</span>
             </NavLink>
           )}
 
