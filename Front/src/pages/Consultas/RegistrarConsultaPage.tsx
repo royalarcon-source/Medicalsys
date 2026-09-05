@@ -6,6 +6,13 @@ import {
   type ConsultaItem,
 } from '../../services/consultasService';
 import {
+  listarDocumentos,
+  subirDocumento,
+  TIPOS_DOCUMENTO,
+  type DocumentoItem,
+} from '../../services/documentosService';
+import ModalVisorDocumento from '../../components/ModalVisorDocumento';
+import {
   Stethoscope,
   FileText,
   Building2,
@@ -17,6 +24,11 @@ import {
   User,
   Activity,
   AlertCircle,
+  Upload,
+  Paperclip,
+  Eye,
+  FileDown,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface DiagnosticoForm {
@@ -52,7 +64,29 @@ export default function RegistrarConsultaPage() {
 
   const [tratamientos, setTratamientos] = useState<TratamientoForm[]>([]);
 
+  // HU-24 & HU-25: Documentos médicos
+  const [documentos, setDocumentos] = useState<DocumentoItem[]>([]);
+  const [documentoSeleccionado, setDocumentoSeleccionado] = useState<DocumentoItem | null>(null);
+  const [cargandoDocs, setCargandoDocs] = useState(false);
+  const [subiendoDoc, setSubiendoDoc] = useState(false);
+  const [errorDoc, setErrorDoc] = useState<string | null>(null);
+  const [exitoDoc, setExitoDoc] = useState<string | null>(null);
+  const [tipoDoc, setTipoDoc] = useState<string>('LABORATORIO');
+  const [archivoDoc, setArchivoDoc] = useState<File | null>(null);
+
   const esAtendida = consulta?.estadoConsulta === 'ATENDIDA';
+
+  const cargarDocumentos = async (idConsulta: number) => {
+    try {
+      setCargandoDocs(true);
+      const res = await listarDocumentos(idConsulta);
+      setDocumentos(res.documentos || []);
+    } catch (err) {
+      console.error('Error al listar documentos:', err);
+    } finally {
+      setCargandoDocs(false);
+    }
+  };
 
   useEffect(() => {
     async function cargar() {
@@ -87,6 +121,8 @@ export default function RegistrarConsultaPage() {
             }))
           );
         }
+
+        await cargarDocumentos(Number(id));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al cargar la consulta.');
       } finally {
@@ -95,6 +131,57 @@ export default function RegistrarConsultaPage() {
     }
     cargar();
   }, [id]);
+
+  const handleSubirDocumento = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!consulta || !archivoDoc) {
+      setErrorDoc('Por favor seleccione un archivo para adjuntar.');
+      return;
+    }
+
+    if (archivoDoc.size > 10 * 1024 * 1024) {
+      setErrorDoc('El archivo supera el límite de 10 MB.');
+      return;
+    }
+
+    const extensionesPermitidas = ['.pdf', '.png', '.jpg', '.jpeg', '.webp'];
+    const nombre = archivoDoc.name.toLowerCase();
+    const esValido = extensionesPermitidas.some((ext) => nombre.endsWith(ext));
+    if (!esValido) {
+      setErrorDoc('Formato no permitido. Solo se aceptan archivos PDF, PNG, JPG o WEBP.');
+      return;
+    }
+
+    setSubiendoDoc(true);
+    setErrorDoc(null);
+    setExitoDoc(null);
+
+    try {
+      await subirDocumento(consulta.idConsulta, tipoDoc, archivoDoc);
+      setExitoDoc(`Documento "${archivoDoc.name}" subido exitosamente a Cloudinary.`);
+      setArchivoDoc(null);
+      const input = document.getElementById('input-archivo-doc') as HTMLInputElement | null;
+      if (input) input.value = '';
+      await cargarDocumentos(consulta.idConsulta);
+    } catch (err) {
+      setErrorDoc(err instanceof Error ? err.message : 'Error al subir el documento.');
+    } finally {
+      setSubiendoDoc(false);
+    }
+  };
+
+  const formatearTamano = (bytes: number) => {
+    if (!bytes || bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
+
+  const obtenerEtiquetaTipo = (tipo: string) => {
+    const item = TIPOS_DOCUMENTO.find((t) => t.value === tipo);
+    return item ? item.label : tipo;
+  };
 
   const handleAgregarDiagnostico = () => {
     setDiagnosticos([...diagnosticos, { codigo: '', descripcion: '', tipo: 'DEFINITIVO' }]);
@@ -546,6 +633,170 @@ export default function RegistrarConsultaPage() {
           </form>
         )}
       </div>
+
+      {/* HU-24 / HU-25: Sección de Gestión Documental Médica (Cloudinary) */}
+      <div className="card" style={{ marginTop: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
+          <div>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontSize: '1.1rem' }}>
+              <Paperclip size={20} className="text-primary" />
+              <span>Documentos Médicos y Exámenes Adjuntos (HU-24 / HU-25)</span>
+            </h3>
+            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+              Almacenamiento seguro en Cloudinary para exámenes de laboratorio, radiografías, ecografías e informes.
+            </p>
+          </div>
+          <span className="badge badge-confirmada" style={{ fontSize: '12px' }}>
+            {documentos.length} {documentos.length === 1 ? 'documento adjunto' : 'documentos adjuntos'}
+          </span>
+        </div>
+
+        {errorDoc && <div className="alert-error" style={{ marginBottom: '14px' }}>{errorDoc}</div>}
+        {exitoDoc && <div className="alert-success" style={{ marginBottom: '14px' }}>{exitoDoc}</div>}
+
+        {/* HU-24: Formulario de Subida de Archivos */}
+        <form
+          onSubmit={handleSubirDocumento}
+          style={{
+            background: 'var(--bg-page)',
+            padding: '16px',
+            borderRadius: '8px',
+            border: '1px solid var(--border)',
+            marginBottom: '20px',
+          }}
+        >
+          <span className="label" style={{ fontWeight: 600, marginBottom: '10px', display: 'block' }}>
+            Subir nuevo documento o examen a esta consulta:
+          </span>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <label className="form-field" style={{ flex: '1 1 200px', margin: 0 }}>
+              <span className="label" style={{ fontSize: '12px' }}>Categoría / Tipo *</span>
+              <select
+                value={tipoDoc}
+                onChange={(e) => setTipoDoc(e.target.value)}
+                disabled={subiendoDoc}
+              >
+                {TIPOS_DOCUMENTO.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="form-field" style={{ flex: '2 1 250px', margin: 0 }}>
+              <span className="label" style={{ fontSize: '12px' }}>Archivo (PDF, PNG, JPG, WEBP — Máx. 10 MB) *</span>
+              <input
+                id="input-archivo-doc"
+                type="file"
+                accept=".pdf,image/png,image/jpeg,image/webp"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    setArchivoDoc(e.target.files[0]);
+                  }
+                }}
+                disabled={subiendoDoc}
+              />
+            </label>
+
+            <button
+              type="submit"
+              disabled={subiendoDoc || !archivoDoc}
+              style={{ height: '42px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Upload size={16} />
+              <span>{subiendoDoc ? 'Subiendo a Cloudinary...' : 'Adjuntar Documento'}</span>
+            </button>
+          </div>
+        </form>
+
+        {/* HU-25: Lista de Documentos Consultados */}
+        <div>
+          <span className="label" style={{ fontWeight: 600, marginBottom: '10px', display: 'block' }}>
+            Documentos cargados en esta consulta:
+          </span>
+
+          {cargandoDocs ? (
+            <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)' }}>
+              Cargando documentos adjuntos...
+            </div>
+          ) : documentos.length === 0 ? (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '24px',
+                background: 'var(--bg-page)',
+                borderRadius: '8px',
+                border: '1px dashed var(--border)',
+                color: 'var(--text-muted)',
+                fontSize: '14px',
+              }}
+            >
+              <FileDown size={30} style={{ margin: '0 auto 8px', opacity: 0.5, display: 'block' }} />
+              No hay documentos ni exámenes adjuntos para esta consulta.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {documentos.map((doc) => {
+                const esPdf = doc.mimeType?.toLowerCase().includes('pdf');
+                return (
+                  <div
+                    key={doc.idDocumento}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '12px',
+                      padding: '12px 16px',
+                      background: 'var(--bg-page)',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      {esPdf ? (
+                        <FileText size={24} className="text-primary" />
+                      ) : (
+                        <ImageIcon size={24} className="text-primary" />
+                      )}
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: '14px' }}>
+                          {doc.nombreArchivo}
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', gap: '10px', marginTop: '2px' }}>
+                          <span className="badge badge-confirmada" style={{ fontSize: '11px', padding: '2px 6px' }}>
+                            {obtenerEtiquetaTipo(doc.tipo)}
+                          </span>
+                          <span>{formatearTamano(doc.tamanoBytes)}</span>
+                          <span>•</span>
+                          <span>{new Date(doc.fechaSubida).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setDocumentoSeleccionado(doc)}
+                      className="button-secondary button-sm"
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Eye size={14} />
+                      <span>Ver Vista Previa</span>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modal Visor de Documentos */}
+      <ModalVisorDocumento
+        documento={documentoSeleccionado}
+        onClose={() => setDocumentoSeleccionado(null)}
+      />
     </section>
   );
 }

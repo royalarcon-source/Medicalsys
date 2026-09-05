@@ -7,6 +7,11 @@ import {
   type HistoriaClinicaDetalleRespuesta,
 } from '../../services/historiaClinicaService';
 import {
+  listarDocumentos,
+  type DocumentoItem,
+} from '../../services/documentosService';
+import ModalVisorDocumento from '../../components/ModalVisorDocumento';
+import {
   FileText,
   ClipboardList,
   Search,
@@ -16,6 +21,9 @@ import {
   Activity,
   CheckCircle2,
   Clock,
+  Paperclip,
+  Eye,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 export default function HistoriaClinicaPage() {
@@ -28,6 +36,8 @@ export default function HistoriaClinicaPage() {
   const [error, setError] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
   const [resultado, setResultado] = useState<HistoriaClinicaDetalleRespuesta | null>(null);
+  const [documentosPorConsulta, setDocumentosPorConsulta] = useState<Record<number, DocumentoItem[]>>({});
+  const [documentoSeleccionado, setDocumentoSeleccionado] = useState<DocumentoItem | null>(null);
   const [abriendoHistoria, setAbriendoHistoria] = useState(false);
 
   const esAdminORecep =
@@ -39,10 +49,27 @@ export default function HistoriaClinicaPage() {
     setError(null);
     setMensajeExito(null);
     setResultado(null);
+    setDocumentosPorConsulta({});
 
     try {
       const data = await buscarHistoriaPorCI(documento.trim());
       setResultado(data);
+
+      if (data?.consultas && data.consultas.length > 0) {
+        try {
+          const resDocs = await listarDocumentos();
+          const agrupados: Record<number, DocumentoItem[]> = {};
+          resDocs.documentos.forEach((d) => {
+            if (d.idConsulta) {
+              if (!agrupados[d.idConsulta]) agrupados[d.idConsulta] = [];
+              agrupados[d.idConsulta].push(d);
+            }
+          });
+          setDocumentosPorConsulta(agrupados);
+        } catch (docErr) {
+          console.error('Error al cargar documentos adjuntos:', docErr);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al consultar historia clínica.');
     } finally {
@@ -329,6 +356,53 @@ export default function HistoriaClinicaPage() {
                               <strong>Observaciones adicionales:</strong> {c.observaciones}
                             </div>
                           )}
+
+                          {/* HU-25: Documentos Médicos y Exámenes Adjuntos */}
+                          {documentosPorConsulta[c.idConsulta] && documentosPorConsulta[c.idConsulta].length > 0 && (
+                            <div style={{ marginTop: '8px', borderTop: '1px dashed var(--border)', paddingTop: '10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: 'var(--text-main)', marginBottom: '8px' }}>
+                                <Paperclip size={14} className="text-primary" />
+                                <span>Documentos y Exámenes Adjuntos ({documentosPorConsulta[c.idConsulta].length}):</span>
+                              </div>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                {documentosPorConsulta[c.idConsulta].map((doc) => {
+                                  const esPdf = doc.mimeType?.toLowerCase().includes('pdf');
+                                  return (
+                                    <button
+                                      key={doc.idDocumento}
+                                      type="button"
+                                      onClick={() => setDocumentoSeleccionado(doc)}
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        background: 'var(--bg-page)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '6px',
+                                        padding: '6px 10px',
+                                        fontSize: '12px',
+                                        color: 'var(--text-main)',
+                                        cursor: 'pointer',
+                                      }}
+                                    >
+                                      {esPdf ? (
+                                        <FileText size={14} className="text-primary" />
+                                      ) : (
+                                        <ImageIcon size={14} className="text-primary" />
+                                      )}
+                                      <span style={{ fontWeight: 500, maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {doc.nombreArchivo}
+                                      </span>
+                                      <span className="badge badge-confirmada" style={{ fontSize: '10px', padding: '1px 5px' }}>
+                                        {doc.tipo}
+                                      </span>
+                                      <Eye size={12} style={{ opacity: 0.7 }} />
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -339,6 +413,12 @@ export default function HistoriaClinicaPage() {
           )}
         </>
       )}
+
+      {/* Modal Visor de Documentos */}
+      <ModalVisorDocumento
+        documento={documentoSeleccionado}
+        onClose={() => setDocumentoSeleccionado(null)}
+      />
     </section>
   );
 }
