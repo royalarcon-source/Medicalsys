@@ -16,7 +16,9 @@ import consultasRoutes from "./routes/consultas.routes";
 import historiaClinicaRoutes from "./routes/historia-clinica.routes";
 import diagnosticosRoutes from "./routes/diagnosticos.routes";
 import tratamientosRoutes from "./routes/tratamientos.routes";
-import documentosRoutes from "./routes/documentos.routes";
+import consentimientosRoutes from "./routes/consentimientos.routes";
+import documentosRoutes from "./routes/documentos.routes;
+  
 
 dotenv.config();
 
@@ -37,6 +39,7 @@ app.use("/api/historia-clinica", historiaClinicaRoutes);
 app.use("/api/diagnosticos", diagnosticosRoutes);
 app.use("/api/tratamientos", tratamientosRoutes);
 app.use("/api/documentos", documentosRoutes);
+app.use("/api/consentimientos", consentimientosRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
