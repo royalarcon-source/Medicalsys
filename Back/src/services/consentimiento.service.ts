@@ -70,7 +70,7 @@ export class ConsentimientoService {
   async obtenerPorPaciente(idPaciente: number) {
     return await this.consentimientoRepo.find({
       where: { paciente: { idPaciente } } as any,
-      relations: ["paciente", "consulta"],
+      relations: { paciente: true, consulta: true },
       order: { fechaEmision: "DESC" },
     });
   }
