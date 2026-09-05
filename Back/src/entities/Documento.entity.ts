@@ -35,7 +35,7 @@ export class Documento {
   tamanoBytes: number | null;
 
   @Column({ type: "varchar", length: 1000, unique: true, name: "storage_key" })
-  storageKey: string; // referencia al objeto en Blob Storage (S3/R2), NO el archivo en sí
+  storageKey: string; // public_id del recurso en Cloudinary (Blob Storage), NO el archivo en sí
 
   @Column({ type: "varchar", length: 128, nullable: true, name: "hash_archivo" })
   hashArchivo: string | null;

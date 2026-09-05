@@ -24,7 +24,10 @@ export type Permission =
   | "DISPONIBILIDAD_GESTIONAR"
   | "DISPONIBILIDAD_VER"
   | "CONSULTORIO_VER"
-  | "CONSULTORIO_GESTIONAR";
+  | "CONSULTORIO_GESTIONAR"
+  // HU-24/HU-25: gestión documental (rayos X, laboratorios, etc. en Blob Storage)
+  | "DOCUMENTO_SUBIR"
+  | "DOCUMENTO_VER";
 
 export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
   ADMINISTRADOR: [
@@ -50,6 +53,9 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "DISPONIBILIDAD_VER",
     "CONSULTORIO_VER",
     "CONSULTORIO_GESTIONAR",
+    // HU-24/HU-25: el administrador supervisa toda la gestión documental
+    "DOCUMENTO_SUBIR",
+    "DOCUMENTO_VER",
   ],
   MEDICO: [
     "MEDICO_VER",
@@ -66,6 +72,9 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "DISPONIBILIDAD_GESTIONAR",
     "DISPONIBILIDAD_VER",
     "CONSULTORIO_VER",
+    // HU-24/HU-25: el médico sube y consulta los exámenes de sus pacientes (rayos X, laboratorios, etc.)
+    "DOCUMENTO_SUBIR",
+    "DOCUMENTO_VER",
   ],
   RECEPCIONISTA: [
     "MEDICO_VER",
@@ -82,6 +91,9 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "DISPONIBILIDAD_VER",
     "CONSULTORIO_VER",
     "CONSULTORIO_GESTIONAR",
+    // HU-24/HU-25: recepción digitaliza/sube exámenes físicos que trae el paciente
+    "DOCUMENTO_SUBIR",
+    "DOCUMENTO_VER",
   ],
   PACIENTE: [
     "ESPECIALIDAD_LISTAR",
@@ -91,6 +103,9 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "CITA_GESTIONAR",
     "DIAGNOSTICO_VER",
     "TRATAMIENTO_VER",
+    // HU-25: el paciente solo consulta sus propios documentos (restricción de propiedad
+    // aplicada en el service, igual que PACIENTE_CONSULTAR en HU-10); no puede subir documentos
+    "DOCUMENTO_VER",
   ],
 };
 
