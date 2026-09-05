@@ -17,8 +17,7 @@ import historiaClinicaRoutes from "./routes/historia-clinica.routes";
 import diagnosticosRoutes from "./routes/diagnosticos.routes";
 import tratamientosRoutes from "./routes/tratamientos.routes";
 import consentimientosRoutes from "./routes/consentimientos.routes";
-import documentosRoutes from "./routes/documentos.routes;
-  
+import documentosRoutes from "./routes/documentos.routes";
 
 dotenv.config();
 
