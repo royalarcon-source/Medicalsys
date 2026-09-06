@@ -15,6 +15,17 @@ export interface DetalleFacturaItem {
   servicio?: ServicioItem;
 }
 
+export interface DatosFiscalesSIN {
+  nitEmisor: string;
+  razonSocialEmisor: string;
+  numeroAutorizacion: string;
+  cadenaQR: string;
+  leyendaLey: string;
+  leyendaSector: string;
+  casaMatriz?: string;
+  municipio?: string;
+}
+
 export interface FacturaItem {
   idFactura: number;
   numeroFactura: string;
@@ -26,6 +37,7 @@ export interface FacturaItem {
   total: string | number;
   estado: 'BORRADOR' | 'EMITIDA' | 'PAGADA' | 'ANULADA';
   codigoControl: string | null;
+  datosFiscalesSIN?: DatosFiscalesSIN;
   paciente?: {
     idPaciente: number;
     documentoIdentidad: string;
@@ -156,6 +168,19 @@ export async function obtenerFacturaPorId(id: number): Promise<FacturaItem> {
   return res.json();
 }
 
+export async function anularFactura(id: number, motivo: string): Promise<{ mensaje: string; factura: FacturaItem }> {
+  const res = await fetch(`/api/facturas/${id}/anular`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ motivo }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
 export async function obtenerPendientesDeFacturacion(idPaciente: number): Promise<PendienteFacturacion[]> {
   const res = await fetch(`/api/facturas/pacientes/${idPaciente}/pendientes`, {
     headers: { ...getAuthHeaders() },
@@ -163,4 +188,3 @@ export async function obtenerPendientesDeFacturacion(idPaciente: number): Promis
   if (!res.ok) throw new Error(await parseError(res));
   return res.json();
 }
-
