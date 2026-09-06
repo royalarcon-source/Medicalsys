@@ -1281,6 +1281,14 @@ export default function FacturacionPage() {
         <ModalVisorFactura
           factura={facturaSeleccionada}
           onClose={() => setFacturaSeleccionada(null)}
+          puedeAnular={esCajero}
+          onFacturaAnulada={(facturaActualizada) => {
+            setFacturas((prev) =>
+              prev.map((f) => (f.idFactura === facturaActualizada.idFactura ? facturaActualizada : f))
+            );
+            setFacturaSeleccionada(facturaActualizada);
+            setMensajeExito(`Factura ${facturaActualizada.numeroFactura} anulada exitosamente.`);
+          }}
         />
       )}
     </div>
