@@ -18,7 +18,12 @@ import diagnosticosRoutes from "./routes/diagnosticos.routes";
 import tratamientosRoutes from "./routes/tratamientos.routes";
 import consentimientosRoutes from "./routes/consentimientos.routes";
 import documentosRoutes from "./routes/documentos.routes";
+import facturaRoutes from "./routes/factura.routes";
+import servicioRoutes from "./routes/servicio.routes";
+import atencionServicioRoutes from "./routes/atencionServicio.routes";
+import path from "path";
 
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 dotenv.config();
 
 const app = express();
@@ -39,6 +44,9 @@ app.use("/api/diagnosticos", diagnosticosRoutes);
 app.use("/api/tratamientos", tratamientosRoutes);
 app.use("/api/documentos", documentosRoutes);
 app.use("/api/consentimientos", consentimientosRoutes);
+app.use("/api/facturas", facturaRoutes);
+app.use("/api/servicios", servicioRoutes);
+app.use("/api/atenciones-servicios", atencionServicioRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

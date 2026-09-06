@@ -1,4 +1,14 @@
 {
+  "name": "medicalsys",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:back": "npm run dev --prefix Back",
+    "dev:front": "npm run dev --prefix Front",
+    "build:back": "npm run build --prefix Back",
+    "build:front": "npm run build --prefix Front",
+    "seed:back": "npm run seed --prefix Back"
+  },
   "dependencies": {
     "cloudinary": "^2.11.0",
     "multer": "^2.3.0",

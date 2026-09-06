@@ -12,6 +12,7 @@ import {
   type DocumentoItem,
 } from '../../services/documentosService';
 import ModalVisorDocumento from '../../components/ModalVisorDocumento';
+import SeccionServiciosConsulta from '../../components/SeccionServiciosConsulta';
 import {
   Stethoscope,
   FileText,
@@ -633,6 +634,15 @@ export default function RegistrarConsultaPage() {
           </form>
         )}
       </div>
+
+      {/* AR-31: Registro y Gestión de Servicios e Insumos Prestados durante la Consulta */}
+      {paciente && (
+        <SeccionServiciosConsulta
+          idConsulta={consulta.idConsulta}
+          idPaciente={paciente.idPaciente}
+          nombrePaciente={nombrePaciente}
+        />
+      )}
 
       {/* HU-24 / HU-25: Sección de Gestión Documental Médica (Cloudinary) */}
       <div className="card" style={{ marginTop: '20px' }}>

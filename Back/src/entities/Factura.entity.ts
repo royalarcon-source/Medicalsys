@@ -3,10 +3,12 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
 } from "typeorm";
 import { Paciente } from "./Paciente.entity";
+import { DetalleFactura } from "./DetalleFactura.entity";
 
 @Entity({ name: "factura" })
 export class Factura {
@@ -43,4 +45,7 @@ export class Factura {
 
   @Column({ type: "varchar", length: 100, nullable: true, name: "codigo_control" })
   codigoControl: string | null; // lo devuelve el SIN al validar (HU-31)
+
+  @OneToMany(() => DetalleFactura, (detalle) => detalle.factura, { cascade: true })
+  detalles: DetalleFactura[];
 }

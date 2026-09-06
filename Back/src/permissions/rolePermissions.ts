@@ -27,7 +27,18 @@ export type Permission =
   | "CONSULTORIO_GESTIONAR"
   // HU-24/HU-25: gestión documental (rayos X, laboratorios, etc. en Blob Storage)
   | "DOCUMENTO_SUBIR"
-  | "DOCUMENTO_VER";
+  | "DOCUMENTO_VER"
+  // AR-32 / HU-29: Facturación y Servicios
+  | "FACTURA_CREAR"
+  | "FACTURA_VER"
+  | "FACTURA_GESTIONAR"
+  | "SERVICIO_LISTAR"
+  | "SERVICIO_GESTIONAR"
+  // AR-31 / HU-28: Registrar Servicios Prestados
+  | "ATENCION_SERVICIO_REGISTRAR"
+  | "ATENCION_SERVICIO_VER"
+  | "ATENCION_SERVICIO_MODIFICAR"
+  | "ATENCION_SERVICIO_ELIMINAR";
 
 export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
   ADMINISTRADOR: [
@@ -56,6 +67,17 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     // HU-24/HU-25: el administrador supervisa toda la gestión documental
     "DOCUMENTO_SUBIR",
     "DOCUMENTO_VER",
+    // AR-32: Facturación y servicios
+    "FACTURA_CREAR",
+    "FACTURA_VER",
+    "FACTURA_GESTIONAR",
+    "SERVICIO_LISTAR",
+    "SERVICIO_GESTIONAR",
+    // AR-31: Servicios prestados
+    "ATENCION_SERVICIO_REGISTRAR",
+    "ATENCION_SERVICIO_VER",
+    "ATENCION_SERVICIO_MODIFICAR",
+    "ATENCION_SERVICIO_ELIMINAR",
   ],
   MEDICO: [
     "MEDICO_VER",
@@ -75,6 +97,14 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     // HU-24/HU-25: el médico sube y consulta los exámenes de sus pacientes (rayos X, laboratorios, etc.)
     "DOCUMENTO_SUBIR",
     "DOCUMENTO_VER",
+    // AR-32
+    "FACTURA_VER",
+    "SERVICIO_LISTAR",
+    // AR-31: El personal médico registra, consulta y ajusta prestaciones
+    "ATENCION_SERVICIO_REGISTRAR",
+    "ATENCION_SERVICIO_VER",
+    "ATENCION_SERVICIO_MODIFICAR",
+    "ATENCION_SERVICIO_ELIMINAR",
   ],
   RECEPCIONISTA: [
     "MEDICO_VER",
@@ -91,6 +121,16 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "DISPONIBILIDAD_VER",
     "CONSULTORIO_VER",
     "CONSULTORIO_GESTIONAR",
+    // AR-32: Emisión y gestión de facturación
+    "FACTURA_CREAR",
+    "FACTURA_VER",
+    "FACTURA_GESTIONAR",
+    "SERVICIO_LISTAR",
+    // AR-31: Recepción/caja registra y visualiza servicios
+    "ATENCION_SERVICIO_REGISTRAR",
+    "ATENCION_SERVICIO_VER",
+    "ATENCION_SERVICIO_MODIFICAR",
+    "ATENCION_SERVICIO_ELIMINAR",
   ],
   PACIENTE: [
     "ESPECIALIDAD_LISTAR",
@@ -103,6 +143,11 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     // HU-25: el paciente solo consulta sus propios documentos (restricción de propiedad
     // aplicada en el service, igual que PACIENTE_CONSULTAR en HU-10); no puede subir documentos
     "DOCUMENTO_VER",
+    // AR-32: el paciente puede consultar sus propias facturas
+    "FACTURA_VER",
+    "SERVICIO_LISTAR",
+    // AR-31: el paciente puede consultar sus servicios prestados
+    "ATENCION_SERVICIO_VER",
   ],
 };
 

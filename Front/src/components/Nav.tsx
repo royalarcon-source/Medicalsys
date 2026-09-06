@@ -12,6 +12,7 @@ import {
   Pill,
   FileCheck,
   Shield,
+  Receipt,
   LogOut,
   LogIn,
   UserCheck,
@@ -118,6 +119,13 @@ export default function Nav() {
             <NavLink to="/consentimientos" end>
               <FileCheck size={16} />
               <span>Consentimientos</span>
+            </NavLink>
+          )}
+
+          {token && (
+            <NavLink to="/facturacion" end>
+              <Receipt size={16} />
+              <span>Facturación</span>
             </NavLink>
           )}
 

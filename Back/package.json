@@ -10,6 +10,7 @@
     "typeorm": "typeorm-ts-node-commonjs -d src/config/database.ts",
     "migration:generate": "npm run typeorm -- migration:generate",
     "migration:run": "npm run typeorm -- migration:run",
+    "seed": "ts-node-dev --transpile-only src/scripts/test/seed.ts",
     "test:hu24-25": "ts-node-dev --transpile-only src/scripts/test/hu24_25.document.integration.ts",
     "test:hu24-25-http": "ts-node-dev --transpile-only src/scripts/test/hu24_25.http.integration.ts",
     "test": "echo \"Error: no test specified\" && exit 1"

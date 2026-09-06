@@ -21,10 +21,15 @@ import { Rol } from "../entities/Rol.entity";
 import { Servicio } from "../entities/Servicio.entity";
 import { Tratamiento } from "../entities/Tratamiento.entity";
 import { Usuario } from "../entities/Usuario.entity";
+import { AtencionServicio } from "../entities/AtencionServicio.entity";
 import { InitialSchemaBaseline1787529278750 } from "../migrations/1787529278750-InitialSchemaBaseline";
 import { CreateDocumentoTable1788566400000 } from "../migrations/1788566400000-CreateDocumentoTable";
 import { AddConsultaToDocumento1788566500000 } from "../migrations/1788566500000-AddConsultaToDocumento";
+import { CreateAtencionServicioTable1788566600000 } from "../migrations/1788566600000-CreateAtencionServicioTable";
+import { FixFacturaEstadoDefault1788566700000 } from "../migrations/1788566700000-FixFacturaEstadoDefault";
+import path from "path";
 
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 dotenv.config();
 
 // process.env siempre es `string | undefined`; con `strict` hay que resolver el undefined aquí
@@ -40,24 +45,23 @@ export const AppDataSource = new DataSource({
   type: "postgres",
   host: env("DB_HOST", "localhost"),
   port: Number(env("DB_PORT", "5432")),
-  username: env("DB_USERNAME"),
+  username: env("DB_USERNAME", "postgres"),
   password: env("DB_PASSWORD", ""),
-  database: env("DB_DATABASE"),
-  synchronize: false, // NUNCA true en un proyecto con migraciones — sincronizaría el schema automáticamente y te pisa las migraciones
+  database: env("DB_DATABASE", "medicalsys"),
+  synchronize: process.env.DB_SYNCHRONIZE === "true", // NUNCA true en un proyecto con migraciones salvo caso puntual — sincronizaría el schema automáticamente y te pisa las migraciones
   logging: process.env.NODE_ENV === "development",
-  ssl:
-  {
-    rejectUnauthorized: false,
-  },
+  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
   entities: [
     Campana, Cita, Consentimiento, Consulta, Consultorio, DetalleFactura,
     Diagnostico, Documento, Especialidad, Factura, HistoriaClinica,
     HorarioDisponibilidad, Medico, Notificacion, Paciente, Promocion, Rol,
-    Servicio, Tratamiento, Usuario,
+    Servicio, Tratamiento, Usuario, AtencionServicio,
   ],
   migrations: [
     InitialSchemaBaseline1787529278750,
     CreateDocumentoTable1788566400000,
     AddConsultaToDocumento1788566500000,
+    CreateAtencionServicioTable1788566600000,
+    FixFacturaEstadoDefault1788566700000,
   ],
 });
