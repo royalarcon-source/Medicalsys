@@ -30,3 +30,7 @@ export interface CrearServicioDTO {
   precio: number;
 }
 
+export interface AnularFacturaDTO {
+  motivo: string;
+}
+
