@@ -60,6 +60,21 @@ export const FacturaController = {
     }
   },
 
+  async anular(req: Request, res: Response, next: NextFunction) {
+    try {
+      const idFactura = Number(req.params.id);
+      if (!idFactura || isNaN(idFactura)) {
+        return res.status(400).json({ error: "ID de factura inválido" });
+      }
+
+      const motivo = req.body.motivo || "Anulación solicitada por el emisor";
+      const resultado = await FacturaService.anularFactura(idFactura, motivo, req.authUser);
+      return res.status(200).json(resultado);
+    } catch (error) {
+      return next(error);
+    }
+  },
+
   async obtenerPendientesPorPaciente(req: Request, res: Response, next: NextFunction) {
     try {
       const idPaciente = Number(req.params.idPaciente);
@@ -74,4 +89,3 @@ export const FacturaController = {
     }
   },
 };
-
