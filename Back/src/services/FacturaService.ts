@@ -8,6 +8,7 @@ import { EmitirFacturaDTO, FiltroFacturasDTO } from "../dtos/factura.dto";
 import { Factura } from "../entities/Factura.entity";
 import { DetalleFactura } from "../entities/DetalleFactura.entity";
 import { AtencionServicio } from "../entities/AtencionServicio.entity";
+import { SinIntegrationService } from "./SinIntegrationService";
 
 export class FacturaService {
   static async emitir(dto: EmitirFacturaDTO, authUser?: { idUsuario: number; rol: string }): Promise<Factura> {
@@ -105,10 +106,16 @@ export class FacturaService {
       // El correlativo se genera dentro de la transacción (con lock) para evitar que dos
       // emisiones concurrentes lean el mismo "último número" y colisionen.
       const numeroFactura = await FacturaRepository.generarSiguienteNumero(queryRunner.manager);
+      const fechaEmision = new Date();
 
-      // Código de control hash simple para representación de respaldo digital
-      const timestamp = Date.now().toString(16).toUpperCase();
-      const codigoControl = `CC-${numeroFactura}-${timestamp.slice(-6)}`;
+      // Generar Código de Control oficial del SIN y datos normativos (HU-31)
+      const datosFiscales = SinIntegrationService.generarDatosFiscales({
+        numeroFactura,
+        nitCliente,
+        fechaEmision,
+        total: totalNumerico,
+        descuento: montoDescuento,
+      });
 
       const nuevaFactura = queryRunner.manager.create(Factura, {
         paciente,
@@ -119,7 +126,8 @@ export class FacturaService {
         impuestos: String(impuestosNumerico.toFixed(2)),
         total: String(totalNumerico.toFixed(2)),
         estado,
-        codigoControl,
+        codigoControl: datosFiscales.codigoControl,
+        fechaEmision,
       });
 
       const facturaGuardada = await queryRunner.manager.save(Factura, nuevaFactura);
@@ -138,10 +146,7 @@ export class FacturaService {
 
       await queryRunner.manager.save(DetalleFactura, entidadesDetalles);
 
-      // Marcar como FACTURADO únicamente los AtencionServicio que esta factura realmente
-      // incluyó (dto.idsAtencionServicio), nunca todos los pendientes del paciente/consulta:
-      // de lo contrario, facturar solo algunos servicios pendientes cerraba también los que
-      // no se cobraron. Se filtra además por id_paciente como verificación de propiedad.
+      // Marcar como FACTURADO únicamente los AtencionServicio que esta factura realmente incluyó
       if (dto.idsAtencionServicio && dto.idsAtencionServicio.length > 0) {
         await queryRunner.manager
           .createQueryBuilder()
@@ -166,7 +171,10 @@ export class FacturaService {
     }
   }
 
-  static async obtenerPorId(idFactura: number, authUser?: { idUsuario: number; rol: string }): Promise<Factura> {
+  static async obtenerPorId(
+    idFactura: number,
+    authUser?: { idUsuario: number; rol: string }
+  ): Promise<Factura & { datosFiscalesSIN?: any }> {
     const factura = await FacturaRepository.buscarPorId(idFactura);
     if (!factura) {
       throw { status: 404, message: "La factura solicitada no existe." };
@@ -180,7 +188,31 @@ export class FacturaService {
       }
     }
 
-    return factura;
+    // Enriquecer con metadatos fiscales del SIN (HU-31)
+    const configSIN = SinIntegrationService.getConfig();
+    let cadenaQR = "";
+    if (factura.codigoControl && factura.numeroFactura) {
+      const datosFiscales = SinIntegrationService.generarDatosFiscales({
+        numeroFactura: factura.numeroFactura,
+        nitCliente: factura.nitCliente || "0",
+        fechaEmision: factura.fechaEmision || new Date(),
+        total: Number(factura.total) || 0,
+      });
+      cadenaQR = datosFiscales.cadenaQR;
+    }
+
+    return Object.assign(factura, {
+      datosFiscalesSIN: {
+        nitEmisor: configSIN.nitEmisor,
+        razonSocialEmisor: configSIN.razonSocialEmisor,
+        numeroAutorizacion: configSIN.numeroAutorizacion,
+        cadenaQR,
+        leyendaLey: configSIN.leyendaLey,
+        leyendaSector: configSIN.leyendaSector,
+        casaMatriz: configSIN.casaMatriz,
+        municipio: configSIN.municipio,
+      },
+    });
   }
 
   static async listar(filtros: FiltroFacturasDTO = {}, authUser?: { idUsuario: number; rol: string }): Promise<Factura[]> {
@@ -195,6 +227,66 @@ export class FacturaService {
     }
 
     return FacturaRepository.listar(filtros);
+  }
+
+  static async anularFactura(
+    idFactura: number,
+    motivo: string,
+    authUser?: { idUsuario: number; rol: string }
+  ): Promise<{ mensaje: string; factura: Factura }> {
+    if (authUser?.rol === "PACIENTE") {
+      throw { status: 403, message: "Acceso denegado: los pacientes no pueden anular facturas." };
+    }
+
+    if (!motivo || motivo.trim().length < 3) {
+      throw { status: 400, message: "Debe especificar un motivo válido de anulación (mínimo 3 caracteres)." };
+    }
+
+    const factura = await FacturaRepository.buscarPorId(idFactura);
+    if (!factura) {
+      throw { status: 404, message: "La factura solicitada no existe." };
+    }
+
+    if (factura.estado === "ANULADA") {
+      throw { status: 400, message: "La factura ya se encuentra anulada." };
+    }
+
+    const configSIN = SinIntegrationService.getConfig();
+
+    // Notificar anulación al SIN (HU-31)
+    await SinIntegrationService.anularFacturaEnSIN({
+      numeroFactura: factura.numeroFactura || String(factura.idFactura),
+      numeroAutorizacion: configSIN.numeroAutorizacion,
+      motivo: motivo.trim(),
+    });
+
+    const queryRunner = AppDataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      factura.estado = "ANULADA";
+      const facturaActualizada = await queryRunner.manager.save(Factura, factura);
+
+      // Liberar atenciones de servicio vinculadas de vuelta a PENDIENTE
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(AtencionServicio)
+        .set({ estado: "PENDIENTE", factura: null })
+        .where("id_factura = :idFactura", { idFactura: factura.idFactura })
+        .execute();
+
+      await queryRunner.commitTransaction();
+      return {
+        mensaje: `Factura ${factura.numeroFactura} anulada exitosamente en el sistema y comunicada al SIN.`,
+        factura: facturaActualizada,
+      };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   static async obtenerPendientesDeFacturacion(idPaciente: number): Promise<any[]> {
@@ -255,4 +347,3 @@ export class FacturaService {
     });
   }
 }
-
