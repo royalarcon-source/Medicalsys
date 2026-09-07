@@ -158,3 +158,21 @@ Adicionalmente se verificó el flujo completo por HTTP real (backend levantado c
 - **Promociones**: tabla con nombre, campaña asociada, porcentaje de descuento, vigencia y badge activa/inactiva; para Administrador, un formulario de creación (con selector de campaña existente) y un botón de activar/desactivar.
 
 Para los roles sin `*_GESTIONAR` (Médico, Recepcionista, Paciente), la página se comporta como una "zona de anuncios" de solo lectura, sin formularios ni botones de gestión.
+
+---
+
+## 9. Corrección adicional (fuera de alcance de HU-32/33): vista previa de documentos (HU-24/25)
+
+Durante el sprint se reportó que, al abrir un documento (imagen o archivo) subido a una consulta/paciente desde `ModalVisorDocumento.tsx`, la app reconocía el archivo (metadatos correctos) pero no mostraba vista previa — había que ir directo a Cloudinary para verlo.
+
+**Causa raíz:** en `Back/src/services/DocumentoService.ts`, los archivos se suben con `resource_type: "auto"` (Cloudinary decide si es `image`, `video` o `raw`), pero solo se guardaba el `public_id`, nunca el `resource_type` real resultante. Al construir después la URL de vista previa, el código lo *adivinaba* (`"image"` si el nombre terminaba en `.pdf`, `"auto"` para todo lo demás — incluidas las imágenes). Un `resource_type: "auto"` en una URL de *entrega* de Cloudinary no es válido para un recurso ya subido como `image`, así que la URL generada para imágenes no resolvía al archivo real.
+
+**Corrección:**
+- Migración `Back/src/migrations/1788566800000-AddResourceTypeToDocumento.ts`: agrega la columna `resource_type` (varchar 20, nullable) a `documento`. Ya aplicada a la BD de desarrollo con `npm run migration:run`; documentos subidos antes del fix quedan con `NULL` y usan el heurístico anterior como mejor esfuerzo, sin romperse.
+- `Documento.entity.ts`: nueva columna `resourceType`.
+- `DocumentoService.ts`: `cargarCloudinary()` ahora captura el `resource_type` real que devuelve Cloudinary al subir y lo persiste; `respuestaDocumento()` lo usa tal cual para construir la URL de vista previa en vez de adivinarlo. De paso se corrigió el mismo problema en el rollback de subida fallida (`cloudinary.uploader.destroy` también usaba `"auto"`, inválido ahí, lo que podía dejar archivos huérfanos en Cloudinary).
+- `docs/MER/BD.sql` actualizado con la columna nueva.
+
+**Verificación:** se subió una imagen PNG real por `POST /api/documentos` y se confirmó con `curl -I` que la URL generada responde `200 OK`, `Content-Type: image/png` y `Access-Control-Allow-Origin: *` (carga correctamente en `<img>`/dentro del modal). El documento y archivo de prueba se eliminaron después de verificar. `npm run typecheck` sigue limpio.
+
+Nota: `documentoUpload.ts` solo permite subir PDF/PNG/JPEG, por lo que en la práctica todos los documentos de esta app caen en `resource_type: "image"` de Cloudinary — la corrección cubre exactamente los casos reales que el sistema puede producir.

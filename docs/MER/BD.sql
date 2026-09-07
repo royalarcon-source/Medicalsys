@@ -96,6 +96,7 @@ CREATE TABLE public.documento (
   mime_type character varying NOT NULL,
   tamano_bytes bigint CHECK (tamano_bytes >= 0),
   storage_key character varying NOT NULL UNIQUE,
+  resource_type character varying(20),
   hash_archivo character varying,
   fecha_subida timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
   activo boolean NOT NULL DEFAULT true,

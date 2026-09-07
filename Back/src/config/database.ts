@@ -27,6 +27,7 @@ import { CreateDocumentoTable1788566400000 } from "../migrations/1788566400000-C
 import { AddConsultaToDocumento1788566500000 } from "../migrations/1788566500000-AddConsultaToDocumento";
 import { CreateAtencionServicioTable1788566600000 } from "../migrations/1788566600000-CreateAtencionServicioTable";
 import { FixFacturaEstadoDefault1788566700000 } from "../migrations/1788566700000-FixFacturaEstadoDefault";
+import { AddResourceTypeToDocumento1788566800000 } from "../migrations/1788566800000-AddResourceTypeToDocumento";
 import path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
@@ -63,5 +64,6 @@ export const AppDataSource = new DataSource({
     AddConsultaToDocumento1788566500000,
     CreateAtencionServicioTable1788566600000,
     FixFacturaEstadoDefault1788566700000,
+    AddResourceTypeToDocumento1788566800000,
   ],
 });

@@ -42,6 +42,13 @@ export class Documento {
   @Column({ type: "varchar", length: 1000, unique: true, name: "storage_key" })
   storageKey: string; // public_id del recurso en Cloudinary (Blob Storage), NO el archivo en sí
 
+  // resource_type real que Cloudinary asignó al subir ("image" | "video" | "raw"), devuelto
+  // por su API en el momento de la carga. Se persiste tal cual porque es indispensable para
+  // reconstruir la URL de entrega (cloudinary.url) más adelante: si no coincide exactamente
+  // con el resource_type usado al subir, la URL generada no resuelve al archivo real.
+  @Column({ type: "varchar", length: 20, nullable: true, name: "resource_type" })
+  resourceType: string | null;
+
   @Column({ type: "varchar", length: 128, nullable: true, name: "hash_archivo" })
   hashArchivo: string | null;
 

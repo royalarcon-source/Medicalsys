@@ -20,6 +20,7 @@ interface ArchivoSubido {
 
 interface ResultadoCloudinary {
   public_id: string;
+  resource_type: string;
 }
 
 const documentoRepository = () => AppDataSource.getRepository(Documento);
@@ -38,7 +39,10 @@ function cargarCloudinary(archivo: ArchivoSubido): Promise<ResultadoCloudinary> 
           reject(new AppError("No se pudo almacenar el documento.", 502));
           return;
         }
-        resolve({ public_id: resultado.public_id });
+        // Cloudinary decide el resource_type real ("image" | "video" | "raw") a partir del
+        // contenido cuando se sube con resource_type: "auto". Hay que guardarlo tal cual: es
+        // el mismo valor exacto que luego hace falta para construir una URL de entrega válida.
+        resolve({ public_id: resultado.public_id, resource_type: resultado.resource_type });
       },
     );
 
@@ -106,9 +110,16 @@ function respuestaDocumento(documento: Documento) {
 
   const isPdf = documento.mimeType?.toLowerCase().includes("pdf") || format === "pdf";
 
+  // El resource_type de la URL de entrega debe coincidir EXACTAMENTE con el que Cloudinary
+  // asignó al subir el archivo (guardado en documento.resourceType); si no coincide, la URL
+  // no resuelve al recurso real y no hay vista previa (aunque el archivo exista en Cloudinary).
+  // Para documentos subidos antes de que se empezara a guardar ese dato, se mantiene el
+  // heurístico anterior como mejor esfuerzo.
+  const resourceType = documento.resourceType || (isPdf ? "image" : "auto");
+
   const url = cloudinary.url(documento.storageKey, {
     secure: true,
-    resource_type: isPdf ? "image" : "auto",
+    resource_type: resourceType,
     format,
   });
 
@@ -159,6 +170,7 @@ export class DocumentoService {
           mimeType: archivo.mimetype,
           tamanoBytes: archivo.size,
           storageKey: almacenado.public_id,
+          resourceType: almacenado.resource_type,
           hashArchivo: null,
           activo: true,
         }),
@@ -166,7 +178,7 @@ export class DocumentoService {
 
       return respuestaDocumento(documento);
     } catch (error) {
-      await cloudinary.uploader.destroy(almacenado.public_id, { resource_type: "auto" });
+      await cloudinary.uploader.destroy(almacenado.public_id, { resource_type: almacenado.resource_type });
       throw error;
     }
   }
