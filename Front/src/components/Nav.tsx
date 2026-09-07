@@ -13,6 +13,7 @@ import {
   FileCheck,
   Shield,
   Receipt,
+  Megaphone,
   LogOut,
   LogIn,
   UserCheck,
@@ -126,6 +127,13 @@ export default function Nav() {
             <NavLink to="/facturacion" end>
               <Receipt size={16} />
               <span>Facturación</span>
+            </NavLink>
+          )}
+
+          {token && (
+            <NavLink to="/marketing" end>
+              <Megaphone size={16} />
+              <span>Marketing</span>
             </NavLink>
           )}
 

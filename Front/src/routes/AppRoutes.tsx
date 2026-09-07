@@ -18,6 +18,7 @@ import DiagnosticosPage from '../pages/Diagnosticos/DiagnosticosPage';
 import TratamientosPage from '../pages/Tratamientos/TratamientosPage';
 import ConsentimientosPage from '../pages/Consentimientos/ConsentimientosPage';
 import FacturacionPage from '../pages/Facturacion/FacturacionPage';
+import MarketingPage from '../pages/Marketing/MarketingPage';
 import RequireAuth from './RequireAuth';
 
 export default function AppRoutes() {
@@ -158,6 +159,14 @@ export default function AppRoutes() {
         element={
           <RequireAuth>
             <FacturacionPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/marketing"
+        element={
+          <RequireAuth>
+            <MarketingPage />
           </RequireAuth>
         }
       />

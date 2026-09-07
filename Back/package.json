@@ -13,6 +13,7 @@
     "seed": "ts-node-dev --transpile-only src/scripts/test/seed.ts",
     "test:hu24-25": "ts-node-dev --transpile-only src/scripts/test/hu24_25.document.integration.ts",
     "test:hu24-25-http": "ts-node-dev --transpile-only src/scripts/test/hu24_25.http.integration.ts",
+    "test:hu32-33": "ts-node-dev --transpile-only src/scripts/test/test-hu32-hu33-marketing.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

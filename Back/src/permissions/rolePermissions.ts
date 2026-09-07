@@ -38,7 +38,12 @@ export type Permission =
   | "ATENCION_SERVICIO_REGISTRAR"
   | "ATENCION_SERVICIO_VER"
   | "ATENCION_SERVICIO_MODIFICAR"
-  | "ATENCION_SERVICIO_ELIMINAR";
+  | "ATENCION_SERVICIO_ELIMINAR"
+  // HU-32/HU-33: Módulo de Marketing (campañas y promociones)
+  | "CAMPANA_VER"
+  | "CAMPANA_GESTIONAR"
+  | "PROMOCION_VER"
+  | "PROMOCION_GESTIONAR";
 
 export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
   ADMINISTRADOR: [
@@ -78,6 +83,11 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "ATENCION_SERVICIO_VER",
     "ATENCION_SERVICIO_MODIFICAR",
     "ATENCION_SERVICIO_ELIMINAR",
+    // HU-32/HU-33: el administrador gestiona campañas y promociones
+    "CAMPANA_VER",
+    "CAMPANA_GESTIONAR",
+    "PROMOCION_VER",
+    "PROMOCION_GESTIONAR",
   ],
   MEDICO: [
     "MEDICO_VER",
@@ -105,6 +115,9 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "ATENCION_SERVICIO_VER",
     "ATENCION_SERVICIO_MODIFICAR",
     "ATENCION_SERVICIO_ELIMINAR",
+    // HU-32/HU-33: el médico solo consulta la zona de anuncios
+    "CAMPANA_VER",
+    "PROMOCION_VER",
   ],
   RECEPCIONISTA: [
     "MEDICO_VER",
@@ -131,6 +144,9 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "ATENCION_SERVICIO_VER",
     "ATENCION_SERVICIO_MODIFICAR",
     "ATENCION_SERVICIO_ELIMINAR",
+    // HU-32/HU-33: recepción solo consulta la zona de anuncios
+    "CAMPANA_VER",
+    "PROMOCION_VER",
   ],
   PACIENTE: [
     "ESPECIALIDAD_LISTAR",
@@ -148,6 +164,9 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "SERVICIO_LISTAR",
     // AR-31: el paciente puede consultar sus servicios prestados
     "ATENCION_SERVICIO_VER",
+    // HU-32/HU-33: el paciente ve la zona de anuncios (campañas y promociones)
+    "CAMPANA_VER",
+    "PROMOCION_VER",
   ],
 };
 

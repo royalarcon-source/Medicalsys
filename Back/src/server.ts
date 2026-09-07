@@ -21,6 +21,8 @@ import documentosRoutes from "./routes/documentos.routes";
 import facturaRoutes from "./routes/factura.routes";
 import servicioRoutes from "./routes/servicio.routes";
 import atencionServicioRoutes from "./routes/atencionServicio.routes";
+import campanaRoutes from "./routes/campana.routes";
+import promocionRoutes from "./routes/promocion.routes";
 import path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
@@ -47,6 +49,8 @@ app.use("/api/consentimientos", consentimientosRoutes);
 app.use("/api/facturas", facturaRoutes);
 app.use("/api/servicios", servicioRoutes);
 app.use("/api/atenciones-servicios", atencionServicioRoutes);
+app.use("/api/campanas", campanaRoutes);
+app.use("/api/promociones", promocionRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
