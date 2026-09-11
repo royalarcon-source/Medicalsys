@@ -1,0 +1,176 @@
+export type RoleName = "ADMINISTRADOR" | "MEDICO" | "RECEPCIONISTA" | "PACIENTE";
+
+export type Permission =
+  | "MEDICO_CREAR"
+  | "MEDICO_VER"
+  | "ESPECIALIDAD_LISTAR"
+  | "ESPECIALIDAD_GESTIONAR"
+  | "PACIENTE_GESTIONAR"
+  | "PACIENTE_CONSULTAR"
+  | "PACIENTE_CREAR"
+  | "ROL_CREAR"
+  | "CITA_RESERVAR"
+  | "CITA_CONSULTAR"
+  | "CITA_GESTIONAR"
+  | "CONSULTA_GESTIONAR"
+  | "CONSULTA_REGISTRAR"
+  | "DIAGNOSTICO_REGISTRAR"
+  | "DIAGNOSTICO_VER"
+  | "TRATAMIENTO_REGISTRAR"
+  | "TRATAMIENTO_VER"
+  | "HISTORIA_CLINICA_VER"
+  | "HISTORIA_CLINICA_CREAR"
+  | "USUARIO_GESTIONAR"
+  | "DISPONIBILIDAD_GESTIONAR"
+  | "DISPONIBILIDAD_VER"
+  | "CONSULTORIO_VER"
+  | "CONSULTORIO_GESTIONAR"
+  // HU-24/HU-25: gestión documental (rayos X, laboratorios, etc. en Blob Storage)
+  | "DOCUMENTO_SUBIR"
+  | "DOCUMENTO_VER"
+  // AR-32 / HU-29: Facturación y Servicios
+  | "FACTURA_CREAR"
+  | "FACTURA_VER"
+  | "FACTURA_GESTIONAR"
+  | "SERVICIO_LISTAR"
+  | "SERVICIO_GESTIONAR"
+  // AR-31 / HU-28: Registrar Servicios Prestados
+  | "ATENCION_SERVICIO_REGISTRAR"
+  | "ATENCION_SERVICIO_VER"
+  | "ATENCION_SERVICIO_MODIFICAR"
+  | "ATENCION_SERVICIO_ELIMINAR"
+  // HU-32/HU-33: Módulo de Marketing (campañas y promociones)
+  | "CAMPANA_VER"
+  | "CAMPANA_GESTIONAR"
+  | "PROMOCION_VER"
+  | "PROMOCION_GESTIONAR";
+
+export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
+  ADMINISTRADOR: [
+    "MEDICO_CREAR",
+    "MEDICO_VER",
+    "ESPECIALIDAD_LISTAR",
+    "ESPECIALIDAD_GESTIONAR",
+    "PACIENTE_GESTIONAR",
+    "PACIENTE_CONSULTAR",
+    "PACIENTE_CREAR",
+    "ROL_CREAR",
+    "CITA_RESERVAR",
+    "CITA_CONSULTAR",
+    "CITA_GESTIONAR",
+    "CONSULTA_GESTIONAR",
+    "CONSULTA_REGISTRAR",
+    "DIAGNOSTICO_VER",
+    "TRATAMIENTO_VER",
+    "HISTORIA_CLINICA_VER",
+    "HISTORIA_CLINICA_CREAR",
+    "USUARIO_GESTIONAR",
+    "DISPONIBILIDAD_GESTIONAR",
+    "DISPONIBILIDAD_VER",
+    "CONSULTORIO_VER",
+    "CONSULTORIO_GESTIONAR",
+    // HU-24/HU-25: el administrador supervisa toda la gestión documental
+    "DOCUMENTO_SUBIR",
+    "DOCUMENTO_VER",
+    // AR-32: Facturación y servicios
+    "FACTURA_CREAR",
+    "FACTURA_VER",
+    "FACTURA_GESTIONAR",
+    "SERVICIO_LISTAR",
+    "SERVICIO_GESTIONAR",
+    // AR-31: Servicios prestados
+    "ATENCION_SERVICIO_REGISTRAR",
+    "ATENCION_SERVICIO_VER",
+    "ATENCION_SERVICIO_MODIFICAR",
+    "ATENCION_SERVICIO_ELIMINAR",
+    // HU-32/HU-33: el administrador gestiona campañas y promociones
+    "CAMPANA_VER",
+    "CAMPANA_GESTIONAR",
+    "PROMOCION_VER",
+    "PROMOCION_GESTIONAR",
+  ],
+  MEDICO: [
+    "MEDICO_VER",
+    "ESPECIALIDAD_LISTAR",
+    "PACIENTE_CONSULTAR",
+    "CITA_CONSULTAR",
+    "CITA_GESTIONAR",
+    "CONSULTA_GESTIONAR",
+    "DIAGNOSTICO_REGISTRAR",
+    "DIAGNOSTICO_VER",
+    "TRATAMIENTO_REGISTRAR",
+    "TRATAMIENTO_VER",
+    "HISTORIA_CLINICA_VER",
+    "DISPONIBILIDAD_GESTIONAR",
+    "DISPONIBILIDAD_VER",
+    "CONSULTORIO_VER",
+    // HU-24/HU-25: el médico sube y consulta los exámenes de sus pacientes (rayos X, laboratorios, etc.)
+    "DOCUMENTO_SUBIR",
+    "DOCUMENTO_VER",
+    // AR-32
+    "FACTURA_VER",
+    "SERVICIO_LISTAR",
+    // AR-31: El personal médico registra, consulta y ajusta prestaciones
+    "ATENCION_SERVICIO_REGISTRAR",
+    "ATENCION_SERVICIO_VER",
+    "ATENCION_SERVICIO_MODIFICAR",
+    "ATENCION_SERVICIO_ELIMINAR",
+    // HU-32/HU-33: el médico solo consulta la zona de anuncios
+    "CAMPANA_VER",
+    "PROMOCION_VER",
+  ],
+  RECEPCIONISTA: [
+    "MEDICO_VER",
+    "ESPECIALIDAD_LISTAR",
+    "PACIENTE_GESTIONAR",
+    "PACIENTE_CONSULTAR",
+    "PACIENTE_CREAR",
+    "CITA_RESERVAR",
+    "CITA_CONSULTAR",
+    "CITA_GESTIONAR",
+    "CONSULTA_REGISTRAR",
+    "HISTORIA_CLINICA_VER",
+    "HISTORIA_CLINICA_CREAR",
+    "DISPONIBILIDAD_VER",
+    "CONSULTORIO_VER",
+    "CONSULTORIO_GESTIONAR",
+    // AR-32: Emisión y gestión de facturación
+    "FACTURA_CREAR",
+    "FACTURA_VER",
+    "FACTURA_GESTIONAR",
+    "SERVICIO_LISTAR",
+    // AR-31: Recepción/caja registra y visualiza servicios
+    "ATENCION_SERVICIO_REGISTRAR",
+    "ATENCION_SERVICIO_VER",
+    "ATENCION_SERVICIO_MODIFICAR",
+    "ATENCION_SERVICIO_ELIMINAR",
+    // HU-32/HU-33: recepción solo consulta la zona de anuncios
+    "CAMPANA_VER",
+    "PROMOCION_VER",
+  ],
+  PACIENTE: [
+    "ESPECIALIDAD_LISTAR",
+    "DISPONIBILIDAD_VER",
+    "CITA_RESERVAR",
+    "CITA_CONSULTAR",
+    "CITA_GESTIONAR",
+    "DIAGNOSTICO_VER",
+    "TRATAMIENTO_VER",
+    // HU-25: el paciente solo consulta sus propios documentos (restricción de propiedad
+    // aplicada en el service, igual que PACIENTE_CONSULTAR en HU-10); no puede subir documentos
+    "DOCUMENTO_VER",
+    // AR-32: el paciente puede consultar sus propias facturas
+    "FACTURA_VER",
+    "SERVICIO_LISTAR",
+    // AR-31: el paciente puede consultar sus servicios prestados
+    "ATENCION_SERVICIO_VER",
+    // HU-32/HU-33: el paciente ve la zona de anuncios (campañas y promociones)
+    "CAMPANA_VER",
+    "PROMOCION_VER",
+  ],
+};
+
+export function hasPermission(roleName: string, permission: Permission): boolean {
+  const permissions = ROLE_PERMISSIONS[roleName as RoleName];
+  return permissions?.includes(permission) ?? false;
+}

@@ -8,6 +8,7 @@ import {
 } from "typeorm";
 import { Paciente } from "./Paciente.entity";
 import { HistoriaClinica } from "./HistoriaClinica.entity";
+import { Consulta } from "./Consulta.entity";
 
 @Entity({ name: "documento" })
 export class Documento {
@@ -22,6 +23,10 @@ export class Documento {
   @JoinColumn({ name: "id_historia" })
   historia: HistoriaClinica | null;
 
+  @ManyToOne(() => Consulta, { nullable: true })
+  @JoinColumn({ name: "id_consulta" })
+  consulta: Consulta | null;
+
   @Column({ type: "varchar", length: 50 })
   tipo: string;
 
@@ -35,7 +40,7 @@ export class Documento {
   tamanoBytes: number | null;
 
   @Column({ type: "varchar", length: 1000, unique: true, name: "storage_key" })
-  storageKey: string; // referencia al objeto en Blob Storage (S3/R2), NO el archivo en sí
+  storageKey: string; // public_id del recurso en Cloudinary (Blob Storage), NO el archivo en sí
 
   @Column({ type: "varchar", length: 128, nullable: true, name: "hash_archivo" })
   hashArchivo: string | null;

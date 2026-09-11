@@ -26,7 +26,10 @@ export class Usuario {
   @Column({ type: "varchar", length: 150, unique: true })
   email: string;
 
-  @Column({ type: "varchar", length: 255, name: "password_hash" })
+  // select: false — nunca se trae por default (evita filtrarlo en endpoints
+  // que hidratan la relación usuario, como GET /medicos/:id). Para login
+  // (HU-06) hay que pedirlo explícito con .addSelect("usuario.password_hash").
+  @Column({ type: "varchar", length: 255, name: "password_hash", select: false })
   passwordHash: string;
 
   @Column({ type: "varchar", length: 30, nullable: true })
