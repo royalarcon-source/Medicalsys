@@ -23,6 +23,7 @@ import servicioRoutes from "./routes/servicio.routes";
 import atencionServicioRoutes from "./routes/atencionServicio.routes";
 import campanaRoutes from "./routes/campana.routes";
 import promocionRoutes from "./routes/promocion.routes";
+import notificacionesRoutes from "./routes/notificaciones.routes";
 import path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
@@ -51,6 +52,7 @@ app.use("/api/servicios", servicioRoutes);
 app.use("/api/atenciones-servicios", atencionServicioRoutes);
 app.use("/api/campanas", campanaRoutes);
 app.use("/api/promociones", promocionRoutes);
+app.use("/api/notificaciones", notificacionesRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
