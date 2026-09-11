@@ -5,6 +5,7 @@ import { AppDataSource } from "../config/database";
 import { HorarioDisponibilidad } from "../entities/HorarioDisponibilidad.entity";
 import { ReservarCitaDTO, ReprogramarCitaDTO, CancelarCitaDTO, CitaFiltrosDTO } from "../dtos/cita.dto";
 import { AppError } from "../utils/AppError";
+import { notificacionService } from "./notificacion.service";
 import { Cita } from "../entities/Cita.entity";
 
 const NOMBRE_ROL_PACIENTE = "PACIENTE";
@@ -115,8 +116,18 @@ export class CitaService {
     });
 
     const guardada = await CitaRepository.save(nuevaCita);
-    return (await CitaRepository.buscarPorId(guardada.idCita))!;
-  }
+    const citaCompleta = (await CitaRepository.buscarPorId(guardada.idCita))!;
+
+    // HU-34: Generar notificación de cita automáticamente
+    try {
+      await notificacionService.generarNotificacionCita(citaCompleta);
+    } catch (err) {
+      console.error("No se pudo generar la notificación de la cita:", err);
+    }
+
+    return citaCompleta;
+  
+    }
 
   async reprogramar(idCita: number, dto: ReprogramarCitaDTO, usuarioActual: UsuarioAutenticado): Promise<Cita> {
     const cita = await CitaRepository.buscarPorId(idCita);
