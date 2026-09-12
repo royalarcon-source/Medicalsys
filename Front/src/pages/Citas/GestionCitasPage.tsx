@@ -13,6 +13,7 @@ import {
   liberarConsultorioDeCita,
   type ConsultorioItem,
 } from '../../services/consultoriosService';
+import { notificacionService } from '../../services/notificacionService';
 import {
   Calendar,
   UserCheck,
@@ -23,6 +24,7 @@ import {
   CheckCircle2,
   X,
   Edit,
+  MessageSquare,
 } from 'lucide-react';
 
 type EstadoCita = 'PENDIENTE' | 'CONFIRMADA' | 'ATENDIDA' | 'CANCELADA' | 'NO_ASISTIO';
@@ -33,6 +35,9 @@ export default function GestionCitasPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+
+  // WhatsApp HU-35
+  const [enviandoWppId, setEnviandoWppId] = useState<number | null>(null);
 
   // Reprogramación
   const [citaParaReprogramar, setCitaParaReprogramar] = useState<CitaItem | null>(null);
@@ -215,6 +220,34 @@ export default function GestionCitasPage() {
     }
   };
 
+  // HU-35: Enviar recordatorio por WhatsApp
+  const handleEnviarWhatsApp = async (idCita: number) => {
+    const token = localStorage.getItem('token') || '';
+    setError(null);
+    setMensajeExito(null);
+    setEnviandoWppId(idCita);
+
+    try {
+      const notificaciones = await notificacionService.obtenerPorCita(token, idCita);
+      const pendiente =
+        notificaciones.find((n) => n.canal === 'WHATSAPP' && n.estado === 'PENDIENTE') ||
+        notificaciones[0];
+
+      if (!pendiente) {
+        alert('No se encontró una notificación de recordatorio generada para esta cita.');
+        return;
+      }
+
+      const res = await notificacionService.enviarWhatsApp(token, pendiente.idNotificacion);
+      setMensajeExito(`Recordatorio de cita #${idCita} enviado.`);
+      window.open(res.enlaceWhatsApp, '_blank');
+    } catch (err: any) {
+      setError(err.message || 'Error al enviar recordatorio por WhatsApp.');
+    } finally {
+      setEnviandoWppId(null);
+    }
+  };
+
   const badgeClase = (estado: EstadoCita) => {
     switch (estado) {
       case 'PENDIENTE':
@@ -335,6 +368,20 @@ export default function GestionCitasPage() {
                       <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                         {puedeModificar ? (
                           <div style={{ display: 'inline-flex', gap: '6px', justifyContent: 'flex-end' }}>
+                            {esAdminOGestor && (
+                              <button
+                                type="button"
+                                className="button-secondary button-sm"
+                                onClick={() => handleEnviarWhatsApp(cita.idCita)}
+                                disabled={enviandoWppId === cita.idCita}
+                                title="Enviar recordatorio por WhatsApp (HU-35)"
+                                style={{ color: '#16a34a' }}
+                              >
+                                <MessageSquare size={13} />
+                                <span>{enviandoWppId === cita.idCita ? 'Enviando...' : 'WhatsApp'}</span>
+                              </button>
+                            )}
+
                             {esAdminOGestor && (
                               <button
                                 type="button"
