@@ -1,82 +1,84 @@
-import { NotificacionRepository } from "../repositories/NotificacionRepository";
-import { Cita } from "../entities/Cita.entity";
-import { AppError } from "../utils/AppError";
+export type EstadoNotificacion = 'PENDIENTE' | 'ENVIADA' | 'FALLIDA' | 'CANCELADA';
 
-export class NotificacionService {
-  // HU-34: Generar notificación de cita
-  async generarNotificacionCita(cita: Cita) {
-    if (!cita.paciente?.usuario) {
-      throw new AppError("El paciente no cuenta con usuario vinculado para notificaciones", 400);
-    }
-
-    const fechaStr = new Date(cita.fechaHoraInicio).toLocaleString("es-BO", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-
-    const nombreMedico = cita.medico?.usuario
-      ? `Dr(a). ${cita.medico.usuario.nombres} ${cita.medico.usuario.apellidos}`
-      : "su médico asignado";
-
-    const mensaje = `Hola ${cita.paciente.usuario.nombres}, le recordamos su cita médica con ${nombreMedico} programada para el día ${fechaStr}. Motivo: ${cita.motivo || "Consulta general"}. MedicalSys.`;
-
-    const notificacion = NotificacionRepository.create({
-      usuario: cita.paciente.usuario,
-      cita,
-      canal: "WHATSAPP",
-      tipo: "RECORDATORIO_CITA",
-      mensaje,
-      estado: "PENDIENTE",
-      fechaProgramada: new Date(),
-      fechaEnvio: null,
-    });
-
-    return await NotificacionRepository.save(notificacion);
-  }
-
-  // HU-35: Enviar recordatorio por WhatsApp
-  async enviarRecordatorioWhatsApp(idNotificacion: number) {
-    const notificacion = await NotificacionRepository.buscarPorId(idNotificacion);
-    if (!notificacion) {
-      throw new AppError("Notificación no encontrada", 404);
-    }
-
-    if (notificacion.estado === "ENVIADA") {
-      throw new AppError("Esta notificación ya fue enviada previamente", 400);
-    }
-
-    // Teléfono: prioridad teléfono de usuario, alternativo teléfono de emergencia
-    const telefono =
-      notificacion.usuario.telefono ||
-      notificacion.cita?.paciente?.telefonoEmergencia;
-
-    if (!telefono) {
-      notificacion.estado = "FALLIDA";
-      await NotificacionRepository.save(notificacion);
-      throw new AppError("El paciente no tiene un número telefónico registrado", 400);
-    }
-
-    const numeroLimpio = telefono.replace(/\D/g, "");
-    const enlaceWhatsApp = `https://api.whatsapp.com/send?phone=${numeroLimpio}&text=${encodeURIComponent(
-      notificacion.mensaje
-    )}`;
-
-    // Marcamos como enviada
-    notificacion.estado = "ENVIADA";
-    notificacion.fechaEnvio = new Date();
-    const actualizada = await NotificacionRepository.save(notificacion);
-
-    return {
-      mensaje: "Recordatorio de WhatsApp procesado exitosamente.",
-      notificacion: actualizada,
-      telefonoDestino: numeroLimpio,
-      enlaceWhatsApp,
-    };
-  }
-
-  async listarPorCita(idCita: number) {
-    return await NotificacionRepository.buscarPorCita(idCita);
-  }
+export interface NotificacionItem {
+  idNotificacion: number;
+  canal: 'WHATSAPP' | 'EMAIL' | 'SMS';
+  tipo: string;
+  mensaje: string;
+  estado: EstadoNotificacion;
+  fechaProgramada: string | null;
+  fechaEnvio: string | null;
 }
 
-export const notificacionService = new NotificacionService();
+export interface FiltrosNotificaciones {
+  estado?: EstadoNotificacion;
+  canal?: string;
+  idCita?: number;
+}
+
+export interface EnviarWhatsAppResponse {
+  mensaje: string;
+  notificacion: NotificacionItem;
+  telefonoDestino: string;
+  enlaceWhatsApp: string;
+}
+
+function getAuthHeaders(): Record<string, string> {
+  const token = window.localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function parseError(response: Response): Promise<string> {
+  const data = await response.json().catch(() => ({}));
+  return data?.message || data?.error || 'Ocurrió un error inesperado al procesar la solicitud.';
+}
+
+export async function listarNotificaciones(filtros: FiltrosNotificaciones = {}): Promise<NotificacionItem[]> {
+  const params = new URLSearchParams();
+  if (filtros.estado) params.set('estado', filtros.estado);
+  if (filtros.canal) params.set('canal', filtros.canal);
+  if (filtros.idCita) params.set('idCita', String(filtros.idCita));
+
+  const queryStr = params.toString() ? `?${params.toString()}` : '';
+  const res = await fetch(`/api/notificaciones${queryStr}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  const data = await res.json();
+  return data.notificaciones;
+}
+
+export async function obtenerNotificacionesPorCita(idCita: number): Promise<NotificacionItem[]> {
+  const res = await fetch(`/api/notificaciones/cita/${idCita}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+export async function enviarWhatsApp(idNotificacion: number): Promise<EnviarWhatsAppResponse> {
+  const res = await fetch(`/api/notificaciones/${idNotificacion}/enviar-whatsapp`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+// HU-36: registrar (actualizar) el estado de una notificación
+export async function registrarEstadoNotificacion(
+  idNotificacion: number,
+  estado: EstadoNotificacion,
+  motivo?: string
+): Promise<{ mensaje: string; notificacion: NotificacionItem }> {
+  const res = await fetch(`/api/notificaciones/${idNotificacion}/estado`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ estado, motivo }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}

@@ -13,7 +13,7 @@ import {
   liberarConsultorioDeCita,
   type ConsultorioItem,
 } from '../../services/consultoriosService';
-import { notificacionService } from '../../services/notificacionService';
+import { obtenerNotificacionesPorCita, enviarWhatsApp } from '../../services/notificacionService';
 import {
   Calendar,
   UserCheck,
@@ -222,13 +222,12 @@ export default function GestionCitasPage() {
 
   // HU-35: Enviar recordatorio por WhatsApp
   const handleEnviarWhatsApp = async (idCita: number) => {
-    const token = localStorage.getItem('token') || '';
     setError(null);
     setMensajeExito(null);
     setEnviandoWppId(idCita);
 
     try {
-      const notificaciones = await notificacionService.obtenerPorCita(token, idCita);
+      const notificaciones = await obtenerNotificacionesPorCita(idCita);
       const pendiente =
         notificaciones.find((n) => n.canal === 'WHATSAPP' && n.estado === 'PENDIENTE') ||
         notificaciones[0];
@@ -238,7 +237,7 @@ export default function GestionCitasPage() {
         return;
       }
 
-      const res = await notificacionService.enviarWhatsApp(token, pendiente.idNotificacion);
+      const res = await enviarWhatsApp(pendiente.idNotificacion);
       setMensajeExito(`Recordatorio de cita #${idCita} enviado.`);
       window.open(res.enlaceWhatsApp, '_blank');
     } catch (err: any) {

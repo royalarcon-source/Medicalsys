@@ -43,7 +43,13 @@ export type Permission =
   | "CAMPANA_VER"
   | "CAMPANA_GESTIONAR"
   | "PROMOCION_VER"
-  | "PROMOCION_GESTIONAR";
+  | "PROMOCION_GESTIONAR"
+  // HU-36: Registrar estado de notificación
+  | "NOTIFICACION_VER"
+  | "NOTIFICACION_GESTIONAR"
+  // HU-37: Publicar anuncios
+  | "ANUNCIO_VER"
+  | "ANUNCIO_GESTIONAR";
 
 export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
   ADMINISTRADOR: [
@@ -88,6 +94,12 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     "CAMPANA_GESTIONAR",
     "PROMOCION_VER",
     "PROMOCION_GESTIONAR",
+    // HU-36: el administrador gestiona el ciclo de vida de las notificaciones
+    "NOTIFICACION_VER",
+    "NOTIFICACION_GESTIONAR",
+    // HU-37: el administrador publica y gestiona anuncios
+    "ANUNCIO_VER",
+    "ANUNCIO_GESTIONAR",
   ],
   MEDICO: [
     "MEDICO_VER",
@@ -118,6 +130,10 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     // HU-32/HU-33: el médico solo consulta la zona de anuncios
     "CAMPANA_VER",
     "PROMOCION_VER",
+    // HU-36: el médico consulta el estado de las notificaciones (solo lectura)
+    "NOTIFICACION_VER",
+    // HU-37: el médico solo consulta la zona de anuncios
+    "ANUNCIO_VER",
   ],
   RECEPCIONISTA: [
     "MEDICO_VER",
@@ -147,6 +163,11 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     // HU-32/HU-33: recepción solo consulta la zona de anuncios
     "CAMPANA_VER",
     "PROMOCION_VER",
+    // HU-36: recepción gestiona el envío y estado de las notificaciones a pacientes
+    "NOTIFICACION_VER",
+    "NOTIFICACION_GESTIONAR",
+    // HU-37: recepción solo consulta la zona de anuncios
+    "ANUNCIO_VER",
   ],
   PACIENTE: [
     "ESPECIALIDAD_LISTAR",
@@ -167,6 +188,11 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     // HU-32/HU-33: el paciente ve la zona de anuncios (campañas y promociones)
     "CAMPANA_VER",
     "PROMOCION_VER",
+    // HU-36: el paciente consulta únicamente sus propias notificaciones (restricción de
+    // propiedad aplicada en el service, igual que PACIENTE_CONSULTAR/FACTURA_VER)
+    "NOTIFICACION_VER",
+    // HU-37: el paciente ve la zona de anuncios publicados
+    "ANUNCIO_VER",
   ],
 };
 

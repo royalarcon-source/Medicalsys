@@ -19,6 +19,8 @@ import TratamientosPage from '../pages/Tratamientos/TratamientosPage';
 import ConsentimientosPage from '../pages/Consentimientos/ConsentimientosPage';
 import FacturacionPage from '../pages/Facturacion/FacturacionPage';
 import MarketingPage from '../pages/Marketing/MarketingPage';
+import NotificacionesPage from '../pages/Notificaciones/NotificacionesPage';
+import AnunciosPage from '../pages/Anuncios/AnunciosPage';
 import RequireAuth from './RequireAuth';
 
 export default function AppRoutes() {
@@ -167,6 +169,22 @@ export default function AppRoutes() {
         element={
           <RequireAuth>
             <MarketingPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/notificaciones"
+        element={
+          <RequireAuth>
+            <NotificacionesPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/anuncios"
+        element={
+          <RequireAuth>
+            <AnunciosPage />
           </RequireAuth>
         }
       />

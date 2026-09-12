@@ -1,6 +1,18 @@
 import { NotificacionRepository } from "../repositories/NotificacionRepository";
 import { Cita } from "../entities/Cita.entity";
+import { Notificacion } from "../entities/Notificacion.entity";
 import { AppError } from "../utils/AppError";
+import { EstadoNotificacion, FiltroNotificacionesDTO, RegistrarEstadoNotificacionDTO } from "../dtos/notificacion.dto";
+
+type UsuarioAutenticado = { idUsuario: number; rol: string };
+
+// HU-36: transiciones válidas del ciclo de vida de una notificación
+const TRANSICIONES_VALIDAS: Record<EstadoNotificacion, EstadoNotificacion[]> = {
+  PENDIENTE: ["ENVIADA", "FALLIDA", "CANCELADA"],
+  ENVIADA: ["FALLIDA"],
+  FALLIDA: [],
+  CANCELADA: [],
+};
 
 export class NotificacionService {
   // HU-34: Generar notificación de cita
@@ -34,6 +46,34 @@ export class NotificacionService {
     return await NotificacionRepository.save(notificacion);
   }
 
+  // HU-36: Registrar (actualizar) el estado de una notificación validando la máquina de estados
+  async registrarEstado(
+    idNotificacion: number,
+    dto: RegistrarEstadoNotificacionDTO
+  ): Promise<Notificacion> {
+    const notificacion = await NotificacionRepository.buscarPorId(idNotificacion);
+    if (!notificacion) {
+      throw new AppError("Notificación no encontrada", 404);
+    }
+
+    const estadoActual = notificacion.estado as EstadoNotificacion;
+    const permitidos = TRANSICIONES_VALIDAS[estadoActual] ?? [];
+
+    if (!permitidos.includes(dto.estado)) {
+      throw new AppError(
+        `No se puede cambiar la notificación de "${estadoActual}" a "${dto.estado}".`,
+        400
+      );
+    }
+
+    notificacion.estado = dto.estado;
+    if (dto.estado === "ENVIADA") {
+      notificacion.fechaEnvio = new Date();
+    }
+
+    return NotificacionRepository.save(notificacion);
+  }
+
   // HU-35: Enviar recordatorio por WhatsApp
   async enviarRecordatorioWhatsApp(idNotificacion: number) {
     const notificacion = await NotificacionRepository.buscarPorId(idNotificacion);
@@ -51,8 +91,8 @@ export class NotificacionService {
       notificacion.cita?.paciente?.telefonoEmergencia;
 
     if (!telefono) {
-      notificacion.estado = "FALLIDA";
-      await NotificacionRepository.save(notificacion);
+      // HU-36: registrar el fallo de envío en el estado de la notificación
+      await this.registrarEstado(idNotificacion, { estado: "FALLIDA", motivo: "Sin número telefónico registrado" });
       throw new AppError("El paciente no tiene un número telefónico registrado", 400);
     }
 
@@ -61,10 +101,8 @@ export class NotificacionService {
       notificacion.mensaje
     )}`;
 
-    // Marcamos como enviada
-    notificacion.estado = "ENVIADA";
-    notificacion.fechaEnvio = new Date();
-    const actualizada = await NotificacionRepository.save(notificacion);
+    // HU-36: registrar el envío exitoso como cambio de estado validado
+    const actualizada = await this.registrarEstado(idNotificacion, { estado: "ENVIADA" });
 
     return {
       mensaje: "Recordatorio de WhatsApp procesado exitosamente.",
@@ -74,8 +112,38 @@ export class NotificacionService {
     };
   }
 
+  // HU-36: cancelar automáticamente las notificaciones pendientes de una cita cancelada
+  async cancelarPendientesPorCita(idCita: number): Promise<void> {
+    const notificaciones = await NotificacionRepository.buscarPorCita(idCita);
+    for (const notificacion of notificaciones.filter((n) => n.estado === "PENDIENTE")) {
+      await this.registrarEstado(notificacion.idNotificacion, { estado: "CANCELADA", motivo: "Cita cancelada" });
+    }
+  }
+
   async listarPorCita(idCita: number) {
     return await NotificacionRepository.buscarPorCita(idCita);
+  }
+
+  // HU-36: listado con filtros; un PACIENTE solo puede ver sus propias notificaciones
+  async listar(filtros: FiltroNotificacionesDTO = {}, authUser?: UsuarioAutenticado): Promise<Notificacion[]> {
+    if (authUser?.rol === "PACIENTE") {
+      filtros.idUsuario = authUser.idUsuario;
+    }
+    return NotificacionRepository.listar(filtros);
+  }
+
+  // HU-36: consulta por ID con la misma restricción de propiedad para PACIENTE
+  async obtenerPorId(idNotificacion: number, authUser?: UsuarioAutenticado): Promise<Notificacion> {
+    const notificacion = await NotificacionRepository.buscarPorId(idNotificacion);
+    if (!notificacion) {
+      throw new AppError("Notificación no encontrada", 404);
+    }
+
+    if (authUser?.rol === "PACIENTE" && notificacion.usuario.idUsuario !== authUser.idUsuario) {
+      throw new AppError("Acceso denegado: solo puede consultar sus propias notificaciones.", 403);
+    }
+
+    return notificacion;
   }
 }
 

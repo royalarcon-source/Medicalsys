@@ -206,6 +206,14 @@ export class CitaService {
 
     cita.estado = "CANCELADA";
     await CitaRepository.save(cita);
+
+    // HU-36: registrar como CANCELADA cualquier notificación pendiente de esta cita
+    try {
+      await notificacionService.cancelarPendientesPorCita(idCita);
+    } catch (err) {
+      console.error("No se pudieron cancelar las notificaciones pendientes de la cita:", err);
+    }
+
     return (await CitaRepository.buscarPorId(idCita))!;
   }
 

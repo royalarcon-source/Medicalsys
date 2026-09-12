@@ -1,6 +1,15 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.anuncio (
+  id_anuncio bigint NOT NULL DEFAULT nextval('anuncio_id_anuncio_seq'::regclass),
+  titulo character varying NOT NULL,
+  contenido text NOT NULL,
+  fecha_publicacion date,
+  fecha_expiracion date,
+  estado character varying NOT NULL DEFAULT 'BORRADOR'::character varying CHECK (estado::text = ANY (ARRAY['BORRADOR'::character varying, 'PUBLICADO'::character varying, 'ARCHIVADO'::character varying]::text[])),
+  CONSTRAINT anuncio_pkey PRIMARY KEY (id_anuncio)
+);
 CREATE TABLE public.campana (
   id_campana bigint NOT NULL DEFAULT nextval('campana_id_campana_seq'::regclass),
   nombre character varying NOT NULL,

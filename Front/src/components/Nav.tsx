@@ -14,6 +14,8 @@ import {
   Shield,
   Receipt,
   Megaphone,
+  Bell,
+  Newspaper,
   LogOut,
   LogIn,
   UserCheck,
@@ -134,6 +136,20 @@ export default function Nav() {
             <NavLink to="/marketing" end>
               <Megaphone size={16} />
               <span>Marketing</span>
+            </NavLink>
+          )}
+
+          {token && (
+            <NavLink to="/anuncios" end>
+              <Newspaper size={16} />
+              <span>Anuncios</span>
+            </NavLink>
+          )}
+
+          {token && (
+            <NavLink to="/notificaciones" end>
+              <Bell size={16} />
+              <span>Notificaciones</span>
             </NavLink>
           )}
 
