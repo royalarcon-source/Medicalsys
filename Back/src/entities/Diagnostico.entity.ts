@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { Consulta } from "./Consulta.entity";
+import { encryptionTransformer } from "../utils/encryption";
 
 @Entity({ name: "diagnostico" })
 export class Diagnostico {
@@ -13,7 +14,7 @@ export class Diagnostico {
   @Column({ type: "varchar", length: 30, nullable: true })
   codigo: string | null;
 
-  @Column({ type: "varchar", length: 500 })
+  @Column({ type: "varchar", length: 500, transformer: encryptionTransformer })
   descripcion: string;
 
   @Column({ type: "varchar", length: 30, nullable: true })
