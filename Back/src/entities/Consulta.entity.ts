@@ -14,6 +14,7 @@ import { Cita } from "./Cita.entity";
 import { Consultorio } from "./Consultorio.entity";
 import { Diagnostico } from "./Diagnostico.entity";
 import { Tratamiento } from "./Tratamiento.entity";
+import { encryptionTransformer } from "../utils/encryption";
 
 export type TipoIngreso = "CONSULTA_ESPONTANEA" | "SOBRECUPO" | "URGENCIA_MENOR" | "CITA_PROGRAMADA";
 export type EstadoConsulta = "EN_ESPERA" | "EN_ATENCION" | "ATENDIDA" | "CANCELADA";
@@ -48,16 +49,16 @@ export class Consulta {
   @CreateDateColumn({ type: "timestamp", name: "fecha_consulta" })
   fechaConsulta: Date;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, transformer: encryptionTransformer })
   motivo: string | null;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, transformer: encryptionTransformer })
   anamnesis: string | null;
 
-  @Column({ type: "text", nullable: true, name: "examen_fisico" })
+  @Column({ type: "text", nullable: true, name: "examen_fisico", transformer: encryptionTransformer })
   examenFisico: string | null;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, transformer: encryptionTransformer })
   observaciones: string | null;
 
   @Column({
