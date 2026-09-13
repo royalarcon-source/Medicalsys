@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
 } from "typeorm";
 import { Paciente } from "./Paciente.entity";
+import { encryptionTransformer } from "../utils/encryption";
 
 @Entity({ name: "historia_clinica" })
 export class HistoriaClinica {
@@ -20,6 +21,6 @@ export class HistoriaClinica {
   @CreateDateColumn({ type: "timestamp", name: "fecha_apertura" })
   fechaApertura: Date;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, transformer: encryptionTransformer })
   observaciones: string | null;
 }
