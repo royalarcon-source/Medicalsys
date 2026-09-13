@@ -1,6 +1,6 @@
 # Documentación de Arquitectura y Diagramas UML — MedicalSys (Sprint 5)
 
-Este documento contiene los tres diagramas principales del sistema **MedicalSys** estructurados en sintaxis **Mermaid**:
+Este documento contiene los tres diagramas principales del sistema **MedicalSys** estructurados en sintaxis **Mermaid** estándar:
 
 1. **Diagrama de Componentes (Arquitectura general)**
 2. **Modelado UML (Diagrama de Clases del Dominio)**
@@ -11,55 +11,53 @@ Este documento contiene los tres diagramas principales del sistema **MedicalSys*
 ## 1. Diagrama de Componentes (Component Diagram)
 
 ```mermaid
-componentDiagram
-    package "Capa de Presentación (Frontend - React + Vite)" {
-        [React App / UI] as UI
-        [AuthContext / Token Storage] as AuthCtx
-        [API Services (Fetch Clients)] as APIClients
-    }
+flowchart TB
+    subgraph Front["Capa de Presentación (Frontend - React + Vite)"]
+        UI["React App / UI"]
+        AuthCtx["AuthContext / Token Storage"]
+        APIClients["API Services (Fetch Clients)"]
+    end
 
-    package "Capa de Aplicación y API (Backend - Node.js / Express 5)" {
-        [Express Router / Endpoints] as Router
+    subgraph Back["Capa de Aplicación y API (Backend - Node.js / Express 5)"]
+        Router["Express Router / Endpoints"]
         
-        package "Middlewares" {
-            [authMiddleware / requirePermission] as AuthMw
-            [errorHandler Middleware] as ErrorMw
-            [Multer Upload Middleware] as UploadMw
-        }
+        subgraph Middlewares["Middlewares"]
+            AuthMw["authMiddleware / requirePermission"]
+            ErrorMw["errorHandler Middleware"]
+            UploadMw["Multer Upload Middleware"]
+        end
         
-        package "Controladores (Controllers)" {
-            [AuthController] as AuthCtrl
-            [PacienteController] as PacienteCtrl
-            [ConsultaController] as ConsultaCtrl
-            [AuditLogController] as AuditCtrl
-            [FacturaController] as FacturaCtrl
-        }
+        subgraph Controllers["Controladores (Controllers)"]
+            AuthCtrl["AuthController"]
+            PacienteCtrl["PacienteController"]
+            ConsultaCtrl["ConsultaController"]
+            AuditCtrl["AuditLogController"]
+            FacturaCtrl["FacturaController"]
+        end
         
-        package "Servicios de Negocio (Services)" {
-            [PacienteService] as PacienteSvc
-            [ConsultaService] as ConsultaSvc
-            [AuditLogService] as AuditSvc
-            [AnuncioService] as AnuncioSvc
-            [FacturaService] as FacturaSvc
-        }
+        subgraph Services["Servicios de Negocio (Services)"]
+            PacienteSvc["PacienteService"]
+            ConsultaSvc["ConsultaService"]
+            AuditSvc["AuditLogService"]
+            AnuncioSvc["AnuncioService"]
+            FacturaSvc["FacturaService"]
+        end
 
-        package "Utilidades de Infraestructura" {
-            [crypto / AES-256-GCM (encryption.ts)] as CryptoUtil
-            [TypeORM ValueTransformer] as EncTransformer
-        }
-    }
+        subgraph Utils["Utilidades de Infraestructura"]
+            CryptoUtil["crypto / AES-256-GCM (encryption.ts)"]
+            EncTransformer["TypeORM ValueTransformer"]
+        end
+    end
 
-    package "Capa de Persistencia e Infraestructura Externa" {
-        [TypeORM DataSource / Repositories] as TypeORM
-        database "PostgreSQL (Supabase DB)" as PostgresDB {
-            [Tablas: paciente, consulta, audit_log, etc.] as Tables
-        }
-        cloud "Cloudinary API" as Cloudinary
-    }
+    subgraph Infra["Capa de Persistencia e Infraestructura Externa"]
+        TypeORM["TypeORM DataSource / Repositories"]
+        PostgresDB[("PostgreSQL - Supabase DB")]
+        Cloudinary["Cloudinary API"]
+    end
 
     UI --> AuthCtx
     UI --> APIClients
-    APIClients --> Router : HTTP / REST (JSON + JWT)
+    APIClients -->|HTTP / REST JSON + JWT| Router
 
     Router --> AuthMw
     AuthMw --> Router
@@ -80,14 +78,14 @@ componentDiagram
     PacienteSvc --> EncTransformer
     ConsultaSvc --> EncTransformer
     EncTransformer --> CryptoUtil
-    ErrorMw --> AuditSvc : Log ERROR_INTERNO (500)
+    ErrorMw -->|Log ERROR_INTERNO 500| AuditSvc
 
     PacienteSvc --> TypeORM
     ConsultaSvc --> TypeORM
     AuditSvc --> TypeORM
     FacturaSvc --> TypeORM
-    TypeORM --> Tables : SQL Queries
-    UploadMw --> Cloudinary : Subida de archivos
+    TypeORM -->|SQL Queries| PostgresDB
+    UploadMw -->|Subida de archivos| Cloudinary
 ```
 
 ---
@@ -118,9 +116,9 @@ classDiagram
         +string documentoIdentidad
         +Date fechaNacimiento
         +string sexo
-        +string direccion [Encrypted]
-        +string contactoEmergencia [Encrypted]
-        +string telefonoEmergencia [Encrypted]
+        +string direccion
+        +string contactoEmergencia
+        +string telefonoEmergencia
         +Date fechaRegistro
     }
 
@@ -139,16 +137,16 @@ classDiagram
     class HistoriaClinica {
         +bigint idHistoria
         +Date fechaApertura
-        +string observaciones [Encrypted]
+        +string observaciones
     }
 
     class Consulta {
         +bigint idConsulta
         +Date fechaConsulta
-        +string motivo [Encrypted]
-        +string anamnesis [Encrypted]
-        +string examenFisico [Encrypted]
-        +string observaciones [Encrypted]
+        +string motivo
+        +string anamnesis
+        +string examenFisico
+        +string observaciones
         +string tipoIngreso
         +int numeroTurno
         +string estadoConsulta
@@ -157,14 +155,14 @@ classDiagram
     class Diagnostico {
         +bigint idDiagnostico
         +string codigo
-        +string descripcion [Encrypted]
+        +string descripcion
         +string tipo
     }
 
     class Tratamiento {
         +bigint idTratamiento
-        +string descripcion [Encrypted]
-        +string indicaciones [Encrypted]
+        +string descripcion
+        +string indicaciones
         +Date fechaInicio
         +Date fechaFin
     }
@@ -180,8 +178,8 @@ classDiagram
         +bigint idFactura
         +string numeroFactura
         +Date fechaEmision
-        +string nitCliente [Encrypted]
-        +string razonSocial [Encrypted]
+        +string nitCliente
+        +string razonSocial
         +decimal subtotal
         +decimal impuestos
         +decimal total
@@ -212,18 +210,18 @@ classDiagram
         +string estado
     }
 
-    Usuario "1" -- "1" Rol : tiene >
-    Paciente "0..1" -- "1" Usuario : asociado a >
-    Medico "0..1" -- "1" Usuario : asociado a >
-    Medico "*" -- "*" Especialidad : especialidades >
-    HistoriaClinica "1" -- "1" Paciente : pertenece a >
-    Consulta "*" -- "1" HistoriaClinica : registrada en >
-    Consulta "*" -- "1" Medico : atendida por >
-    Consulta "0..1" -- "0..1" Cita : vinculada a >
-    Diagnostico "*" -- "1" Consulta : genera <
-    Tratamiento "*" -- "1" Consulta : prescribe <
-    Factura "*" -- "1" Paciente : facturada a >
-    AuditLog "*" -- "0..1" Usuario : ejecutado por >
+    Usuario "1" -- "1" Rol : tiene
+    Paciente "0..1" -- "1" Usuario : asociado_a
+    Medico "0..1" -- "1" Usuario : asociado_a
+    Medico "*" -- "*" Especialidad : especialidades
+    HistoriaClinica "1" -- "1" Paciente : pertenece_a
+    Consulta "*" -- "1" HistoriaClinica : registrada_en
+    Consulta "*" -- "1" Medico : atendida_por
+    Consulta "0..1" -- "0..1" Cita : vinculada_a
+    Diagnostico "*" -- "1" Consulta : genera
+    Tratamiento "*" -- "1" Consulta : prescribe
+    Factura "*" -- "1" Paciente : facturada_a
+    AuditLog "*" -- "0..1" Usuario : ejecutado_por
 ```
 
 ---
@@ -242,10 +240,10 @@ sequenceDiagram
     participant Postgres as PostgreSQL (Supabase)
     participant AuditSvc as AuditLogService
 
-    Note over MedicoUser, Postgres: ⏱️ T0: Envío de Petición HTTP POST /api/consultas
+    Note over MedicoUser, Postgres: T0: Envío de Petición HTTP POST /api/consultas
     MedicoUser->>Express: POST /api/consultas (JWT + Payload plano)
     
-    Note over Express: ⏱️ T1: Autenticación y Autorización (JWT Check)
+    Note over Express: T1: Autenticación y Autorización (JWT Check)
     Express->>Express: Validar JWT y Permiso "CONSULTA_CREAR"
     
     alt Token o Permiso Inválido
@@ -255,21 +253,21 @@ sequenceDiagram
         Express->>Controller: req.user + req.body
         Controller->>Service: crearConsulta(datos)
         
-        Note over Service, Encrypter: ⏱️ T2: Transformación y Cifrado AES-256-GCM
+        Note over Service, Encrypter: T2: Transformación y Cifrado AES-256-GCM
         Service->>Encrypter: encrypt(anamnesis, examenFisico, motivo)
         Encrypter-->>Service: iv:authTag:ciphertext (hex)
         
-        Note over Service, Postgres: ⏱️ T3: Inserción en Base de Datos
+        Note over Service, Postgres: T3: Inserción en Base de Datos
         Service->>TypeORM: save(ConsultaEntity)
         TypeORM->>Postgres: INSERT INTO consulta (motivo, anamnesis, ...) VALUES ('cifrado...', 'cifrado...')
         Postgres-->>TypeORM: OK (id_consulta: 105)
         TypeORM-->>Service: Consulta Guardada
         
-        Note over Service, AuditSvc: ⏱️ T4: Auditoría Asíncrona (Fire-and-Forget)
+        Note over Service, AuditSvc: T4: Auditoría Asíncrona (Fire-and-Forget)
         Service-)AuditSvc: AuditLogService.registrar("CONSULTA_CREAR", "EXITO")
         AuditSvc-)Postgres: INSERT INTO audit_log (...)
         
-        Note over Service, MedicoUser: ⏱️ T5: Respuesta al Cliente (Descifrado transparente)
+        Note over Service, MedicoUser: T5: Respuesta al Cliente (Descifrado transparente)
         Service-->>Controller: DTO Consulta
         Controller-->>MedicoUser: 201 Created (Payload JSON)
     end
