@@ -30,6 +30,9 @@ import { FixFacturaEstadoDefault1788566700000 } from "../migrations/178856670000
 import { AddResourceTypeToDocumento1788566800000 } from "../migrations/1788566800000-AddResourceTypeToDocumento";
 import { CreateAnuncioTable1788566900000 } from "../migrations/1788566900000-CreateAnuncioTable";
 import { Anuncio } from "../entities/Anuncio.entity";
+import { AuditLog } from "../entities/AuditLog.entity";
+import { CreateAuditLogTable1789000000000 } from "../migrations/1789000000000-CreateAuditLogTable";
+import { ExpandColumnsForEncryption1789000000001 } from "../migrations/1789000000001-ExpandColumnsForEncryption";
 import path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
@@ -58,7 +61,7 @@ export const AppDataSource = new DataSource({
     Campana, Cita, Consentimiento, Consulta, Consultorio, DetalleFactura,
     Diagnostico, Documento, Especialidad, Factura, HistoriaClinica,
     HorarioDisponibilidad, Medico, Notificacion, Paciente, Promocion, Rol,
-    Servicio, Tratamiento, Usuario, AtencionServicio, Anuncio,
+    Servicio, Tratamiento, Usuario, AtencionServicio, Anuncio, AuditLog,
   ],
   migrations: [
     InitialSchemaBaseline1787529278750,
@@ -68,5 +71,7 @@ export const AppDataSource = new DataSource({
     FixFacturaEstadoDefault1788566700000,
     AddResourceTypeToDocumento1788566800000,
     CreateAnuncioTable1788566900000,
+    CreateAuditLogTable1789000000000,
+    ExpandColumnsForEncryption1789000000001,
   ],
 });
