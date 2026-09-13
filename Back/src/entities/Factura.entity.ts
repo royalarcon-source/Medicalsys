@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { Paciente } from "./Paciente.entity";
 import { DetalleFactura } from "./DetalleFactura.entity";
+import { encryptionTransformer } from "../utils/encryption";
 
 @Entity({ name: "factura" })
 export class Factura {
@@ -25,10 +26,10 @@ export class Factura {
   @CreateDateColumn({ type: "timestamp", name: "fecha_emision" })
   fechaEmision: Date;
 
-  @Column({ type: "varchar", length: 30, nullable: true, name: "nit_cliente" })
+  @Column({ type: "varchar", length: 30, nullable: true, name: "nit_cliente", transformer: encryptionTransformer })
   nitCliente: string | null;
 
-  @Column({ type: "varchar", length: 200, nullable: true, name: "razon_social" })
+  @Column({ type: "varchar", length: 200, nullable: true, name: "razon_social", transformer: encryptionTransformer })
   razonSocial: string | null;
 
   @Column({ type: "numeric", precision: 12, scale: 2, default: 0 })
