@@ -50,7 +50,7 @@ export type Permission =
   // HU-37: Publicar anuncios
   | "ANUNCIO_VER"
   | "ANUNCIO_GESTIONAR"
-  // HU-37: Consultar registros de auditoría (solo ADMINISTRADOR)
+  // HU-39: Consultar registros de auditoría (solo ADMINISTRADOR)
   | "AUDITORIA_VER";
 
 export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
