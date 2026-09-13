@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { Consulta } from "./Consulta.entity";
+import { encryptionTransformer } from "../utils/encryption";
 
 @Entity({ name: "tratamiento" })
 export class Tratamiento {
@@ -10,10 +11,10 @@ export class Tratamiento {
   @JoinColumn({ name: "id_consulta" })
   consulta: Consulta;
 
-  @Column({ type: "text" })
+  @Column({ type: "text", transformer: encryptionTransformer })
   descripcion: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, transformer: encryptionTransformer })
   indicaciones: string | null;
 
   @Column({ type: "date", nullable: true, name: "fecha_inicio" })
