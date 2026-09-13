@@ -16,6 +16,7 @@ import {
   Megaphone,
   Bell,
   Newspaper,
+  ShieldCheck,
   LogOut,
   LogIn,
   UserCheck,
@@ -150,6 +151,13 @@ export default function Nav() {
             <NavLink to="/notificaciones" end>
               <Bell size={16} />
               <span>Notificaciones</span>
+            </NavLink>
+          )}
+
+          {token && usuario?.rol === 'ADMINISTRADOR' && (
+            <NavLink to="/auditoria" end>
+              <ShieldCheck size={16} />
+              <span>Auditoría</span>
             </NavLink>
           )}
 
