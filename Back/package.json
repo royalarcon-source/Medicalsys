@@ -15,6 +15,8 @@
     "test:hu24-25-http": "ts-node-dev --transpile-only src/scripts/test/hu24_25.http.integration.ts",
     "test:hu32-33": "ts-node-dev --transpile-only src/scripts/test/test-hu32-hu33-marketing.ts",
     "test:hu36-37": "ts-node-dev --transpile-only src/scripts/test/test-hu36-hu37.ts",
+    "test:hu38": "ts-node-dev --transpile-only src/scripts/test/test-hu38-encryption.ts",
+    "verificar:bd": "ts-node-dev --transpile-only src/scripts/test/verificar-bd-hu38-hu39.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
