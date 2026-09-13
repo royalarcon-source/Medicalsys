@@ -282,6 +282,7 @@ classDiagram
         +Date fechaEnvio
     }
 
+    %% Relaciones entre Clases del Dominio
     Usuario "1" -- "1" Rol : posee
     Paciente "0..1" -- "1" Usuario : cuenta_usuario
     Medico "0..1" -- "1" Usuario : cuenta_usuario
