@@ -49,7 +49,9 @@ export type Permission =
   | "NOTIFICACION_GESTIONAR"
   // HU-37: Publicar anuncios
   | "ANUNCIO_VER"
-  | "ANUNCIO_GESTIONAR";
+  | "ANUNCIO_GESTIONAR"
+  // HU-37: Consultar registros de auditoría (solo ADMINISTRADOR)
+  | "AUDITORIA_VER";
 
 export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
   ADMINISTRADOR: [
@@ -100,6 +102,8 @@ export const ROLE_PERMISSIONS: Record<RoleName, Permission[]> = {
     // HU-37: el administrador publica y gestiona anuncios
     "ANUNCIO_VER",
     "ANUNCIO_GESTIONAR",
+    // HU-37: solo el administrador puede consultar el log de auditoría
+    "AUDITORIA_VER",
   ],
   MEDICO: [
     "MEDICO_VER",
