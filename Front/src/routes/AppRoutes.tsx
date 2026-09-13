@@ -21,6 +21,7 @@ import FacturacionPage from '../pages/Facturacion/FacturacionPage';
 import MarketingPage from '../pages/Marketing/MarketingPage';
 import NotificacionesPage from '../pages/Notificaciones/NotificacionesPage';
 import AnunciosPage from '../pages/Anuncios/AnunciosPage';
+import AuditoriaPage from '../pages/Auditoria/AuditoriaPage';
 import RequireAuth from './RequireAuth';
 
 export default function AppRoutes() {
@@ -185,6 +186,14 @@ export default function AppRoutes() {
         element={
           <RequireAuth>
             <AnunciosPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/auditoria"
+        element={
+          <RequireAuth rolesPermitidos={['ADMINISTRADOR']}>
+            <AuditoriaPage />
           </RequireAuth>
         }
       />
