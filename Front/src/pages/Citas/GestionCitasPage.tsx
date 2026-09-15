@@ -237,8 +237,18 @@ export default function GestionCitasPage() {
         return;
       }
 
-      const res = await enviarWhatsApp(pendiente.idNotificacion);
-      setMensajeExito(`Recordatorio de cita #${idCita} enviado.`);
+      let forzar = false;
+      if (pendiente.estado === 'ENVIADA') {
+        const fecha = pendiente.fechaEnvio ? new Date(pendiente.fechaEnvio).toLocaleString('es-BO') : 'una fecha anterior';
+        const confirmar = window.confirm(
+          `Esta notificación ya está marcada como ENVIADA (${fecha}). Si el mensaje nunca llegó a WhatsApp (por ejemplo, si se cerró WhatsApp Web antes de mandarlo), podés reenviarla.\n\n¿Querés reenviar el recordatorio de todas formas?`
+        );
+        if (!confirmar) return;
+        forzar = true;
+      }
+
+      const res = await enviarWhatsApp(pendiente.idNotificacion, forzar);
+      setMensajeExito(`Recordatorio de cita #${idCita} ${forzar ? 'reenviado' : 'enviado'}.`);
       window.open(res.enlaceWhatsApp, '_blank');
     } catch (err: any) {
       setError(err.message || 'Error al enviar recordatorio por WhatsApp.');

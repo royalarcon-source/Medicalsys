@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import {
   listarAnuncios,
@@ -7,7 +7,9 @@ import {
   type AnuncioItem,
   type EstadoAnuncio,
 } from '../../services/anuncioService';
-import { Newspaper, Plus, X, RefreshCw, Clock, ArrowRight } from 'lucide-react';
+import { Newspaper, Plus, X, RefreshCw, Clock, ArrowRight, Eye } from 'lucide-react';
+
+type Periodo = 'hoy' | 'semana' | 'mes' | 'todos';
 
 const TRANSICIONES_VALIDAS: Record<EstadoAnuncio, EstadoAnuncio[]> = {
   BORRADOR: ['PUBLICADO', 'ARCHIVADO'],
@@ -21,14 +23,36 @@ const BADGE_POR_ESTADO: Record<EstadoAnuncio, string> = {
   ARCHIVADO: 'badge badge-cancelada',
 };
 
+// Comparaciones por string "YYYY-MM-DD" (así llega fechaPublicacion del backend) en vez de
+// construir objetos Date, para no repetir el desfase de huso horario que ya se documentó
+// para Campaña/Promoción (HU-32/33) con columnas "date".
+function hoyYYYYMMDD(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function inicioYFinDeSemana(): [string, string] {
+  const d = new Date();
+  const dia = d.getDay(); // 0 = domingo
+  const diffInicio = dia === 0 ? 6 : dia - 1; // semana de lunes a domingo
+  const inicio = new Date(d);
+  inicio.setDate(d.getDate() - diffInicio);
+  const fin = new Date(inicio);
+  fin.setDate(inicio.getDate() + 6);
+  const fmt = (x: Date) => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+  return [fmt(inicio), fmt(fin)];
+}
+
 export default function AnunciosPage() {
   const { usuario } = useAuth();
   const esAdmin = usuario?.rol === 'ADMINISTRADOR';
 
   const [anuncios, setAnuncios] = useState<AnuncioItem[]>([]);
+  const [filtroPeriodo, setFiltroPeriodo] = useState<Periodo>('mes');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  const [anuncioSeleccionado, setAnuncioSeleccionado] = useState<AnuncioItem | null>(null);
 
   const [mostrarForm, setMostrarForm] = useState(false);
   const [titulo, setTitulo] = useState('');
@@ -54,6 +78,24 @@ export default function AnunciosPage() {
     cargarDatos();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Filtro por período (hoy/semana/mes) para no tener que revisar todo el historial —
+  // sobre todo pensado para el paciente, que solo quiere ver lo reciente. Un anuncio sin
+  // fechaPublicacion (BORRADOR, solo lo ve el administrador) se muestra siempre: todavía
+  // no tiene una fecha de publicación con la cual filtrar.
+  const anunciosFiltrados = useMemo(() => {
+    if (filtroPeriodo === 'todos') return anuncios;
+
+    const hoy = hoyYYYYMMDD();
+    const [inicioSemana, finSemana] = inicioYFinDeSemana();
+
+    return anuncios.filter((a) => {
+      if (!a.fechaPublicacion) return true;
+      if (filtroPeriodo === 'hoy') return a.fechaPublicacion === hoy;
+      if (filtroPeriodo === 'semana') return a.fechaPublicacion >= inicioSemana && a.fechaPublicacion <= finSemana;
+      return a.fechaPublicacion.slice(0, 7) === hoy.slice(0, 7); // 'mes'
+    });
+  }, [anuncios, filtroPeriodo]);
 
   const handleCrear = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +154,13 @@ export default function AnunciosPage() {
               Comunicados y avisos generales del centro médico para pacientes y personal.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <select value={filtroPeriodo} onChange={(e) => setFiltroPeriodo(e.target.value as Periodo)}>
+              <option value="hoy">Hoy</option>
+              <option value="semana">Esta semana</option>
+              <option value="mes">Este mes</option>
+              <option value="todos">Todos</option>
+            </select>
             <button type="button" onClick={cargarDatos} className="button-secondary">
               <RefreshCw size={15} />
               <span>Actualizar</span>
@@ -202,12 +250,16 @@ export default function AnunciosPage() {
             <Newspaper size={32} className="empty-state-icon" />
             <p>No hay anuncios publicados por el momento.</p>
           </div>
+        ) : anunciosFiltrados.length === 0 ? (
+          <div className="empty-state">
+            <Clock size={32} className="empty-state-icon" />
+            <p>No hay anuncios en el período seleccionado.</p>
+          </div>
         ) : (
           <div className="table-container" style={{ marginTop: '12px' }}>
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Título</th>
                   <th>Publicación</th>
                   <th>Expiración</th>
@@ -216,20 +268,24 @@ export default function AnunciosPage() {
                 </tr>
               </thead>
               <tbody>
-                {anuncios.map((a) => (
-                  <tr key={a.idAnuncio}>
-                    <td><strong>#{a.idAnuncio}</strong></td>
+                {anunciosFiltrados.map((a) => (
+                  <tr
+                    key={a.idAnuncio}
+                    onClick={() => setAnuncioSeleccionado(a)}
+                    style={{ cursor: 'pointer' }}
+                    title="Ver anuncio completo"
+                  >
                     <td>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Eye size={13} style={{ color: 'var(--text-muted)' }} />
                         <strong>{a.titulo}</strong>
-                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{a.contenido}</span>
                       </div>
                     </td>
                     <td>{formatearFecha(a.fechaPublicacion)}</td>
                     <td>{formatearFecha(a.fechaExpiracion)}</td>
                     <td><span className={BADGE_POR_ESTADO[a.estado]}>{a.estado}</span></td>
                     {esAdmin && (
-                      <td style={{ textAlign: 'right' }}>
+                      <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                           {TRANSICIONES_VALIDAS[a.estado].length === 0 ? (
                             <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Sin acciones</span>
@@ -256,6 +312,38 @@ export default function AnunciosPage() {
           </div>
         )}
       </div>
+
+      {/* Tarjeta con el detalle completo del anuncio */}
+      {anuncioSeleccionado && (
+        <div className="modal-overlay" onClick={() => setAnuncioSeleccionado(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
+            <div className="modal-header">
+              <h3>
+                <Newspaper size={20} className="text-primary" />
+                <span>{anuncioSeleccionado.titulo}</span>
+              </h3>
+              <button
+                type="button"
+                className="button-secondary button-sm button-icon"
+                onClick={() => setAnuncioSeleccionado(null)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <span className={BADGE_POR_ESTADO[anuncioSeleccionado.estado]}>{anuncioSeleccionado.estado}</span>
+            </div>
+
+            <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, margin: 0 }}>{anuncioSeleccionado.contenido}</p>
+
+            <div style={{ marginTop: '18px', paddingTop: '12px', borderTop: '1px solid var(--border)', fontSize: '13px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span>Publicado: {formatearFecha(anuncioSeleccionado.fechaPublicacion)}</span>
+              <span>Expira: {formatearFecha(anuncioSeleccionado.fechaExpiracion)}</span>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

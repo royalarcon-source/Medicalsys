@@ -1,5 +1,18 @@
 export type EstadoNotificacion = 'PENDIENTE' | 'ENVIADA' | 'FALLIDA' | 'CANCELADA';
 
+export interface NotificacionUsuario {
+  idUsuario: number;
+  nombres: string;
+  apellidos: string;
+  email: string;
+}
+
+export interface NotificacionCita {
+  idCita: number;
+  fechaHoraInicio: string;
+  motivo: string | null;
+}
+
 export interface NotificacionItem {
   idNotificacion: number;
   canal: 'WHATSAPP' | 'EMAIL' | 'SMS';
@@ -8,6 +21,8 @@ export interface NotificacionItem {
   estado: EstadoNotificacion;
   fechaProgramada: string | null;
   fechaEnvio: string | null;
+  usuario: NotificacionUsuario;
+  cita: NotificacionCita | null;
 }
 
 export interface FiltrosNotificaciones {
@@ -56,10 +71,16 @@ export async function obtenerNotificacionesPorCita(idCita: number): Promise<Noti
   return res.json();
 }
 
-export async function enviarWhatsApp(idNotificacion: number): Promise<EnviarWhatsAppResponse> {
+// `forzar` reenvía una notificación que ya está ENVIADA (el usuario confirmó que en
+// realidad no llegó). Sin `forzar`, el backend rechaza con 409 si ya está ENVIADA.
+export async function enviarWhatsApp(idNotificacion: number, forzar = false): Promise<EnviarWhatsAppResponse> {
   const res = await fetch(`/api/notificaciones/${idNotificacion}/enviar-whatsapp`, {
     method: 'POST',
-    headers: { ...getAuthHeaders() },
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ forzar }),
   });
   if (!res.ok) throw new Error(await parseError(res));
   return res.json();
