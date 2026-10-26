@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   OneToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
 } from "typeorm";
@@ -11,6 +12,12 @@ import { HistoriaClinica } from "./HistoriaClinica.entity";
 import { Medico } from "./Medico.entity";
 import { Cita } from "./Cita.entity";
 import { Consultorio } from "./Consultorio.entity";
+import { Diagnostico } from "./Diagnostico.entity";
+import { Tratamiento } from "./Tratamiento.entity";
+import { encryptionTransformer } from "../utils/encryption";
+
+export type TipoIngreso = "CONSULTA_ESPONTANEA" | "SOBRECUPO" | "URGENCIA_MENOR" | "CITA_PROGRAMADA";
+export type EstadoConsulta = "EN_ESPERA" | "EN_ATENCION" | "ATENDIDA" | "CANCELADA";
 
 @Entity({ name: "consulta" })
 export class Consulta {
@@ -27,24 +34,49 @@ export class Consulta {
 
   @OneToOne(() => Cita, { nullable: true })
   @JoinColumn({ name: "id_cita" })
-  cita: Cita | null; // NULL = atención sin cita previa (HU-18)
+  cita: Cita | null;
 
   @ManyToOne(() => Consultorio, { nullable: true })
   @JoinColumn({ name: "id_consultorio" })
   consultorio: Consultorio | null;
 
+  @OneToMany(() => Diagnostico, (diagnostico) => diagnostico.consulta)
+  diagnosticos: Diagnostico[];
+
+  @OneToMany(() => Tratamiento, (tratamiento) => tratamiento.consulta)
+  tratamientos: Tratamiento[];
+
   @CreateDateColumn({ type: "timestamp", name: "fecha_consulta" })
   fechaConsulta: Date;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, transformer: encryptionTransformer })
   motivo: string | null;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, transformer: encryptionTransformer })
   anamnesis: string | null;
 
-  @Column({ type: "text", nullable: true, name: "examen_fisico" })
+  @Column({ type: "text", nullable: true, name: "examen_fisico", transformer: encryptionTransformer })
   examenFisico: string | null;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, transformer: encryptionTransformer })
   observaciones: string | null;
+
+  @Column({
+    type: "varchar",
+    length: 30,
+    nullable: true,
+    name: "tipo_ingreso",
+  })
+  tipoIngreso: TipoIngreso | null;
+
+  @Column({ type: "int", nullable: true, name: "numero_turno" })
+  numeroTurno: number | null;
+
+  @Column({
+    type: "varchar",
+    length: 20,
+    default: "EN_ESPERA",
+    name: "estado_consulta",
+  })
+  estadoConsulta: EstadoConsulta;
 }

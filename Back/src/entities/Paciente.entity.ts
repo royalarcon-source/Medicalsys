@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
 } from "typeorm";
 import { Usuario } from "./Usuario.entity";
+import { encryptionTransformer } from "../utils/encryption";
 
 @Entity({ name: "paciente" })
 export class Paciente {
@@ -26,13 +27,13 @@ export class Paciente {
   @Column({ type: "varchar", length: 20, nullable: true })
   sexo: string | null;
 
-  @Column({ type: "varchar", length: 250, nullable: true })
+  @Column({ type: "varchar", length: 250, nullable: true, transformer: encryptionTransformer })
   direccion: string | null;
 
-  @Column({ type: "varchar", length: 150, nullable: true, name: "contacto_emergencia" })
+  @Column({ type: "varchar", length: 150, nullable: true, name: "contacto_emergencia", transformer: encryptionTransformer })
   contactoEmergencia: string | null;
 
-  @Column({ type: "varchar", length: 30, nullable: true, name: "telefono_emergencia" })
+  @Column({ type: "varchar", length: 30, nullable: true, name: "telefono_emergencia", transformer: encryptionTransformer })
   telefonoEmergencia: string | null;
 
   @CreateDateColumn({ type: "timestamp", name: "fecha_registro" })

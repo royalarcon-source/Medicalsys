@@ -1,19 +1,20 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { Consulta } from "./Consulta.entity";
+import { encryptionTransformer } from "../utils/encryption";
 
 @Entity({ name: "diagnostico" })
 export class Diagnostico {
   @PrimaryGeneratedColumn({ type: "bigint", name: "id_diagnostico" })
   idDiagnostico: number;
 
-  @ManyToOne(() => Consulta, { nullable: false })
+  @ManyToOne(() => Consulta, (consulta) => consulta.diagnosticos, { nullable: false })
   @JoinColumn({ name: "id_consulta" })
   consulta: Consulta;
 
   @Column({ type: "varchar", length: 30, nullable: true })
   codigo: string | null;
 
-  @Column({ type: "varchar", length: 500 })
+  @Column({ type: "varchar", length: 500, transformer: encryptionTransformer })
   descripcion: string;
 
   @Column({ type: "varchar", length: 30, nullable: true })
